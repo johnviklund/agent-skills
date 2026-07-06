@@ -72,6 +72,12 @@ Read all of these before starting analysis:
   under `.github/skills/*/SKILL.md` and the shared `agent-skills` repo's `.github/skills/*/SKILL.md`.
   Use this to spot `MEMORY.md` entries whose principle already belongs in one
   of them, and to avoid proposing a new skill that duplicates an existing one.
+- **Installed plugin skill names** — `ls ~/.copilot/installed-plugins/*/*/skills/`
+  and `~/.codex/skills/`. Cross-check every repo-local skill folder's name
+  against this list; a repo-local skill sharing a name with an installed
+  plugin's skill silently shadows it and is a bug, not a valid extension of
+  "an existing skill." Flag any match found as a naming-collision candidate
+  (see step 3) rather than treating it as the same skill.
 - **DESIGN.md** — when the repo has one, check for entries duplicating
   design-system decisions that already live there, or that should be refined
   into it instead.
@@ -117,6 +123,13 @@ For each entry in MEMORY.md, classify as:
   warrants a new one.
 - **Skill-duplicated** — The entry restates a principle an existing skill
   (checked in step 1) already covers. Collapse to a short pointer or remove.
+- **Plugin-name collision** — Separate from entry analysis: while scanning
+  `.github/skills/*` in step 1, flag any repo-local skill folder whose name
+  matches an installed plugin's skill name. This is always a bug (the plugin
+  skill is being silently shadowed), never a legitimate "shared name" — surface
+  it in the report even though it did not come from a `MEMORY.md` entry, and
+  recommend renaming the repo-local folder to a repo-specific prefix or
+  folding its content into a differently-named skill.
 - **Design-duplicated** — The entry restates a `DESIGN.md` section (when the
   repo has one). Collapse to a short pointer or remove; the durable version
   belongs in `DESIGN.md`, refined in place.
@@ -199,6 +212,9 @@ Print:
 - Any promotion candidates for AGENTS.md
 - Any skill-promotion candidates, with the target skill named (or "new skill
   warranted" only when the bar is genuinely cleared)
+- Any plugin-name collisions found, named explicitly (e.g. "repo-local
+  `ce-debug` shadows the `compound-engineering` plugin's `ce-debug`") — this
+  is always worth surfacing even outside a major compaction pass
 - Cross-file duplication report across README/AGENTS/MEMORY/archive/skills/design
 - Instruction: **"Review the diff: `diff MEMORY.md MEMORY.proposed.md`"**
 - If archive changes were proposed, instruction:
