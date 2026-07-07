@@ -11,7 +11,7 @@ from both Codex CLI and GitHub Copilot CLI.
 - **`memory.compact`** — manual, occasional cleanup of a repo's `MEMORY.md`: groups entries by
   topic, flags stale/duplicate/superseded entries and skill-promotion candidates, and writes
   proposal files for review. Never runs automatically.
-- **`multi-agent-workflow`** — a personal five-phase solo-dev workflow (brainstorm → spec →
+- **`workflow`** — a personal five-phase solo-dev workflow (brainstorm → spec →
   audit & plan → execute → review → wrap-up) split across Codex CLI and Copilot CLI on purpose
   (separate token/quota pools). This is the canonical source for that workflow — there is no
   separate markdown doc to keep in sync; edit this skill directly when the workflow's shape

@@ -1,24 +1,34 @@
 ---
-name: multi-agent-workflow
+name: workflow
 description: >
   Runs a personal, five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
-  brainstorm, spec, audit & plan, execute, review, then wrap-up. Use whenever the user wants to
-  start or continue this workflow — phrases like "let's brainstorm", "spec this", "write the
-  spec", "audit and plan this", "audit the spec", "execute the plan", "run phase 3", "review
-  this", "review the changes", "wrap up", or "curate learnings" should trigger it, even without
+  brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Use whenever
+  the user wants to start or continue this workflow. Recognize these as direct phase commands
+  even as a single bare word with no other text — "brainstorm", "spec", "plan", "execute",
+  "review", "learn" (and the same words with a leading slash, e.g. "/brainstorm", if the CLI
+  passes that through as plain text) — as well as fuller phrases like "let's brainstorm", "spec
+  this", "write the spec", "audit and plan this", "audit the spec", "execute the plan", "run
+  phase 3", "review this", "review the changes", "wrap up", or "curate learnings", even without
   the word "skill" or "workflow". Also use it to re-ground mid-workflow (e.g. "where are we in
   the plan?") by reading .workflow/*.md and git state. This is a deliberately thin, single-voice
   workflow — no reviewer personas, no sub-agent orchestration — built to replace ad-hoc
   copy-pasted prompts, not to imitate heavier multi-agent review systems.
 ---
 
-# Multi-Agent Workflow
+# Workflow
 
 A personal five-phase workflow, roles matched to model strengths: one brainstorm partner, one
 fast generator/executor, one deep reviewer. Two CLIs stay in the loop on purpose — Codex and
 Copilot draw from separate token/quota pools, so splitting phases across both buys more total
 throughput than picking one tool and living inside its limits. Roles matter more than the brand;
 swap models freely as better ones become available.
+
+**Command words:** neither Codex CLI nor Copilot CLI supports user-defined slash commands (`/` is
+reserved for each CLI's own built-ins, and skills only trigger via natural-language matching), so
+there is no true `/brainstorm`-style command. The closest practical equivalent, and the one to
+actually use, is a single bare word with nothing else in the message: `brainstorm`, `spec`,
+`plan`, `execute`, `review`, `learn`. Each maps directly to the phase of the same name below
+(`learn` invokes the Learning loop / `memory.remember` directly, without waiting for wrap-up).
 
 | Tool | Model | Role |
 |---|---|---|
@@ -94,7 +104,7 @@ Set effort in `/model` (Codex also via `model_reasoning_effort` in `~/.codex/con
   committed) so both CLIs can share state without polluting `docs/` or git.
 - **Commit after each verified step.**
 
-## Learning loop
+## Learning loop — command: `learn`
 
 Commits save *what* changed; `MEMORY.md`, skills, and `DESIGN.md` save *why*. This is the point of
 the workflow, not an afterthought: **solve a real problem → remember it. Do the same kind of thing
@@ -117,7 +127,7 @@ actually route each line — any time, not only at wrap-up. It reads `MEMORY.md`
 names* before deciding a destination, so it won't create a skill that collides with one you don't
 own. For periodic `MEMORY.md` cleanup, invoke `memory.compact` manually — it never runs on its own.
 
-## Phase 0 — Brainstorm (Copilot, Sonnet 5, medium)
+## Phase 0 — Brainstorm (Copilot, Sonnet 5, medium) — command: `brainstorm`
 
 If already in Copilot on Sonnet 5: read `PRODUCT.md`/`DESIGN.md` if they exist and this touches
 product direction or UI, then run the brainstorm directly — ask clarifying questions one at a
@@ -140,7 +150,7 @@ Read PRODUCT.md and DESIGN.md first, if they exist and this touches product dire
   named file/library/component as the reference for shape/behavior, then brainstorm how it adapts
   here.
 
-## Phase 1 — Spec (Codex, high)
+## Phase 1 — Spec (Codex, high) — command: `spec`
 
 If already in Codex: read `AGENTS.md` + `MEMORY.md` + `PRODUCT.md`/`DESIGN.md` (if relevant) +
 `.workflow/brainstorm.md` (if present) + the code. Propose the architecture, modified interfaces,
@@ -153,7 +163,7 @@ If handing this to a fresh Codex session, paste:
 Read AGENTS.md + MEMORY.md + PRODUCT.md/DESIGN.md (if this touches product direction or UI) + .workflow/brainstorm.md (if present) + the code. We're refactoring [feature]. Propose the architecture, the modified interfaces, and every impacted file. Verify each existing signature against the actual code and flag anything you're only inferring. Save to .workflow/spec.md.
 ```
 
-## Phase 2 — Audit & Plan (Copilot, Opus 4.8, high → max)
+## Phase 2 — Audit & Plan (Copilot, Opus 4.8, high → max) — command: `plan`
 
 If already in Copilot: switch to Opus 4.8 with `/model` if still on Sonnet, then read
 `.workflow/spec.md`, the repo, and `PRODUCT.md`/`DESIGN.md` if relevant (flag conflicts). Find
@@ -169,7 +179,7 @@ If handing this to a fresh Copilot session on Opus 4.8, paste:
 Read .workflow/spec.md, the repo, and PRODUCT.md/DESIGN.md if this touches product or UI (flag anything that conflicts with either). Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm against the real code. Then rewrite it as a sequential, file-by-file checklist, core interfaces before consumers, each step with a verification check. Lead the checklist with whatever's most likely to need a human tweak (data model/schema shape, type interfaces, user-facing behavior) — put mechanical/rote steps at the bottom. Save to .workflow/plan.md.
 ```
 
-## Phase 3 — Execute (Codex GPT-5.5, or Copilot Sonnet 5 — medium; high for logic, xhigh for SQL/contracts)
+## Phase 3 — Execute (Codex GPT-5.5, or Copilot Sonnet 5 — medium; high for logic, xhigh for SQL/contracts) — command: `execute`
 
 Default to Codex; use Copilot/Sonnet 5 only if already there and not wanting to switch tools —
 don't run the same step in both.
@@ -191,7 +201,7 @@ Codex-only optional autonomous loop: `/goal` can drive the whole plan end to end
 re-prompting each step — worth knowing about, but not the default here; only reach for it if
 explicitly asked, and keep `review each diff` on SQL/contract steps even under a goal.
 
-## Phase 4 — Review (Copilot, Opus 4.8, max)
+## Phase 4 — Review (Copilot, Opus 4.8, max) — command: `review`
 
 If already in Copilot on Opus: review the changes against `.workflow/plan.md` as a strict senior
 engineer, including any "Deviations" logged during execution. Verify empirically — compile, run
