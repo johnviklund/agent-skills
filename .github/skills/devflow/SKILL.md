@@ -1,5 +1,5 @@
 ---
-name: workflow
+name: devflow
 description: >
   Runs a personal, five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
   brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Use whenever
