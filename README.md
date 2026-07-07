@@ -50,3 +50,13 @@ install) and let Copilot write its own `config.json` entry.
 Add a new folder under `.github/skills/<name>/SKILL.md`, symlink it from `skills/<name>` at the
 repo root, commit and push, then run `copilot plugin update agent-skills` and add a matching
 symlink under `~/.codex/skills/<name>`.
+
+**Known gotcha — Copilot silently drops skills with a long `description`.** Confirmed
+empirically: a description field somewhere between ~1033 and ~1078 characters causes Copilot's
+plugin loader to install the plugin successfully (no error) but silently omit that one skill from
+`copilot skill list` — the skill name and content aren't the cause (tested independently), only
+description length is. Codex is unaffected (it reads `SKILL.md` directly, no such limit
+observed). Keep each skill's `description` under ~900 characters to stay safely clear of this,
+and after adding or editing a skill, verify it actually registered:
+`copilot skill list --json | grep '"name": "<your-skill>"'` — don't just trust the "Updated N
+skills" success message, since that prints even when a skill was silently dropped.

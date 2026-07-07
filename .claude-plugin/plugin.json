@@ -1,6 +1,6 @@
 {
   "name": "agent-skills",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Global, cross-repo agent skills: capture durable session learnings into MEMORY.md/AGENTS.md/README.md/skills/DESIGN.md (memory.remember), and periodically compact MEMORY.md (memory.compact).",
   "author": {
     "name": "jviklun1"
