@@ -10,9 +10,10 @@ description: >
   this", "write the spec", "audit and plan this", "audit the spec", "execute the plan", "run
   phase 3", "review this", "review the changes", "wrap up", or "curate learnings", even without
   the word "skill" or "workflow". Also use it to re-ground mid-workflow by reading .workflow
-  files and git state, checking for brainstorm, spec, plan, and review artifacts as needed here.
+  files and git state, checking for brainstorm, spec, plan, and review artifacts as needed here,
+  this is a deliberately thin single voice workflow with no reviewer personas at all involved.
 ---
 
 # Desc Test
 
-Testing around 1000 chars total.
+Testing around 1050 chars total.
