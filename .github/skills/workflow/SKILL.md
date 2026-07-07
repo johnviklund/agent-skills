@@ -4,11 +4,12 @@ description: >
   Runs a personal five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
   brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Only trigger
   on an explicit, deliberate invocation of the form "workflow <phase> ..." or "/workflow <phase>
-  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, or status -- e.g.
-  "workflow spec the retry mechanism", "/workflow execute", "workflow status". Do NOT trigger on
-  casual mentions of spec, plan, execute, review, or learn anywhere else in a message -- this
-  skill is intentionally narrow and explicit, never a broad natural-language matcher.
-  Deliberately thin and single-voice -- no reviewer personas, no sub-agent orchestration.
+  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, or improve
+  -- e.g. "workflow spec the retry mechanism", "/workflow execute", "workflow improve <feature> -
+  goal: <goal>". Do NOT trigger on casual mentions of spec, plan, execute, review, or learn
+  anywhere else in a message -- this skill is intentionally narrow and explicit, never a broad
+  natural-language matcher. Deliberately thin and single-voice -- no reviewer personas, no
+  sub-agent orchestration.
 ---
 
 # Workflow
@@ -154,6 +155,18 @@ Read PRODUCT.md and DESIGN.md first, if they exist and this touches product dire
 - **Reference instead of prose** (can't describe what's wanted but would recognize it): read the
   named file/library/component as the reference for shape/behavior, then brainstorm how it adapts
   here.
+- **Improve** (command: `workflow improve <feature> - goal: <goal>`) — brainstorm seeded by a
+  real code audit instead of a blank idea, loosely inspired by shadcn/improve but scoped to one
+  feature and one pass, no sub-agent fan-out, no multi-file plan backlog. Find and read the
+  named feature's actual code first. Look for concrete, evidence-backed improvement
+  opportunities in it (correctness, tech debt, performance, missing tests, docs/DX) — every
+  finding cites `file:line`, no generic suggestions. Weigh each finding against the stated goal:
+  drop or clearly mark as tangential anything that doesn't serve it. Present the findings as a
+  short table and ask which ones to pursue, same as a normal brainstorm's clarifying-question
+  step — don't assume all of them. Once agreed, save the usual summary (problem statement built
+  from the goal + selected findings, chosen approach, explicit non-goals including the rejected
+  findings and why, open questions) to `.workflow/brainstorm.md` — same file, same shape as a
+  regular Phase 0 brainstorm, so `workflow spec` picks it up identically either way.
 
 ## Phase 1 — Spec (Codex, high) — command: `workflow spec`
 
