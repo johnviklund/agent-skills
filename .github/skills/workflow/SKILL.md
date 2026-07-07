@@ -2,13 +2,13 @@
 name: workflow
 description: >
   Runs a personal five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
-  brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Trigger on a
-  single bare word -- brainstorm, spec, plan, execute, review, learn -- or fuller phrases like
-  "let's brainstorm", "spec this", "audit and plan", "execute the plan", "review this", "wrap
-  up", "curate learnings" -- even without the word skill or workflow. Also use to re-ground
-  mid-workflow by reading .workflow files and git state. Deliberately thin and single-voice --
-  no reviewer personas, no sub-agent orchestration -- replacing copy-pasted prompts, not
-  imitating heavier multi-agent review systems.
+  brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Only trigger
+  on an explicit, deliberate invocation of the form "workflow <phase> ..." or "/workflow <phase>
+  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, or status -- e.g.
+  "workflow spec the retry mechanism", "/workflow execute", "workflow status". Do NOT trigger on
+  casual mentions of spec, plan, execute, review, or learn anywhere else in a message -- this
+  skill is intentionally narrow and explicit, never a broad natural-language matcher.
+  Deliberately thin and single-voice -- no reviewer personas, no sub-agent orchestration.
 ---
 
 # Workflow
@@ -19,12 +19,17 @@ Copilot draw from separate token/quota pools, so splitting phases across both bu
 throughput than picking one tool and living inside its limits. Roles matter more than the brand;
 swap models freely as better ones become available.
 
-**Command words:** neither Codex CLI nor Copilot CLI supports user-defined slash commands (`/` is
-reserved for each CLI's own built-ins, and skills only trigger via natural-language matching), so
-there is no true `/brainstorm`-style command. The closest practical equivalent, and the one to
-actually use, is a single bare word with nothing else in the message: `brainstorm`, `spec`,
-`plan`, `execute`, `review`, `learn`. Each maps directly to the phase of the same name below
-(`learn` invokes the Learning loop / `memory.remember` directly, without waiting for wrap-up).
+**Invocation is deliberate, not ambient.** Neither Codex CLI nor Copilot CLI supports
+user-defined slash commands (`/` is reserved for each CLI's own built-ins, and skills only
+trigger via natural-language description matching) — so there is no *true* `/workflow` command.
+The practical equivalent, and the required form, is the message starting with `workflow` or
+`/workflow` followed by a phase name: `workflow brainstorm <topic>`, `workflow spec`, `workflow
+plan`, `workflow execute`, `workflow review`, `workflow learn`, or `workflow status` (re-ground:
+report which phase `.workflow/*.md` state implies, without acting). Try `/workflow ...` first; if
+a leading slash gets rejected or swallowed by the CLI before it reaches the model, drop the slash
+and use the bare `workflow ...` form instead — both are treated identically. **Do not** treat an
+unprefixed mention of "spec", "plan", "execute", "review", or "learn" elsewhere in a normal
+conversation as an invocation — this skill only acts on the explicit prefixed form.
 
 | Tool | Model | Role |
 |---|---|---|
@@ -36,11 +41,13 @@ Phase 3 (execute) is the one phase with a real choice: default to Codex/GPT-5.5,
 Copilot is an equally capable stand-in if already there and not wanting to switch tools. Never run
 the same step in both — pick one per plan (or split the plan by file to parallelize across both).
 
-## Where are we? (re-grounding)
+## Where are we? (re-grounding) — command: `workflow status`
 
-This skill can be invoked at the start of a fresh session or mid-workflow. Before doing anything,
-check `.workflow/` for `brainstorm.md`, `spec.md`, `plan.md`, `patch_plan.md`, and `learnings.md`
-— their presence/absence is the state machine, more trustworthy than a remembered summary:
+This skill can be invoked at the start of a fresh session or mid-workflow via `workflow status`
+(or `/workflow status`) — report which phase is next without acting yet, then wait for the next
+explicit `workflow <phase>` command. Before answering, check `.workflow/` for `brainstorm.md`,
+`spec.md`, `plan.md`, `patch_plan.md`, and `learnings.md` — their presence/absence is the state
+machine, more trustworthy than a remembered summary:
 
 - No files yet → Phase 0 (Brainstorm).
 - `brainstorm.md` only → Phase 1 (Spec).
@@ -51,7 +58,9 @@ check `.workflow/` for `brainstorm.md`, `spec.md`, `plan.md`, `patch_plan.md`, a
 - Everything present and the plan is fully checked off with a clean review → *Final check &
   wrap-up*.
 
-If genuinely ambiguous, ask which phase to run rather than guessing. Also read `AGENTS.md`,
+If a `workflow <phase>` command is given directly and it does not match what the file state
+implies (e.g. `workflow execute` with no `plan.md` yet), say so and ask for confirmation before
+proceeding rather than silently running the wrong phase. Also read `AGENTS.md`,
 `MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if this touches product direction or UI), and
 `git log --oneline -15` / `git status` as part of grounding — the same re-ground that used to be a
 copy-pasted block is now just: run this skill.
@@ -100,7 +109,7 @@ Set effort in `/model` (Codex also via `model_reasoning_effort` in `~/.codex/con
   committed) so both CLIs can share state without polluting `docs/` or git.
 - **Commit after each verified step.**
 
-## Learning loop — command: `learn`
+## Learning loop — command: `workflow learn`
 
 Commits save *what* changed; `MEMORY.md`, skills, and `DESIGN.md` save *why*. This is the point of
 the workflow, not an afterthought: **solve a real problem → remember it. Do the same kind of thing
@@ -123,7 +132,7 @@ actually route each line — any time, not only at wrap-up. It reads `MEMORY.md`
 names* before deciding a destination, so it won't create a skill that collides with one you don't
 own. For periodic `MEMORY.md` cleanup, invoke `memory.compact` manually — it never runs on its own.
 
-## Phase 0 — Brainstorm (Copilot, Sonnet 5, medium) — command: `brainstorm`
+## Phase 0 — Brainstorm (Copilot, Sonnet 5, medium) — command: `workflow brainstorm`
 
 If already in Copilot on Sonnet 5: read `PRODUCT.md`/`DESIGN.md` if they exist and this touches
 product direction or UI, then run the brainstorm directly — ask clarifying questions one at a
@@ -146,7 +155,7 @@ Read PRODUCT.md and DESIGN.md first, if they exist and this touches product dire
   named file/library/component as the reference for shape/behavior, then brainstorm how it adapts
   here.
 
-## Phase 1 — Spec (Codex, high) — command: `spec`
+## Phase 1 — Spec (Codex, high) — command: `workflow spec`
 
 If already in Codex: read `AGENTS.md` + `MEMORY.md` + `PRODUCT.md`/`DESIGN.md` (if relevant) +
 `.workflow/brainstorm.md` (if present) + the code. Propose the architecture, modified interfaces,
@@ -159,7 +168,7 @@ If handing this to a fresh Codex session, paste:
 Read AGENTS.md + MEMORY.md + PRODUCT.md/DESIGN.md (if this touches product direction or UI) + .workflow/brainstorm.md (if present) + the code. We're refactoring [feature]. Propose the architecture, the modified interfaces, and every impacted file. Verify each existing signature against the actual code and flag anything you're only inferring. Save to .workflow/spec.md.
 ```
 
-## Phase 2 — Audit & Plan (Copilot, Opus 4.8, high → max) — command: `plan`
+## Phase 2 — Audit & Plan (Copilot, Opus 4.8, high → max) — command: `workflow plan`
 
 If already in Copilot: switch to Opus 4.8 with `/model` if still on Sonnet, then read
 `.workflow/spec.md`, the repo, and `PRODUCT.md`/`DESIGN.md` if relevant (flag conflicts). Find
@@ -175,7 +184,7 @@ If handing this to a fresh Copilot session on Opus 4.8, paste:
 Read .workflow/spec.md, the repo, and PRODUCT.md/DESIGN.md if this touches product or UI (flag anything that conflicts with either). Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm against the real code. Then rewrite it as a sequential, file-by-file checklist, core interfaces before consumers, each step with a verification check. Lead the checklist with whatever's most likely to need a human tweak (data model/schema shape, type interfaces, user-facing behavior) — put mechanical/rote steps at the bottom. Save to .workflow/plan.md.
 ```
 
-## Phase 3 — Execute (Codex GPT-5.5, or Copilot Sonnet 5 — medium; high for logic, xhigh for SQL/contracts) — command: `execute`
+## Phase 3 — Execute (Codex GPT-5.5, or Copilot Sonnet 5 — medium; high for logic, xhigh for SQL/contracts) — command: `workflow execute`
 
 Default to Codex; use Copilot/Sonnet 5 only if already there and not wanting to switch tools —
 don't run the same step in both.
@@ -197,7 +206,7 @@ Codex-only optional autonomous loop: `/goal` can drive the whole plan end to end
 re-prompting each step — worth knowing about, but not the default here; only reach for it if
 explicitly asked, and keep `review each diff` on SQL/contract steps even under a goal.
 
-## Phase 4 — Review (Copilot, Opus 4.8, max) — command: `review`
+## Phase 4 — Review (Copilot, Opus 4.8, max) — command: `workflow review`
 
 If already in Copilot on Opus: review the changes against `.workflow/plan.md` as a strict senior
 engineer, including any "Deviations" logged during execution. Verify empirically — compile, run
@@ -240,7 +249,7 @@ don't auto-fix everything listed, especially anything marked "defer." For items 
 one at a time, check + commit after each; leave "defer"/"wontfix" alone (confirm the reasoning
 still holds, don't implement it). Re-run Phase 4 review on the fixes before wrap-up.
 
-## Final check & wrap-up
+## Final check & wrap-up — command: `workflow wrap`
 
 Commit, push, curate, and clean up — in one go, in either CLI.
 
