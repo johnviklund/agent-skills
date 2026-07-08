@@ -4,9 +4,10 @@ description: >
   Runs a personal five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
   brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Only trigger
   on an explicit, deliberate invocation of the form "workflow <phase> ..." or "/workflow <phase>
-  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, or improve
-  -- e.g. "workflow spec the retry mechanism", "/workflow execute", "workflow improve <feature> -
-  goal: <goal>". Do NOT trigger on casual mentions of spec, plan, execute, review, or learn
+  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, next, or
+  improve -- e.g. "workflow spec the retry mechanism", "/workflow execute", "workflow next", a
+  bare "/workflow" (treated as next), or "workflow improve <feature> - goal: <goal>". Do NOT
+  trigger on casual mentions of spec, plan, execute, review, or learn
   anywhere else in a message -- this skill is intentionally narrow and explicit, never a broad
   natural-language matcher. Deliberately thin and single-voice -- no reviewer personas, no
   sub-agent orchestration.
@@ -25,12 +26,16 @@ user-defined slash commands (`/` is reserved for each CLI's own built-ins, and s
 trigger via natural-language description matching) — so there is no *true* `/workflow` command.
 The practical equivalent, and the required form, is the message starting with `workflow` or
 `/workflow` followed by a phase name: `workflow brainstorm <topic>`, `workflow spec`, `workflow
-plan`, `workflow execute`, `workflow review`, `workflow learn`, or `workflow status` (re-ground:
-report which phase `.workflow/*.md` state implies, without acting). Try `/workflow ...` first; if
+plan`, `workflow execute`, `workflow review`, `workflow learn`, `workflow status` (re-ground:
+report which phase `.workflow/*.md` state implies, without acting), or `workflow next` (print the
+paste-ready next-step card — see *Next recommended step*). A **bare** `workflow` or `/workflow`
+with no phase word is treated as `workflow next`. Try `/workflow ...` first; if
 a leading slash gets rejected or swallowed by the CLI before it reaches the model, drop the slash
 and use the bare `workflow ...` form instead — both are treated identically. **Do not** treat an
 unprefixed mention of "spec", "plan", "execute", "review", or "learn" elsewhere in a normal
-conversation as an invocation — this skill only acts on the explicit prefixed form.
+conversation as an invocation — this skill only acts on the explicit prefixed form; a bare
+`workflow`/`/workflow` on its own is the one exception, and it only prints the next-step card,
+never runs a phase.
 
 | Tool | Model | Role |
 |---|---|---|
@@ -100,6 +105,73 @@ Set effort in `/model` (Codex also via `model_reasoning_effort` in `~/.codex/con
 - **Never `/compact` at a handoff or for verification-critical work** — a summary can silently
   drop exact signatures, line numbers, or contract versions. `/clear` and re-ground instead.
 
+## Next recommended step — command: `workflow next` (or bare `/workflow`)
+
+Every phase response ends by printing this card, and `workflow next` / a bare `workflow`/`/workflow`
+prints it on demand **without doing any phase work** — re-ground from the `.workflow/*.md` state
+machine in *Where are we?* first, then emit the card. It turns "which phase is next" into a
+paste-ready handoff: whether to `/clear`, which CLI + model + effort, what to ground in, which
+`workflow <phase>` to send, and the GPT `/goal`, GPT `/fast`, and sub-agent calls. Derive the
+Model/Effort from *Reasoning effort & approval per step*, the `/clear`-vs-`/compact` call from
+*Context hygiene*, and the phase itself from the file-state machine.
+
+Print exactly this shape — one row per setup step, in order; the very last thing to type is the
+prompt block:
+
+---
+### ▶ Next recommended step
+
+**You are here:** Phase N (\<name>) → **Next:** Phase M (\<name>)
+
+| # | Step | Setting |
+|---|------|---------|
+| 1 | `/clear`? | Yes — reset before the CLI/model handoff (or *No — continue in this session*) |
+| 2 | CLI · model · effort | e.g. Copilot CLI · Opus 4.8 · `max` |
+| 3 | Ground in | exact files to read first, e.g. `.workflow/plan.md`, `DESIGN.md`, `git diff` |
+| 4 | Invoke | the `workflow <phase>` command to send |
+
+**GPT `/goal`:** yes/no (+why) · **GPT `/fast`:** yes/no (+why) · **Sub-agents:** none / which & why
+
+Paste next:
+```text
+<the exact prompt or `workflow <phase>` line to send>
+```
+---
+
+Fill the toggles from these defaults:
+
+- **`/clear`** — Yes at every phase handoff (0→1→2→3→4 and into wrap); on the Copilot side it
+  doubles as the Sonnet→Opus swap. Say *No* only for continued same-model work inside one phase
+  (offer `/compact [focus]` instead when the window is filling).
+- **CLI · model · effort** — read straight from *Reasoning effort & approval per step* for the next
+  phase (Phase 2/4 → Copilot Opus 4.8 `high`→`max`; Phase 1 → Codex GPT-5.5 `high`; Phase 3 →
+  Codex GPT-5.5 or Copilot Sonnet 5, `medium`→`high`→`xhigh` by risk).
+- **Ground in** — the `.workflow/*.md` file(s) that phase reads, plus `AGENTS.md`/`MEMORY.md` and
+  `PRODUCT.md`/`DESIGN.md` when product/UI is in scope, plus `git diff`/`git log` for review/wrap.
+- **GPT `/goal`** — default No. Offer it only for Phase 3 execute in Codex when the whole plan
+  should be driven end-to-end without re-prompting, and only with `review each diff` kept on
+  SQL/contract steps.
+- **GPT `/fast`** — default No. Suggest it only for Phase 3 mechanical/rote, low-risk edits (the
+  `medium`-effort, auto-approve rows) to raise throughput; never for logic/schema/contract steps,
+  and never for Phase 2/4 reasoning or review.
+- **Sub-agents** — default none. Suggest `explore` (parallel, read-only) for Phase 1/2 research
+  across many independent areas of a large codebase, and `code-review`/`rubber-duck` to reinforce
+  Phase 4; keep single-thread for small changes.
+
+When the run is actually finished — plan fully checked off, review clean or patched, learnings
+routed, scratch cleared — do not invent a next phase. Print the done card instead:
+
+---
+### ✅ Workflow complete — no more steps
+
+\<one line on what shipped>. Committed, pushed, learnings routed, `.workflow/` scratch cleared.
+
+**Recommended next:**
+- Start the next unit: `workflow brainstorm <topic>` (or `workflow improve <feature> - goal: <goal>`).
+- If `MEMORY.md` has grown, invoke `memory.compact`.
+- Open a PR if you weren't committing straight to `main`.
+---
+
 ## Ground rules (every phase)
 
 - **Verify, don't trust.** Check every interface, signature, and column against the real
@@ -109,6 +181,9 @@ Set effort in `/model` (Codex also via `model_reasoning_effort` in `~/.codex/con
 - **Handoff files live in `.workflow/`** (gitignored scratch; only durable docs/skills get
   committed) so both CLIs can share state without polluting `docs/` or git.
 - **Commit after each verified step.**
+- **Always close with the next-step card.** End every phase response — and every `workflow status`
+  / `workflow next` — by printing the *Next recommended step* card (or the ✅ done card when the
+  run is finished), so the next action is always one paste away.
 
 ## Learning loop — command: `workflow learn`
 
@@ -284,7 +359,8 @@ their durable value already lives in the commits and wherever `memory.remember` 
 stale `plan.md` left behind would poison the next run's re-ground (which trusts the files as
 truth). Never delete `learnings.md` before `memory.remember` has actually routed every line — it
 enforces this itself, but don't race ahead of it. Open a PR only if not committing straight to
-`main`.
+`main`. When wrap-up is done, close with the ✅ done card from *Next recommended step*, not a
+next-phase card.
 
 ## Keeping this skill alive
 
