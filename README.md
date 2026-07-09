@@ -16,6 +16,13 @@ from both Codex CLI and GitHub Copilot CLI.
   (separate token/quota pools). This is the canonical source for that workflow — there is no
   separate markdown doc to keep in sync; edit this skill directly when the workflow's shape
   changes.
+- **`checkup`** — manual, read-first workspace health check (inspired by a `/checkup` command):
+  audits skill hygiene (plugin name collisions, folder-vs-frontmatter name, description length,
+  Codex symlink parity, self-publish drift), memory hygiene (MEMORY.md size/staleness/superseded,
+  leftover proposals), doc freshness (canonical docs, dead skill references), workspace
+  cleanliness (leftover `.workflow` scratch, tracked junk, unpushed work), and config health.
+  Reports severity-ranked findings and prioritized fixes; delegates compaction to `memory.compact`;
+  applies only opt-in, one-at-a-time safe fixes.
 
 ## How this repo is wired up
 
