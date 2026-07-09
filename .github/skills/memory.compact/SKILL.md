@@ -17,8 +17,16 @@ Reduce MEMORY.md to its essential active entries without losing audit trail or s
 
 ## Memory Layers
 
-- **Active memory:** `MEMORY.md`, read during normal session startup. Keep current,
-  behavior-shaping entries only.
+- **Active memory:** `MEMORY.md`, read during normal session startup. Layer of **last resort** —
+  environment facts, durable user preferences, repo-specific gotchas/workarounds, temporary
+  in-flight state, and open gaps: things a future session needs that fit nowhere else. Bounded and
+  compact. **Not** a product/architecture ledger, design ledger, operating-rules doc, or how-to
+  principle store — those belong to the owners below. Compaction should actively move misfiled
+  doctrine out, not just tidy it in place.
+- **Product doctrine:** `PRODUCT.md`, when the repo has one. Checked for entries that are really
+  product shape, vocabulary, or workflow doctrine misfiled in memory. **Do not edit `PRODUCT.md`
+  during a compaction** — flag the entry as doctrine-misfiled and propose relocating it, since
+  canonical product/design docs are changed only on explicit human approval.
 - **Agent operating contract:** `AGENTS.md`, checked for rules already promoted
   out of memory.
 - **Operator reference:** `README.md`, checked for workflow/setup/output guidance
@@ -41,6 +49,8 @@ Reduce MEMORY.md to its essential active entries without losing audit trail or s
 
 Run `/compact` when:
 - MEMORY.md feels bloated or hard to scan
+- MEMORY.md is over the **~40-entry / ~40 KB soft ceiling** (a strong trigger — the file should
+  live comfortably under it; the goal of the pass is to get it back under)
 - You suspect contradictions or duplicates across entries
 - After a major architecture change that invalidated multiple entries
 - Active memory contains long evidence blocks, old baselines, or historical
@@ -133,6 +143,14 @@ For each entry in MEMORY.md, classify as:
 - **Design-duplicated** — The entry restates a `DESIGN.md` section (when the
   repo has one). Collapse to a short pointer or remove; the durable version
   belongs in `DESIGN.md`, refined in place.
+- **Doctrine-misfiled** — The entry *is* product/architecture doctrine, a design
+  decision, or a stable operating rule that belongs in `PRODUCT.md`, `DESIGN.md`,
+  or `AGENTS.md` but was written into `MEMORY.md` instead (a primary cause of
+  memory drift). Flag it for **relocate-and-delete**: propose the destination and
+  the text to move, and in the compacted `MEMORY.md` replace it with at most a
+  one-line pointer (or nothing). **Never edit `PRODUCT.md`/`DESIGN.md` yourself**
+  during a compaction — these relocations are proposals for the human to apply,
+  the same as `MEMORY.proposed.md`.
 
 ### 4. Group by Topic
 
@@ -170,7 +188,7 @@ When entries should move to archive, also write **`MEMORY_ARCHIVE.proposed.md`**
 If the repo does not yet have `MEMORY_ARCHIVE.md`, create the proposed archive
 from the existing archive format in sibling CX repos or a compact topical format.
 
-**NEVER overwrite MEMORY.md, MEMORY_ARCHIVE.md, DESIGN.md, or any SKILL.md directly.**
+**NEVER overwrite MEMORY.md, MEMORY_ARCHIVE.md, PRODUCT.md, DESIGN.md, or any SKILL.md directly.**
 
 The proposed file includes:
 - Same header and schema version as MEMORY.md
@@ -179,11 +197,12 @@ The proposed file includes:
 - A summary block at the top:
   ```
   <!-- Compaction summary:
-       Input: N entries
+       Input: N entries (soft ceiling ~40 / ~40 KB)
        Active: X | Stale: Y | Superseded: Z | Duplicates removed: W
        Contradicted by CE: C | Promotion candidates: P | Skill-promotion candidates: S
-       Cross-file overlaps: R README | A AGENTS | M archive | K skill | D design
-       Net reduction: N → M entries
+       Doctrine-misfiled (relocate-and-delete): F
+       Cross-file overlaps: R README | A AGENTS | Pr PRODUCT | M archive | K skill | D design
+       Net reduction: N → M entries (under ceiling? yes/no)
   -->
   ```
 
@@ -234,10 +253,13 @@ Print:
   in active memory only when still behavior-shaping; otherwise move them to
   archive with enough context to search.
 - Never overwrite MEMORY.md or MEMORY_ARCHIVE.md. Always write proposal files.
-- Never edit a `SKILL.md` or `DESIGN.md` directly from `/compact`. Skill and
-  design promotion candidates are proposals for the user to apply, the same
-  as `MEMORY.proposed.md` — this keeps skill/design changes reviewed rather
-  than silently rewritten during a routine memory cleanup.
+- Never edit a `SKILL.md`, `PRODUCT.md`, or `DESIGN.md` directly from `/compact`. Skill, product,
+  and design relocations (including doctrine-misfiled entries) are proposals for the user to apply,
+  the same as `MEMORY.proposed.md` — this keeps canonical docs reviewed rather than silently
+  rewritten during a routine memory cleanup.
+- The compacted `MEMORY.md` should end **under the ~40-entry / ~40 KB soft ceiling**; if it can't
+  without losing genuinely current, admission-test-passing entries, say so and recommend
+  redistribution rather than quietly leaving it oversized.
 - Don't propose a new skill for anything short of the 3+ recurrence bar; a
   single striking entry is still just a good `MEMORY.md` entry.
 - No state tracking. No cadence. No automatic triggering.

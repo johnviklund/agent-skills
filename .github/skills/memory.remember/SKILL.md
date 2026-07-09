@@ -33,7 +33,15 @@ Treat repo memory as separate layers with different owners:
 
 - **Agent operating contract:** `AGENTS.md`, read by agents during startup. Use it for stable repo operating rules, command contracts agents must follow, and high-risk gotchas that prevent repeated mistakes.
 - **Operator reference:** `README.md`, read by humans and agents when workflow/setup/output shape matters. Use it for setup, command examples, workflow descriptions, output structure, and troubleshooting.
-- **Active memory:** `MEMORY.md`, read during normal session startup. Keep it small and behavior-shaping: current decisions, durable user preferences, active caveats, and recent high-value lessons that have not yet been promoted.
+- **Active memory:** `MEMORY.md`, read during normal session startup. It is the layer of **last
+  resort** — the place for things a future coding session needs but that fit **nowhere else**:
+  model/agent-relevant facts, the working environment (OS, tools, paths, credential locations),
+  durable user preferences, repo-specific gotchas and workarounds, temporary in-flight state
+  ("X is suspended until repaired"), and known open gaps. It is **bounded and must stay compact**.
+  It is **not** a product/architecture ledger (that is `PRODUCT.md`), a design ledger (`DESIGN.md`),
+  an operating-rules doc (`AGENTS.md`), or a home for durable how-to principles (a skill). If a
+  candidate fits one of those, it goes **there**, not here. A one-line pointer to a canonical owner
+  is fine; duplicated doctrine is drift.
 - **Archive memory:** `MEMORY_ARCHIVE.md`, searched on demand. Use it for superseded decisions, stale baselines, source-list history, long explanations, and evidence-heavy details that should not load by default.
 - **Detailed solution notes:** `docs/solutions/`, used for postmortems, durable patterns, implementation reasoning, and evidence-heavy write-ups that need more detail than startup memory.
 - **Reusable principle:** a **skill** under `.github/skills/<name>/SKILL.md` (repo-local) or the shared `agent-skills` repo's `.github/skills/<name>/SKILL.md` (available from every repo). Use it for a transferable "how to design/review/build X" practice that has proven itself beyond this one feature or schema — not a repo-specific decision or gotcha. This is the layer active `MEMORY.md` should hand off to instead of accumulating principle prose indefinitely.
@@ -56,6 +64,37 @@ Every entry in `MEMORY.md` follows this structure:
 - **Last confirmed:** <YYYY-MM-DD>
 - **Source:** <session ID, repo, or PR>
 ```
+
+## The MEMORY.md admission test
+
+Before writing anything to `MEMORY.md`, run every candidate through this gate. It may stay in
+active memory **only if all four are true**:
+
+1. **Useful next session** — a future coding session would waste time or repeat a mistake without it.
+2. **Fits nowhere else** — it is not product/architecture doctrine (`PRODUCT.md`), a design decision
+   (`DESIGN.md`), an operating rule / command contract (`AGENTS.md`), or a transferable how-to
+   principle (a skill). If it fits one of those, route it **there** and do not also keep it here.
+3. **Concrete and repo-specific** — a gotcha, environment fact, preference, temporary state, or open
+   gap — not a durable principle and not a design/product decision.
+4. **Not already owned elsewhere** — if a canonical owner already states it, keep at most a one-line
+   pointer, never a copy.
+
+If a candidate fails the test, it does not "wait" in memory to be promoted later — that deferral is
+exactly how `MEMORY.md` drifts into a second product/design ledger. Route it to its real home in the
+**same pass**, or drop it.
+
+## Keeping MEMORY.md bounded (cap + consolidate-before-add)
+
+`MEMORY.md` has no automatic compaction, so this skill enforces the bound at write time (inspired by
+bounded-memory designs like Hermes, where an over-limit write is refused until the agent consolidates):
+
+- Treat roughly **~40 structured entries / ~40 KB** as a soft ceiling. Near or over it, **consolidate
+  before adding**: merge overlapping entries into one tighter entry, or route/drop stale ones, in the
+  same pass — do not just append.
+- Prefer replacing/merging an existing entry over adding a new one whenever the topic already exists.
+- If consolidation can't get a genuinely new, test-passing entry to fit under the ceiling, that is the
+  signal to run `memory.compact` (or redistribute entries to their canonical owners) rather than let
+  the file grow.
 
 ## Workflow
 
@@ -127,20 +166,32 @@ When the user invokes `/remember`:
 
 ## What to Save
 
-- Durable learnings that will matter in future sessions
-- New feature behavior that changes how the repo should be used
-- Repeated user preferences that belong in repo operating guidance
-- Migration or install details that affect repeatability
-- Cross-repo rules that should live in the shared `agent-skills` repo
-- Archive pointers for old context that remains useful for search but should not shape startup behavior
-- Reusable principles that have proven themselves 3+ times and belong in a skill instead of another `MEMORY.md` paragraph
-- Durable design-system decisions worth refining into `DESIGN.md`, when the repo has one
+Save to `MEMORY.md` only what passes the admission test above — typically:
+
+- **Environment facts:** OS, language/runtime quirks, tool availability, key paths, where
+  credentials live (never the credentials themselves).
+- **Durable user preferences** about how to work in this repo.
+- **Repo-specific gotchas and workarounds** — concrete traps with real names (a proc that behaves
+  unexpectedly, a command that fails a certain way) that a fresh session would hit.
+- **Temporary in-flight state** that changes: "X is suspended until repaired", "Y path is dormant
+  until Z is enabled", "endpoint W still lacks guard V" (open gaps).
+- **Tried-and-rejected dead ends**, so they are not relitigated.
+
+Everything else routes to its owner in the same pass (do not stage it in memory):
+
+- New feature behavior / product shape / vocabulary → `PRODUCT.md`.
+- UI or design-system decisions → `DESIGN.md`.
+- Stable operating rules, "never do X", command contracts, ports, write-scope → `AGENTS.md`.
+- Transferable "how to design/review/build X" principles (3+ recurrences) → a skill.
+- Long evidence / superseded history → `MEMORY_ARCHIVE.md` or `docs/`.
 
 ## What Not to Save
 
 - Raw transcripts, case details, event IDs, names, or other PII
 - One-off debugging noise
-- Duplicate prose across files
+- Duplicate prose across files (route to one owner, keep at most a pointer)
+- **Product, architecture, or design *doctrine*** — it belongs in `PRODUCT.md`/`DESIGN.md`, not memory
+- **Durable how-to principles** — they belong in a skill, not another memory paragraph
 - Speculative ideas that were not actually adopted
 - Long CE pattern write-ups already captured under `docs/solutions/`
 - Stable operator or agent rules already promoted to `README.md` or `AGENTS.md`
@@ -151,7 +202,12 @@ When the user invokes `/remember`:
 - Aggregates only. Never persist customer-level details.
 - If nothing durable was learned, say so instead of forcing an update.
 - Do not put operational rules in `SOUL.md`; keep identity there and operations in `AGENTS.md`.
-- Do not treat `MEMORY.md` as a changelog; write only the durable part that should survive.
+- Do not treat `MEMORY.md` as a changelog; write only the durable part that should survive. The
+  session-level "what was built/changed" log is `WORKLOG.md` (owned by the `workflow` skill), not memory.
+- Route product/architecture/design doctrine to `PRODUCT.md`/`DESIGN.md` and durable how-to
+  principles to a skill in the **same pass**; never stage them in `MEMORY.md` "to promote later".
+- Keep `MEMORY.md` bounded: near the ~40-entry / ~40 KB soft ceiling, consolidate or route before
+  adding (see *Keeping MEMORY.md bounded*), and recommend `memory.compact` when it won't fit.
 - Do not use active `MEMORY.md` as an evidence warehouse. Move long explanations, superseded history, and low-frequency lookup material to `MEMORY_ARCHIVE.md`.
 - Do not load `MEMORY_ARCHIVE.md` during normal extraction unless it is needed to reconcile or archive a specific candidate.
 - Before adding active memory, check whether `AGENTS.md`, `README.md`, `MEMORY_ARCHIVE.md`, or an existing skill already owns the same lesson.
