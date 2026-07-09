@@ -4,10 +4,10 @@ description: >
   Runs a personal five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
   brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Only trigger
   on an explicit, deliberate invocation of the form "workflow <phase> ..." or "/workflow <phase>
-  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, next, or
+  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, next, log, or
   improve -- e.g. "workflow spec the retry mechanism", "/workflow execute", "workflow next", a
-  bare "/workflow" (treated as next), or "workflow improve <feature> - goal: <goal>". Do NOT
-  trigger on casual mentions of spec, plan, execute, review, or learn
+  bare "/workflow" (treated as next), "workflow log", or "workflow improve <feature> - goal:
+  <goal>". Do NOT trigger on casual mentions of spec, plan, execute, review, or learn
   anywhere else in a message -- this skill is intentionally narrow and explicit, never a broad
   natural-language matcher. Deliberately thin and single-voice -- no reviewer personas, no
   sub-agent orchestration.
@@ -27,8 +27,9 @@ trigger via natural-language description matching) — so there is no *true* `/w
 The practical equivalent, and the required form, is the message starting with `workflow` or
 `/workflow` followed by a phase name: `workflow brainstorm <topic>`, `workflow spec`, `workflow
 plan`, `workflow execute`, `workflow review`, `workflow learn`, `workflow status` (re-ground:
-report which phase `.workflow/*.md` state implies, without acting), or `workflow next` (print the
-paste-ready next-step card — see *Next recommended step*). A **bare** `workflow` or `/workflow`
+report which phase `.workflow/*.md` state implies, without acting), `workflow next` (print the
+paste-ready next-step card — see *Next recommended step*), or `workflow log` (append this
+session's entry to `WORKLOG.md` — see *Worklog*). A **bare** `workflow` or `/workflow`
 with no phase word is treated as `workflow next`. Try `/workflow ...` first; if
 a leading slash gets rejected or swallowed by the CLI before it reaches the model, drop the slash
 and use the bare `workflow ...` form instead — both are treated identically. **Do not** treat an
@@ -345,11 +346,15 @@ Commit, push, curate, and clean up — in one go, in either CLI.
    don't treat them as regressions).
 2. Grep for leftover shortcuts: `TODO: Implement`, `NotImplementedError`, `...`, `placeholder`,
    `real implementation`, and any old contract version literal — nothing should still pin it.
-3. Commit any remaining changes.
+3. Commit any remaining changes. **Commit discipline:** use session-level messages that read as a
+   worklog line on their own (what shipped + why), not terse "fix" stubs — the commit log is the
+   portable backtrack record, so make it carry the narrative.
 4. Invoke `memory.remember` to route every tagged line in `.workflow/learnings.md` to its
    destination (`MEMORY.md`, `AGENTS.md`, `README.md`, an existing or new skill, `DESIGN.md`),
    commit those changes, and push.
-5. Once `memory.remember` confirms every line is routed, delete `.workflow/brainstorm.md`,
+5. Append this run's entry to `WORKLOG.md` (see *Worklog*): one capped, git-pointing entry, rolling
+   the oldest off if over ~15; commit and push it with the rest.
+6. Once `memory.remember` confirms every line is routed, delete `.workflow/brainstorm.md`,
    `.workflow/spec.md`, `.workflow/plan.md`, `.workflow/patch_plan.md` (if present), and
    `.workflow/learnings.md`.
 
@@ -361,6 +366,41 @@ truth). Never delete `learnings.md` before `memory.remember` has actually routed
 enforces this itself, but don't race ahead of it. Open a PR only if not committing straight to
 `main`. When wrap-up is done, close with the ✅ done card from *Next recommended step*, not a
 next-phase card.
+
+## Worklog — command: `workflow log`
+
+A small, **bounded, rolling** `WORKLOG.md` at the repo root: a newest-first index of what was
+built or changed, so any session can backtrack development quickly. It is deliberately **not** a
+source of truth and **not** an archive — git is the source of truth for *what* changed, and the
+repo's canonical docs (`PRODUCT.md`/`DESIGN.md`/`AGENTS.md`) own *what we're building*. `WORKLOG.md`
+only **points into git**; the diffs live in the commits.
+
+**Anti-bloat is the whole point** (learned from bounded-memory designs like Hermes): the file is
+capped and rolls off. Never let it grow into a second memory file that confuses future sessions.
+
+- **Cap:** keep roughly the **15 most recent entries** (about one screen). Before appending, if
+  there are already ~15 `## ` entries, **delete the oldest ones** — they are preserved forever in
+  git history of the file and in the commits they cite. Rolling off is deletion, not archival.
+- **Entry = pointer, not payload.** One entry per unit of work (a workflow run, or an ad-hoc
+  session). Shape:
+
+  ```markdown
+  ## YYYY-MM-DD · <one-line what> · <CLI/model>
+  - <1–4 terse bullets: what shipped / changed>
+  - Commits: <sha> <sha> ... (+ <other-repo> <sha> if it spanned repos)
+  - Why: <one line>
+  ```
+
+- **When it's written:**
+  - `workflow wrap` appends an entry automatically as part of wrap-up (see below).
+  - `workflow log` appends one on demand for an **ad-hoc session that didn't run the full
+    workflow** (like a quick fix or a review). Same shape, same cap. This is what keeps the log
+    complete instead of only capturing formal runs.
+- **Never** paste diffs, file dumps, rationale essays, product/design decisions, or learnings into
+  it. Learnings go through `memory.remember`; product/design go to their canonical docs; detail
+  lives in git and the session store. If an entry needs more than ~4 bullets, it's too much.
+- If `WORKLOG.md` doesn't exist yet, create it with a one-line header explaining it's a bounded,
+  rolling, git-pointing index, then add the first entry.
 
 ## Keeping this skill alive
 
