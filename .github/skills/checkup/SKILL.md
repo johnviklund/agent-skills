@@ -66,17 +66,23 @@ ls ~/.codex/skills/ 2>/dev/null                                  # Codex skills 
 Then check:
 
 - **Name collision with an installed plugin/global skill.** For every repo-local `.github/skills/<name>`,
-  is there also an installed plugin/global skill named `<name>`? If so, the repo-local one shadows the
-  plugin one in this repo. **Diff their `SKILL.md`:** identical content = benign self-publish (note it);
-  **different content = 🔴 harmful shadow** (a repo skill hiding a different, often richer, plugin skill).
-  The fix is to rename the repo-local one to a repo-specific prefix (e.g. `cx-<name>`) and update
-  references -- never silently keep the shadow.
+  is there also a *different* skill named `<name>` installed elsewhere -- a Copilot plugin/global skill,
+  or a `~/.codex/skills/<name>` entry? **Ignore a `~/.codex/skills/<name>` that is a symlink pointing
+  back to this same repo skill** -- that is intended cross-CLI parity wiring, not a collision (a naive
+  name-match false-positives on every skill you've wired into Codex). For genuine matches, **diff the
+  `SKILL.md`:** identical content = benign self-publish (note it); **different content = 🔴 harmful
+  shadow** (a repo skill hiding a different, often richer, plugin skill). Fix by renaming the repo-local
+  one to a repo-specific prefix (e.g. `cx-<name>`) and updating references -- never silently keep the shadow.
 - **Folder name ≠ frontmatter `name`.** For each `.github/skills/<dir>/SKILL.md`, confirm `name:`
   matches `<dir>`. A mismatch breaks discovery.
-- **Description length.** Flag any skill whose frontmatter `description` exceeds ~900 characters --
-  Copilot's plugin loader silently drops such skills (installs with no error, omits the skill). This
-  is a 🔴 because the skill looks installed but isn't. After any skill edit the owner should verify:
-  `copilot skill list --json | grep '"name": "<skill>"'`.
+- **Description length.** Flag any skill whose frontmatter `description` exceeds ~900 characters. This
+  limit is **confirmed for the Copilot *plugin-install* path** -- the loader silently drops an
+  over-length skill (installs with no error, omits it). So it is **🔴 for any skill published/installed
+  as a plugin** (it looks installed but isn't; verify `copilot skill list --json | grep '"name": "<skill>"'`).
+  For a **repo-local-only** skill loaded directly from `.github/skills/`, discovery tolerates longer
+  descriptions -- treat over-length as **⚠️ portability debt** (trim before it is ever published), not a
+  hard failure. When unsure, check whether a matching installed plugin or a `copilot-plugins/` packaging
+  dir exists.
 - **Codex parity.** Codex only loads from `~/.codex/skills/` -- it does not scan a repo's
   `.github/skills/`. For each repo-local skill meant to be available in Codex, confirm a
   `~/.codex/skills/<name>` entry exists and resolves. Missing ones are ⚠️ (Copilot-only until linked).
@@ -107,9 +113,12 @@ ls MEMORY.proposed.md MEMORY_ARCHIVE.proposed.md skill-promotion-candidates.prop
 - **Canonical docs present.** Note which of `AGENTS.md`, `README.md`, `PRODUCT.md`, `DESIGN.md`,
   `PRD.md`, `MEMORY.md`, `MEMORY_ARCHIVE.md` exist; a repo that has some but is missing an expected
   one is worth a note, not an error.
-- **Dead skill references.** Skill names referenced in `AGENTS.md` (or README) that no longer resolve
-  to a real skill -- e.g. a skill that was renamed but the reference wasn't updated. 🔴 when the
-  referenced skill genuinely doesn't exist anywhere.
+- **Dead skill references.** Skill names referenced in `AGENTS.md`/README that no longer resolve to a
+  real skill (e.g. renamed but the reference wasn't updated). **Scope this to actual skill references** --
+  backticked names in the skills-list sentence, or tokens matched against the real skill inventory --
+  **not every prefix-shaped token.** Doc *paths* and identifiers often share a skill's prefix (e.g. a
+  `cx-agentic-intelligence-poc/` docs folder vs. `cx-*` skills) and will false-positive a naive `grep`.
+  🔴 only when a name genuinely referenced *as a skill* exists nowhere (repo-local, plugin, or Codex).
 - **Prose-doc staleness (heuristic).** Compare each canonical doc's last commit date against recent
   activity in the area it governs (e.g. `DESIGN.md` vs. churn under `web-ui/`):
   `git log -1 --format=%cs -- DESIGN.md` and `git log --since=... --oneline -- web-ui | wc -l`.
