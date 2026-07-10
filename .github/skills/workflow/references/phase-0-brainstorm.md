@@ -1,0 +1,40 @@
+# Phase 0 — Brainstorm — `workflow brainstorm` / `workflow improve`
+
+Model/effort/CLI: per the routing tables in `SKILL.md` (Phase 0 row). Rationale for the seat:
+knowledge-shaped dialogue with no execution payoff — the cheap near-Opus model wins.
+
+Read `PRODUCT.md`/`DESIGN.md` if they exist and this touches product direction or UI, then run
+the brainstorm directly — ask clarifying questions one at a time (prioritize whichever answer
+would change architecture/scope the most), explore 2-3 approaches with tradeoffs, push back on
+shaky assumptions or oversized scope. Don't write a spec yet. When converged, save a short
+summary (problem statement, chosen approach, explicit non-goals, open questions) to
+`.workflow/brainstorm.md`.
+
+If handing this to a fresh Copilot session, paste:
+
+```text
+Read PRODUCT.md and DESIGN.md first, if they exist and this touches product direction or UI, so we don't relitigate settled decisions. Let's brainstorm before we spec anything: [describe the idea, problem, or need]. Ask me clarifying questions one at a time, prioritizing whichever question's answer would change the architecture or scope the most. Explore 2-3 different approaches with tradeoffs, and push back on any assumption that seems shaky or any scope that seems bigger than the actual need. Don't write a spec yet. When we've converged, save a short summary (problem statement, chosen approach, explicit non-goals, open questions) to .workflow/brainstorm.md.
+```
+
+## Variants
+
+- **Blind spot pass** (unfamiliar territory, don't know what to ask yet): find unknown unknowns —
+  what would an expert here know that isn't known — and explain them before brainstorming
+  approaches.
+- **Reference instead of prose** (can't describe what's wanted but would recognize it): read the
+  named file/library/component as the reference for shape/behavior, then brainstorm how it adapts
+  here.
+- **Improve** (command: `workflow improve <feature> - goal: <goal>`) — brainstorm seeded by a
+  real code audit instead of a blank idea, loosely inspired by shadcn/improve but scoped to one
+  feature and one pass, no sub-agent fan-out, no multi-file plan backlog. Find and read the
+  named feature's actual code first. Look for concrete, evidence-backed improvement
+  opportunities in it (correctness, tech debt, performance, missing tests, docs/DX) — every
+  finding cites `file:line`, no generic suggestions. Weigh each finding against the stated goal:
+  drop or clearly mark as tangential anything that doesn't serve it. Present the findings as a
+  short table and ask which ones to pursue, same as a normal brainstorm's clarifying-question
+  step — don't assume all of them. Once agreed, save the usual summary (problem statement built
+  from the goal + selected findings, chosen approach, explicit non-goals including the rejected
+  findings and why, open questions) to `.workflow/brainstorm.md` — same file, same shape as a
+  regular Phase 0 brainstorm, so `workflow spec` picks it up identically either way.
+
+Close with the next-step card (format in `SKILL.md`).
