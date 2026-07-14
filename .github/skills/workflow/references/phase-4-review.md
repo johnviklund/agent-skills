@@ -34,7 +34,8 @@ now depends on.
 
 **P0/P1 present** (models/efforts per the patch-cycle rows in `SKILL.md`):
 1. **Patch plan**: group P0/P1/P2/P3 into a file-by-file patch plan, core interfaces first, each
-   with a local check. Save to `.workflow/patch_plan.md`.
+   with a local check — same step shape as Phase 2, including a `Skills:` line per step.
+   Save to `.workflow/patch_plan.md`.
 2. **Fix P0s** (review each diff): fix only the P0s, one at a time, check + commit after each.
    Don't touch P1/P2 yet.
 3. **Fix P1/P2/P3s** (auto): fix the rest, verify no regressions.

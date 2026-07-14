@@ -10,10 +10,27 @@ shaky assumptions or oversized scope. Don't write a spec yet. When converged, sa
 summary (problem statement, chosen approach, explicit non-goals, open questions) to
 `.workflow/brainstorm.md`.
 
+**TODO intake.** Also read repo-root `TODO.md` if present — the human's intake scratchpad, never
+a roadmap or product truth (`PRODUCT.md` owns product state; TODO entries point at it, they don't
+duplicate it). Two directions:
+
+- **Topic matches a TODO item/initiative** → seed the brainstorm from its user story / purpose /
+  definition of done and original details instead of re-deriving from scratch — but verify the
+  details against the current codebase first (paths, column names, and assumptions in a
+  scratchpad drift); treat stale details as questions, not facts.
+- **Otherwise** → scan Active Initiatives, Small UI Changes, and Open Questions for items
+  touching the same feature/files, list the related ones, and ask which to fold into scope and
+  which to leave. Record the outcome in `.workflow/brainstorm.md`: folded items go into the
+  problem statement/scope; consciously excluded ones go under non-goals *by name*, so Phase 2
+  and review don't re-import them.
+
+Honor the file's own header rule: never implement a TODO item just because it's listed —
+confirm scope with the human first.
+
 If handing this to a fresh Copilot session, paste:
 
 ```text
-Read PRODUCT.md and DESIGN.md first, if they exist and this touches product direction or UI, so we don't relitigate settled decisions. Let's brainstorm before we spec anything: [describe the idea, problem, or need]. Ask me clarifying questions one at a time, prioritizing whichever question's answer would change the architecture or scope the most. Explore 2-3 different approaches with tradeoffs, and push back on any assumption that seems shaky or any scope that seems bigger than the actual need. Don't write a spec yet. When we've converged, save a short summary (problem statement, chosen approach, explicit non-goals, open questions) to .workflow/brainstorm.md.
+Read PRODUCT.md and DESIGN.md first, if they exist and this touches product direction or UI, so we don't relitigate settled decisions. Also read TODO.md at the repo root if present — it's my intake scratchpad, not a roadmap: if this brainstorm matches a listed item, seed from its user story/purpose/DoD but verify the details against the current code; otherwise list related TODO items and ask which to fold into scope and which to exclude (record exclusions by name under non-goals). Let's brainstorm before we spec anything: [describe the idea, problem, or need]. Ask me clarifying questions one at a time, prioritizing whichever question's answer would change the architecture or scope the most. Explore 2-3 different approaches with tradeoffs, and push back on any assumption that seems shaky or any scope that seems bigger than the actual need. Don't write a spec yet. When we've converged, save a short summary (problem statement, chosen approach, explicit non-goals, open questions) to .workflow/brainstorm.md.
 ```
 
 ## Variants

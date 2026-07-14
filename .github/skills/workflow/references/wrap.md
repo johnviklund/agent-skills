@@ -23,9 +23,18 @@ Commit, push, curate, and clean up — in one go:
 4. Invoke `memory.remember` to route every tagged line in `.workflow/learnings.md` to its
    destination (`MEMORY.md`, `AGENTS.md`, `README.md`, an existing or new skill, `DESIGN.md`),
    commit those changes, and push.
-5. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,
+5. **TODO hygiene** — update repo-root `TODO.md` (if present) from the plan's `## TODO impacts`
+   list plus anything done in passing: move completed/subsumed items to Archived with a one-line
+   pointer (commit sha or the initiative that subsumed them); rewrite items whose scope this run
+   changed so they match the code that now exists; check off Small UI Changes shipped along the
+   way. Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
+   only add items the human explicitly deferred during this run, in the right section); and
+   `PRODUCT.md` stays the source of truth for product state — if this run changed product
+   direction, that edit goes to `PRODUCT.md`, and the TODO entry should point at it, not
+   duplicate it.
+6. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,
    git-pointing entry, rolling the oldest off if over ~15; commit and push it with the rest.
-6. Once `memory.remember` confirms every line is routed, delete `.workflow/brainstorm.md`,
+7. Once `memory.remember` confirms every line is routed, delete `.workflow/brainstorm.md`,
    `.workflow/spec.md`, `.workflow/plan.md` (including its `## Execution state` block — session
    scratch, not a durable doc), `.workflow/patch_plan.md` (if present), and
    `.workflow/learnings.md`.

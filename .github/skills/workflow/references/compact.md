@@ -1,5 +1,13 @@
 # Mid-execution compaction — `workflow compact`
 
+**When to run what (the decision rule, also printed on every next-step card):**
+
+- Phase boundary → `/clear` and re-ground. Never compact between phases.
+- Mid-phase + `/context` filling (roughly >70%) → run `workflow compact`, between steps only.
+- Never hand-write `/compact` — the only `/compact` the human runs is the line this command
+  prints.
+- Window fine → do nothing.
+
 For long Phase 3 runs (and long Phase 4 reviews) working through a multi-step plan: when the
 session is filling up but the plan isn't done, don't guess at a `/compact` focus and don't let
 the CLI auto-compact decide what survives. This command does two things, in this order —
@@ -7,17 +15,19 @@ the CLI auto-compact decide what survives. This command does two things, in this
 however lossy, can destroy it. Same CLI, same model, same effort — this continues the current
 phase.
 
-**1. Update `.workflow/plan.md` so the next plan step re-grounds from the file, not from
-session memory.** Before emitting any compact command:
+**1. Reconcile `.workflow/plan.md` so the next plan step re-grounds from the file, not from
+session memory.** Phase 3 already persists after every step (checklist + `## Execution state`),
+so this is normally a quick verification pass — but do it, don't assume: catch anything the
+per-step discipline missed before emitting any compact command:
 
-- Check off every completed step; confirm each was committed (a done-but-uncommitted step is
+- Confirm every completed step is checked off *and* committed (a done-but-uncommitted step is
   flagged, not checked).
-- Refresh (or create) an **`## Execution state`** section at the top of the plan with exactly
+- Refresh (or create) the **`## Execution state`** section at the top of the plan with exactly
   what the next step needs and a summary would mangle: the current/next step and its status;
   baseline test results (which failures are pre-existing/environmental); exact signatures,
   schema/column names, and contract versions currently in flight; files touched but not yet
   committed; and any pending decision. Keep it under ~15 lines — it's a re-ground block, not a
-  transcript.
+  transcript. This block's shape is defined here; Phase 3 maintains it per step.
 - Append any unrecorded deviations to the plan's "Deviations" section and any unrecorded
   learnings to `.workflow/learnings.md` (see `references/learning-worklog.md`) — both are
   casualties of a careless compact otherwise.

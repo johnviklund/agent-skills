@@ -52,7 +52,9 @@ Report which phase is next without acting, then wait for an explicit `workflow <
 
 If a given `workflow <phase>` mismatches the file state (e.g. `execute` with no `plan.md`), say
 so and ask before proceeding. Also read `AGENTS.md`, `MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if
-product/UI is in scope), and `git log --oneline -15` / `git status` as part of grounding.
+product/UI is in scope), repo-root `TODO.md` (intake scratchpad — relevant to Phase 0, Phase 2's
+TODO-impact check, and wrap's TODO hygiene), and `git log --oneline -15` / `git status` as part
+of grounding.
 
 ## Clarify before running a phase (every phase)
 
@@ -132,9 +134,12 @@ real code. Ultra multiplies token burn; default to Sol `max` unless breadth is t
 
 `/clear` at every phase handoff (0→1→2→3→4 and into wrap) — re-ground from `.workflow/*.md` + git
 instead of dragging the previous phase's context (or the wrong model's mindset) forward; in
-Copilot the reset precedes the Sonnet 5→Opus 4.8 swap. Mid-phase, when `/context` shows the
-window filling, run `workflow compact` (see `references/compact.md`) — don't hand-write a
-`/compact` focus and don't let the CLI auto-compact decide what survives. Never compact at a
+Copilot the reset precedes the Sonnet 5→Opus 4.8 swap. Mid-phase: Phase 3 persists state to
+`.workflow/plan.md` after **every** step (checklist + `## Execution state` block), so any
+compaction — manual or automatic — can never strand the run; when `/context` shows the window
+filling, run `workflow compact` between steps (see `references/compact.md`) — don't hand-write a
+`/compact` focus and don't let the CLI auto-compact decide what survives. After *any* compaction,
+re-read the plan's `Execution state` block before the next step. Never compact at a
 handoff or mid-verification-critical-step: summaries silently drop exact signatures and contract
 versions.
 
@@ -157,14 +162,18 @@ work (re-ground via *Where are we?* first). Print exactly this shape:
 
 **GPT `/goal`:** yes/no (+why) · **GPT `/fast`:** yes/no (+why) · **Sub-agents:** none — except `ultra` per the read-only exception above
 
+**Compact?** \<one of:> No — `/clear` at this handoff (never compact between phases) · No — window fine, just continue · Yes — mid-phase and `/context` is filling: run `workflow compact` between steps. Never hand-write `/compact`; the only `/compact` to run is the line `workflow compact` prints.
+
 Paste next:
 ```text
 <the exact prompt or `workflow <phase>` line to send>
 ```
 ---
 
-Toggle defaults: `/clear` Yes at every handoff, No only for continued same-model work (offer
-`workflow compact` if filling). Model/effort straight from the tables above. Ground in: the
+Toggle defaults: `/clear` Yes at every handoff, No only for continued same-model work. **Compact**
+by the rule on the card — the decision is: phase boundary → `/clear`, never compact; mid-phase +
+window filling (check `/context`, roughly >70%) → `workflow compact` between steps, never
+mid-step; otherwise nothing. Model/effort straight from the tables above. Ground in: the
 `.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md`
 when product/UI is in scope, `git diff`/`git log` for review/wrap. `/goal` default No (only
 whole-plan Phase 3 in Codex, keeping review-each-diff on SQL/contract steps). `/fast` default No
