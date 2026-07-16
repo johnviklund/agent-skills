@@ -1,6 +1,6 @@
 {
   "name": "agent-skills",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Global, cross-repo agent skills: capture durable session learnings (memory.remember), periodically compact MEMORY.md (memory.compact), run a personal five-phase dev workflow (workflow), run a read-first workspace health check (checkup), and grade candidate models against eval golden sets (evals).",
   "author": {
     "name": "jviklun1"
