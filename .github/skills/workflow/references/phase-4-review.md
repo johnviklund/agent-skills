@@ -39,7 +39,10 @@ now depends on.
 2. **Fix P0s** (review each diff): fix only the P0s, one at a time, check + commit after each.
    Don't touch P1/P2 yet.
 3. **Fix P1/P2/P3s** (auto): fix the rest, verify no regressions.
-4. Re-run Phase 4 review on the fixes before wrap-up.
+4. Re-run Phase 4 review on the fixes before wrap-up. Also: every *confirmed* P0/P1 the review
+   caught is a reviewer-seat golden case — tag it `[durable→eval] reviewer — ...` in
+   `.workflow/learnings.md` (see `references/learning-worklog.md`) so wrap deposits the
+   diff + finding before the scratch files are deleted.
 
 **Only P2/P3 (no P0/P1):** worth a lighter patch plan — group into a file-by-file patch plan,
 each with a local check AND a recommended disposition (fix now/defer/wontfix, one-line reason).

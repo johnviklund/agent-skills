@@ -32,16 +32,28 @@ Commit, push, curate, and clean up — in one go:
    `PRODUCT.md` stays the source of truth for product state — if this run changed product
    direction, that edit goes to `PRODUCT.md`, and the TODO entry should point at it, not
    duplicate it.
-6. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,
+6. **Eval deposit** — for every `[durable→eval]` line in `.workflow/learnings.md`, write a
+   golden case to `evals/<seat>/<YYYY-MM-DD>-<slug>.md` in the repo (seats: `spec`, `plan`,
+   `reviewer`, `mechanical`). Each case must be self-contained, because the source artifacts are
+   gitignored scratch about to be deleted in step 8 — **copy content in, don't point at
+   `.workflow/` paths**: the input (e.g. the brainstorm text, the spec, the diff), the approved
+   output, grading notes (what a passing answer must contain, known traps), and provenance
+   (date, commit shas, which model produced and which approved it). Enforce the admission test
+   and the ~15-per-seat rolling cap from `references/learning-worklog.md` — displace the
+   weakest case when full, never append past the cap. Commit with the rest.
+7. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,
    git-pointing entry, rolling the oldest off if over ~15; commit and push it with the rest.
-7. Once `memory.remember` confirms every line is routed, delete `.workflow/brainstorm.md`,
+8. Once `memory.remember` confirms every line is routed and step 6's cases are deposited,
+   delete `.workflow/brainstorm.md`,
    `.workflow/spec.md`, `.workflow/plan.md` (including its `## Execution state` block — session
    scratch, not a durable doc), `.workflow/patch_plan.md` (if present), and
    `.workflow/learnings.md`.
 
 **Why this order:** commits are local — nothing leaves the machine until push. Code → learnings
-routed and committed → **push** → clear scratch. Delete all the run files, not just the log —
-their durable value already lives in the commits and wherever `memory.remember` routed it, and a
+routed, evals deposited, and committed → **push** → clear scratch. Delete all the run files, not
+just the log —
+their durable value already lives in the commits, the `evals/` cases, and wherever
+`memory.remember` routed it, and a
 stale `plan.md` left behind would poison the next run's re-ground (which trusts the files as
 truth). Never delete `learnings.md` before `memory.remember` has actually routed every line — it
 enforces this itself, but don't race ahead of it. Open a PR only if not committing straight to

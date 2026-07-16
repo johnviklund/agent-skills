@@ -5,9 +5,10 @@ description: >
   brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Only trigger
   on an explicit, deliberate invocation of the form "workflow [phase] ..." or "/workflow [phase]
   ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, next, log,
-  compact, or
+  compact, todo, or
   improve -- e.g. "workflow spec the retry mechanism", "/workflow execute", "workflow next", a
-  bare "/workflow" (treated as next), "workflow log", "workflow compact", or "workflow improve
+  bare "/workflow" (treated as next), "workflow log", "workflow compact", "workflow todo [idea]",
+  or "workflow improve
   [feature] - goal:
   [goal]". Do NOT trigger on casual mentions of spec, plan, execute, review, or learn
   anywhere else in a message -- this skill is intentionally narrow and explicit, never a broad
@@ -68,7 +69,8 @@ interpretation in one sentence, "I read this as X — correct?"); **silent assum
 lifting** (surface the assumption instead of building on it). State what *is* understood, then
 ask — prefer "I'm about to do X, which I read as Y — confirm or correct" over "what do you
 want?". Skip the gate for mechanical, low-risk, clearly-specified work (Luna-tier edits,
-`status`, `next`, `log`, `compact`). This complements the in-phase rules (Phase 0 dialogue,
+`status`, `next`, `log`, `compact`, `todo` — which has its own question step). This complements
+the in-phase rules (Phase 0 dialogue,
 Phase 3 stop-on-deviation); it doesn't replace them.
 
 ## Model routing — the single source of truth
@@ -117,6 +119,7 @@ edits.
 | Fix P0s | Codex Sol | high | review each diff |
 | Fix P1/P2/P3s | Codex Terra | medium | auto |
 | Final check & wrap-up | Copilot Sonnet 5 / Codex Terra | medium | auto |
+| TODO intake (`workflow todo`) | Copilot Sonnet 5 / Codex Terra | medium | auto (writes only `TODO.md`) |
 
 Set effort in `/model`; Copilot also accepts `--reasoning-effort`, Codex `model_reasoning_effort`
 in `~/.codex/config.toml`. Phase 3 in Copilot: mirror Luna/Terra/Sol, or Sonnet 5 with effort
@@ -205,6 +208,7 @@ Read the listed reference before acting. `status` and `next` need only this file
 | `workflow wrap` | `references/wrap.md` |
 | `workflow learn`, `workflow log` | `references/learning-worklog.md` |
 | `workflow compact` | `references/compact.md` |
+| `workflow todo [idea]` | `references/todo.md` |
 
 ## Keeping this skill alive
 

@@ -14,8 +14,28 @@ any time something worth keeping gets solved — don't wait for wrap-up:
 - [durable→memory] <the fix, gotcha, or decision>
 - [durable→skill] <the transferable principle, stripped of concrete schema/names/logic>
 - [durable→design] <the UI pattern/convention/token decision>
+- [durable→eval] <seat> — <what the golden case proves> (artifacts: <which .workflow files / diff / output>)
 - [drop] <one-off noise>
 ```
+
+### `[durable→eval]` — every run should exam future models
+
+Evals are a side effect of shipping, never separate work: each run's approved artifacts become
+golden test cases that future models must pass before earning a seat in the routing tables. The
+seats and their natural case shapes:
+
+- **spec seat** (Phase 1): this run's `brainstorm.md` → the *approved* `spec.md`.
+- **plan seat** (Phase 2): the approved `spec.md` → the *approved* `plan.md`.
+- **reviewer seat** (Phase 4): a diff containing a *confirmed* P0/P1 → the finding that caught
+  it. These are the most valuable cases — a candidate reviewer must catch everything the
+  incumbent caught.
+- **mechanical lane** (Phase 3, Luna-tier): a transform prompt with known-correct output.
+
+**Admission test — deposit only discriminating cases:** a case earns a slot only if it would
+plausibly separate models (the approved output required real judgment, or a model actually got
+it wrong first). Routine cases teach nothing. **Cap: ~15 cases per seat, rolling** — when full,
+a new case must displace the weakest, not append. Wrap performs the deposit (see
+`references/wrap.md`); tag the line any time during the run, at latest before wrap.
 
 Then invoke `memory.remember` (a sibling skill in this same repo, available from both CLIs) to
 actually route each line — any time, not only at wrap-up. It reads `MEMORY.md`/`AGENTS.md`/

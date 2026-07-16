@@ -8,15 +8,18 @@ description: >
   hygiene (plugin name collisions, folder-vs-frontmatter name, description length, Codex symlink
   parity, drift), memory hygiene (MEMORY.md size/staleness/superseded, leftover proposals), doc
   freshness (canonical docs, dead skill references), workspace cleanliness (leftover .workflow
-  scratch, tracked junk, unpushed work), and config health. Reports severity-ranked findings and
-  prioritized fixes; delegates compaction to memory.compact; applies only opt-in safe fixes.
+  scratch, tracked junk, unpushed work), config health, and eval-set health. Reports
+  severity-ranked findings and prioritized fixes;
+  delegates compaction to memory.compact and eval runs to evals.run; applies only opt-in safe
+  fixes.
 ---
 
 # checkup
 
 A manual, read-first workspace health check. It answers "is my workspace in good shape?" in one
 pass: are my skills wired correctly and not colliding, is memory compacted, are the canonical docs
-drifting, is there leftover scratch or junk, is my config sane. Inspired by a `/checkup` command.
+drifting, is there leftover scratch or junk, is my config sane, are the eval golden sets healthy.
+Inspired by a `/checkup` command.
 
 **It reports and recommends; it does not bulldoze.** Everything is read-only by default. The only
 things it may change are a short allow-list of *trivially safe* fixes, offered **one at a time**
@@ -29,7 +32,7 @@ if the leading slash is swallowed by the CLI, use the bare `checkup` form. Do no
 mentions of "check" elsewhere in a message -- only the explicit prefixed form.
 
 Optional scope words narrow the pass: `checkup skills`, `checkup memory`, `checkup docs`,
-`checkup workspace`, `checkup config`. With no scope word, run all sections.
+`checkup workspace`, `checkup config`, `checkup evals`. With no scope word, run all sections.
 
 ## Ground rules
 
@@ -37,7 +40,8 @@ Optional scope words narrow the pass: `checkup skills`, `checkup memory`, `check
   any canonical doc as part of a checkup -- surface drift and let the human decide (this mirrors the
   repo rule that those docs are not edited without an explicit ask).
 - **Delegate, don't reimplement.** When memory needs compaction, recommend `memory.compact`; when
-  learnings need routing, recommend `memory.remember`. Do not re-do their work inside a checkup.
+  learnings need routing, recommend `memory.remember`; when a model needs examining, recommend
+  `evals.run`. Do not re-do their work inside a checkup.
 - **Opt-in safe fixes only, one at a time.** See *Safe-fix allow-list*. Ask before each; if the
   user declined the fix appetite, stay pure-report.
 - **Honest heuristics.** Staleness of prose docs can't be proven mechanically. Say "worth a human
@@ -135,7 +139,9 @@ git ls-files | grep -Ei '(^|/)\.DS_Store$|(^|/)\.env$|/node_modules/|/\.venv|\.p
 ```
 
 - **Leftover `.workflow/*.md` run scratch** from an aborted workflow run -- ⚠️, recommend routing
-  learnings (`memory.remember`) then deleting, per the workflow's wrap step.
+  learnings (`memory.remember`) then deleting, per the workflow's wrap step. If the leftover
+  `learnings.md` contains `[durable→eval]` lines, flag them specifically -- undeposited golden
+  cases die with the scratch.
 - **Tracked junk / secrets.** A committed `.DS_Store`, `.env`, virtualenv, build output, or `.pyc`
   is 🔴 (secrets) or ⚠️ (junk). A tracked `.env` is always 🔴 -- flag loudly.
 - **Uncommitted or unpushed work.** If the repo treats push as its archive/safety net, unpushed
@@ -148,9 +154,39 @@ git ls-files | grep -Ei '(^|/)\.DS_Store$|(^|/)\.env$|/node_modules/|/\.venv|\.p
 - **Light secret sniff.** Only flag obvious committed credential files or `.env`; do not attempt a
   deep secret scan (too noisy) -- point at a dedicated tool if the user wants depth.
 
+### 6. Eval-set health
+
+The `workflow` skill deposits golden cases into `evals/<seat>/` at wrap (seats: `spec`, `plan`,
+`reviewer`, `mechanical`); `evals.run` exams candidate models against them. Checkup only audits
+the sets and *detects the need* for an exam -- it never runs one (expensive, writes scorecards;
+delegate to `evals.run`).
+
+```sh
+for s in spec plan reviewer mechanical; do printf '%s: ' $s; ls evals/$s/*.md 2>/dev/null | wc -l; done
+grep -rl '\.workflow/' evals/ 2>/dev/null                    # cases pointing at deleted scratch
+grep -rhoE 'date: [0-9-]+|^- Date: .*' evals/ 2>/dev/null | sort | tail -3   # newest provenance
+ls evals/scorecards/ 2>/dev/null
+```
+
+- **Self-containment.** Any case referencing a `.workflow/` path is 🔴 -- that scratch is deleted
+  at wrap, so the case is silently worthless. It must inline its input/approved output.
+- **Cap respected.** More than ~15 cases in a seat is ⚠️ -- the rolling cap says a new case
+  displaces the weakest, never appends past it. Recommend a pruning pass (human decides which).
+- **Coverage gaps.** A seat with 0 cases is ⚠️ (the asset isn't compounding); a near-empty
+  `reviewer` set is worth calling out specifically -- it's the most valuable set and only grows
+  when Phase 4 catches real bugs are tagged.
+- **Malformed cases.** A case missing its approved output, grading notes, or provenance is ⚠️ --
+  it can't be graded.
+- **Staleness (heuristic).** If every case's provenance date is old while the codebase has moved a
+  lot since, say "worth a human skim -- cases may test a codebase that no longer exists".
+- **Unexamined models (detect-the-need).** Cross-check the models named in the `workflow` skill's
+  routing tables against `evals/scorecards/`: a model holding a seat with no scorecard, or a
+  scorecard older than the model's entry into the tables, is ⚠️ -- recommend `evals.run <seat>`.
+  This mirrors how section 2 detects memory pressure and delegates to `memory.compact`.
+
 ## Output format
 
-Print a compact, scannable report grouped by the five sections, each finding one line with its
+Print a compact, scannable report grouped by the six sections, each finding one line with its
 severity, the evidence, and the fix. Close with a **prioritized action list** (🔴 first) and, if the
 user opted into fixes, offer the safe ones one at a time.
 
@@ -162,10 +198,11 @@ user opted into fixes, offer the safe ones one at a time.
 ### Docs          ...
 ### Workspace     ...
 ### Config        ...
+### Evals         ...
 
 ### Recommended next
 1. 🔴 <highest-value fix> — <how>
-2. ⚠️ <next> — <how / delegate to memory.compact / etc.>
+2. ⚠️ <next> — <how / delegate to memory.compact / evals.run / etc.>
 ...
 ```
 
@@ -183,13 +220,17 @@ Only these may be applied during a checkup, and only after the user approves eac
 
 Everything else is **propose-only or delegate**: renaming a colliding skill, editing any canonical
 doc, compacting memory (`memory.compact`), routing learnings (`memory.remember`), deleting
-`.workflow` scratch (route first), or removing anything that could carry unsaved value.
+`.workflow` scratch (route first), running or pruning eval sets (`evals.run` / human decision),
+or removing anything that could carry unsaved value.
 
 ## Relationship to the other skills
 
 - `memory.compact` — owns the actual MEMORY.md compaction proposal; checkup only *detects the need*.
 - `memory.remember` — owns routing learnings; checkup only flags un-routed leftovers.
-- `workflow` — owns the dev loop; checkup flags its leftover `.workflow` scratch and unpushed work.
+- `workflow` — owns the dev loop and *deposits* eval golden cases at wrap; checkup flags its
+  leftover `.workflow` scratch and unpushed work.
+- `evals.run` — owns running the exams and writing scorecards; checkup only audits set health and
+  flags unexamined models.
 
 Keep this skill's `description` under ~900 characters (it enforces that rule on others -- it must
 pass its own check).

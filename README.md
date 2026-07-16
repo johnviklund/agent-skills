@@ -20,9 +20,15 @@ from both Codex CLI and GitHub Copilot CLI.
   audits skill hygiene (plugin name collisions, folder-vs-frontmatter name, description length,
   Codex symlink parity, self-publish drift), memory hygiene (MEMORY.md size/staleness/superseded,
   leftover proposals), doc freshness (canonical docs, dead skill references), workspace
-  cleanliness (leftover `.workflow` scratch, tracked junk, unpushed work), and config health.
-  Reports severity-ranked findings and prioritized fixes; delegates compaction to `memory.compact`;
-  applies only opt-in, one-at-a-time safe fixes.
+  cleanliness (leftover `.workflow` scratch, tracked junk, unpushed work), config health, and
+  eval-set health. Reports severity-ranked findings and prioritized fixes; delegates compaction
+  to `memory.compact` and eval runs to `evals.run`; applies only opt-in, one-at-a-time safe fixes.
+- **`evals`** — runs model exams against the eval golden sets deposited by the `workflow` skill:
+  `evals.run <seat> [candidate model]` exams a candidate on one seat's cases (seats: spec, plan,
+  reviewer, mechanical), grades with the incumbent strict reviewer plus a human spot check, scores
+  quality and cost/latency, and writes a scorecard to `evals/scorecards/`. `evals.list` shows set
+  and scorecard status. Routing changes are propose-only — recommends fallback-order edits to the
+  `workflow` skill's tables but never applies them.
 
 ## How this repo is wired up
 
