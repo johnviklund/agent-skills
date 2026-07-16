@@ -29,7 +29,7 @@ seats and their natural case shapes:
 - **reviewer seat** (Phase 4): a diff containing a *confirmed* P0/P1 → the finding that caught
   it. These are the most valuable cases — a candidate reviewer must catch everything the
   incumbent caught.
-- **mechanical lane** (Phase 3, Luna-tier): a transform prompt with known-correct output.
+- **mechanical lane** (Phase 3): a transform prompt with known-correct output.
 
 **Admission test — deposit only discriminating cases:** a case earns a slot only if it would
 plausibly separate models (the approved output required real judgment, or a model actually got

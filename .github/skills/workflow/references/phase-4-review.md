@@ -1,10 +1,10 @@
 # Phase 4 — Review — `workflow review` (+ what happens after)
 
-Model/effort/CLI: per the routing tables in `SKILL.md` (Phase 4 row). Rationale for the seat:
-the strongest hard-engineering reasoner *and* an independent set of eyes — the code was written
-by GPT-5.6, so the reviewer should be the other vendor; a Codex-only review loses that
-independence. In Codex, `ultra` is permitted if the diff is wide (many files/subsystems
-reviewable independently) per the read-only exception in `SKILL.md` — same P0–P3 output
+Seat: **strict reviewer** — mapping in `ROUTING.md`. Rationale: the strongest hard-engineering
+reasoner *and* an independent set of eyes — the reviewer should be a different vendor from
+whichever model wrote the code; a same-vendor review is a degraded mode and should be noted as
+such. A harness parallel-breadth mode is permitted if the diff is wide (many files/subsystems
+reviewable independently) per the read-only-breadth invariant in `SKILL.md` — same P0–P3 output
 contract, and verify its flagged signatures against real code before acting.
 
 Review the changes against `.workflow/plan.md` as a strict senior engineer, including any
@@ -16,7 +16,7 @@ verdict — "ship as-is" if nothing's worth acting on, otherwise the smallest di
 (fix now/defer/wontfix, one-line reason). List pre-existing/environmental failures separately so
 they aren't mistaken for regressions.
 
-If handing this to a fresh Copilot session, paste:
+If handing this to a fresh session on the strict-reviewer seat, paste:
 
 ```text
 Review the changes against .workflow/plan.md as a strict senior engineer, including any "Deviations" it logged during execution. Verify empirically — compile, run tests, trace producer↔consumer, run live queries. Flag: missing error handling, resource leaks, security flaws, syntax/compile regressions, and logic that defeats the feature's own guarantees (e.g. a gate that can never fire). Output P0 (blocker) / P1 (high) / P2 (medium) / P3 (low), and an explicit verdict — "ship as-is" if there's nothing worth acting on, otherwise the smallest disposition per issue (fix now / defer / wontfix, with a one-line reason). List pre-existing/environmental failures separately so they aren't mistaken for regressions.

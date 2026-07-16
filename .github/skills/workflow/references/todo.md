@@ -1,10 +1,9 @@
 # TODO intake — `workflow todo [idea]`
 
-Model/effort/CLI: per the routing tables in `SKILL.md` (TODO intake row) — Sonnet 5 `medium` in
-Copilot, Terra `medium` in Codex. Rationale: this is knowledge-shaped intake dialogue with no
-execution payoff — the same seat as brainstorm, and it's a quick command, so the cheap
-near-Opus model is right; never spend Sol/Opus on it. Runs anytime, in any session — it doesn't
-read or change `.workflow/` state.
+Seat: **brainstorm partner** at medium effort — mapping in `ROUTING.md`. Rationale: this is
+knowledge-shaped intake dialogue with no execution payoff — the same seat as brainstorm, and
+it's a quick command; never spend a heavy or reviewer seat on it. Runs anytime, in any
+session — it doesn't read or change `.workflow/` state.
 
 Capture the idea into repo-root `TODO.md` well-placed and well-shaped — intake only, never the
 start of implementation.

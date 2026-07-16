@@ -1,7 +1,8 @@
 # Phase 0 — Brainstorm — `workflow brainstorm` / `workflow improve`
 
-Model/effort/CLI: per the routing tables in `SKILL.md` (Phase 0 row). Rationale for the seat:
-knowledge-shaped dialogue with no execution payoff — the cheap near-Opus model wins.
+Seat: **brainstorm partner** — mapping in `ROUTING.md`. Rationale: knowledge-shaped dialogue
+with no execution payoff — the cheap conversational seat wins; never spend a reviewer- or
+heavy-executor-tier model here.
 
 Read `PRODUCT.md`/`DESIGN.md` if they exist and this touches product direction or UI, then run
 the brainstorm directly — ask clarifying questions one at a time (prioritize whichever answer
@@ -27,7 +28,7 @@ duplicate it). Two directions:
 Honor the file's own header rule: never implement a TODO item just because it's listed —
 confirm scope with the human first.
 
-If handing this to a fresh Copilot session, paste:
+If handing this to a fresh session on the brainstorm seat, paste:
 
 ```text
 Read PRODUCT.md and DESIGN.md first, if they exist and this touches product direction or UI, so we don't relitigate settled decisions. Also read TODO.md at the repo root if present — it's my intake scratchpad, not a roadmap: if this brainstorm matches a listed item, seed from its user story/purpose/DoD but verify the details against the current code; otherwise list related TODO items and ask which to fold into scope and which to exclude (record exclusions by name under non-goals). Let's brainstorm before we spec anything: [describe the idea, problem, or need]. Ask me clarifying questions one at a time, prioritizing whichever question's answer would change the architecture or scope the most. Explore 2-3 different approaches with tradeoffs, and push back on any assumption that seems shaky or any scope that seems bigger than the actual need. Don't write a spec yet. When we've converged, save a short summary (problem statement, chosen approach, explicit non-goals, open questions) to .workflow/brainstorm.md.

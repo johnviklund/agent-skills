@@ -1,11 +1,10 @@
 # Final check & wrap-up — `workflow wrap`
 
-Model/effort/CLI: per the routing tables in `SKILL.md` (wrap row) — mid-tier at `medium`,
-auto-approve, in either CLI. Since wrap usually follows Phase 4 in Copilot, the common move is
-simply dropping Opus 4.8→Sonnet 5 after the review verdict. Rationale: wrap is procedural — the
+Seat: wrap runs on a mid-tier seat at medium effort, auto-approve, in either harness — mapping
+and the practical after-review model swap in `ROUTING.md`. Rationale: wrap is procedural — the
 only judgment calls are commit messages that read as worklog lines and `memory.remember`'s
-routing decisions, which rules out Luna but doesn't justify Sol or Opus; the hard reasoning
-already happened in review.
+routing decisions, which rules out the mechanical lane but doesn't justify a heavy or reviewer
+seat; the hard reasoning already happened in review.
 
 **Escalate on failure, don't fix in wrap:** if step 1's final checks surface a regression, stop —
 that's a mini review→patch cycle (route it through the patch-cycle models in `SKILL.md`), not

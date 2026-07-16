@@ -1,42 +1,41 @@
 ---
 name: workflow
 description: >
-  Runs a personal five-phase solo-dev coding workflow across Codex CLI and Copilot CLI:
-  brainstorm, spec, audit & plan, execute, review, then wrap-up (learning capture). Only trigger
-  on an explicit, deliberate invocation of the form "workflow [phase] ..." or "/workflow [phase]
-  ..." where phase is brainstorm, spec, plan, execute, review, learn, wrap, status, next, log,
-  compact, todo, or
-  improve -- e.g. "workflow spec the retry mechanism", "/workflow execute", "workflow next", a
-  bare "/workflow" (treated as next), "workflow log", "workflow compact", "workflow todo [idea]",
-  or "workflow improve
-  [feature] - goal:
-  [goal]". Do NOT trigger on casual mentions of spec, plan, execute, review, or learn
-  anywhere else in a message -- this skill is intentionally narrow and explicit, never a broad
-  natural-language matcher. Deliberately thin and single-voice -- no reviewer personas, no
-  self-orchestrated sub-agents (GPT-5.6 ultra is permitted narrowly, on read-only seats only).
+  Runs a personal five-phase solo-dev coding workflow across CLI coding agents (CLI/model
+  mapping in ROUTING.md): brainstorm, spec, audit & plan, execute, review, then wrap-up
+  (learning capture). Only trigger on an explicit, deliberate invocation of the form "workflow
+  [command] ..." or "/workflow [command] ..." where command is brainstorm, spec, plan, execute,
+  review, learn, wrap, status, next, log, compact, todo, or improve -- e.g. "workflow spec the
+  retry mechanism", "workflow todo [idea]", "workflow improve [feature] - goal: [goal]", or a
+  bare "/workflow" (treated as next). Do NOT trigger on casual mentions of spec, plan, execute,
+  review, or learn elsewhere in a message -- this skill is intentionally narrow and explicit,
+  never a broad natural-language matcher. Thin and single-voice -- no reviewer
+  personas, no sub-agents (harness parallel modes only on read-only seats).
 ---
 
 # Workflow
 
-A personal five-phase workflow, roles matched to model strengths: one brainstorm partner, one
-pragmatic generator/executor, one deep reviewer. Two CLIs stay in the loop on purpose — Codex and
-Copilot draw from separate token/quota pools (more total throughput), and the split buys
-cross-vendor independence: GPT-5.6 writes in Codex, Claude audits and reviews in Copilot.
+A personal five-phase workflow built on **seats** — jobs with an output contract and effort
+profile, filled by whatever model currently earns them: one brainstorm partner, pragmatic
+executors, one strict reviewer. Two harnesses (CLI coding agents) stay in the loop on purpose:
+separate token/quota pools buy more total throughput, and splitting writer and reviewer across
+vendors buys independence — a different vendor's model catches blind spots the writer's own
+family shares.
 
-**This file is the router.** Full instructions per command live in `references/` (paths relative
-to this skill's directory) — read the one file for the invoked command before acting, per the
-*Command index* below. Model/effort assignments live ONLY in the two tables here; reference files
-point back rather than restating them.
+**This file is the hub, and it is vendor-neutral.** Full instructions per command live in
+`references/` (read the one file for the invoked command, per the *Command index*). The concrete
+mapping of seats to CLIs, models, efforts, and fallbacks lives in **`ROUTING.md`** next to this
+file — the *only* file that names vendors. Edit ROUTING.md to fit your own tools; nothing else
+should need to change.
 
 ## Invocation — deliberate, not ambient
 
-Neither CLI supports user-defined slash commands (`/` is reserved for built-ins; skills trigger
-via description matching), so there is no *true* `/workflow` command. The required form is a
-message starting with `workflow` or `/workflow` plus a command word (see *Command index*). Try
-`/workflow ...` first; if the CLI swallows the slash, drop it — both forms are identical. A
-**bare** `workflow`/`/workflow` is treated as `workflow next`. **Do not** treat unprefixed
-mentions of "spec", "plan", "execute", "review", or "learn" in normal conversation as an
-invocation.
+Most CLIs reserve `/` for built-ins (skills trigger via description matching), so there is no
+*true* `/workflow` command. The required form is a message starting with `workflow` or
+`/workflow` plus a command word (see *Command index*). Try `/workflow ...` first; if the CLI
+swallows the slash, drop it — both forms are identical. A **bare** `workflow`/`/workflow` is
+treated as `workflow next`. **Do not** treat unprefixed mentions of "spec", "plan", "execute",
+"review", or "learn" in normal conversation as an invocation.
 
 ## Where are we? (re-grounding) — `workflow status`
 
@@ -68,83 +67,56 @@ thing, or scope reads two ways); **command/state mismatch** (per *Where are we?*
 interpretation in one sentence, "I read this as X — correct?"); **silent assumptions doing heavy
 lifting** (surface the assumption instead of building on it). State what *is* understood, then
 ask — prefer "I'm about to do X, which I read as Y — confirm or correct" over "what do you
-want?". Skip the gate for mechanical, low-risk, clearly-specified work (Luna-tier edits,
+want?". Skip the gate for mechanical, low-risk, clearly-specified work (mechanical-lane edits,
 `status`, `next`, `log`, `compact`, `todo` — which has its own question step). This complements
-the in-phase rules (Phase 0 dialogue,
-Phase 3 stop-on-deviation); it doesn't replace them.
+the in-phase rules (Phase 0 dialogue, Phase 3 stop-on-deviation); it doesn't replace them.
 
-## Model routing — the single source of truth
+## Seats — roles, not vendors
 
-Route across GPT-5.6 (Sol/Terra/Luna), Claude Sonnet 5, and Claude Opus 4.8 by task shape:
-
-| Model | Workflow seat | Why |
+| Seat | Job | Used by |
 |---|---|---|
-| Claude Opus 4.8 | Plan audit, final review, patch plan | Highest accuracy on the hardest repo-level reasoning; the strict reviewer |
-| GPT-5.6 Sol | Hardest execution: schema/SQL/contract edits, P0 fixes | Best long-horizon agentic/terminal execution; stays oriented across files, tests, follow-ups |
-| GPT-5.6 Terra | Specs, everyday logic-bearing implementation, wrap (Codex) | Near-flagship quality at ~half Sol's price — the default execution lane |
-| Claude Sonnet 5 | Brainstorm, wrap (Copilot), all-round Claude fallback | Near-Opus quality at Sonnet prices; strong root-cause tracing and CLI work |
-| GPT-5.6 Luna | Mechanical transformations with an explicit expected result | Fastest/cheapest lane |
+| Brainstorm partner | Knowledge-shaped dialogue, intake; cheap, conversational | Phase 0, `workflow todo`, wrap |
+| Default executor | Specs and everyday logic-bearing implementation; best quality-per-cost | Phase 1, Phase 3 (logic), P1–P3 fixes, wrap |
+| Heavy executor | Schema/SQL/contract-coupled edits, hardest multi-file work; best long-horizon agentic model | Phase 3 (schema/contract), P0 fixes |
+| Mechanical lane | Transforms with an explicit expected result; cheapest/fastest | Phase 3 (mechanical) |
+| Strict reviewer | Deepest read-only reasoning; the workflow's skeptic | Phase 2, Phase 4, patch plans |
 
-**Structural facts:** Codex CLI serves only OpenAI models (`gpt-5.6-sol/terra/luna`; `gpt-5.6` is
-the family alias); Copilot CLI serves both vendors (use the ID its picker shows). Claude is only
-reachable from Copilot — and that's a feature: a different vendor reviewing GPT-written code
-catches blind spots a same-family sibling shares. Default CLI split: Phase 0/2/4 in Copilot
-(Claude seats), Phase 1/3 in Codex (GPT seats). Every phase must still run in either CLI: staying
-in Codex, use Terra for 0/1, Luna/Terra/Sol for 3, Sol for 2/4; staying in Copilot, use Sonnet 5
-for 0/1/3 (effort scaled the way Luna→Terra→Sol would) and Opus 4.8 for 2/4. Never run the same
-step in both CLIs.
+Which model fills each seat, in which harness, at what effort, with what fallback chain —
+that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not by novelty.
 
-**Availability:** open `/model` at session start; use a model only if listed (plan/policy/region/
-rollout-dependent). Fallbacks: no Opus 4.8 → Sonnet 5 `xhigh` for Phase 2/4; no Sonnet 5 → Terra
-for Phase 0; no GPT-5.6 in Codex → GPT-5.5 at the closest effort. Don't retry or silently switch
-to `auto`.
+**Portable invariants (hold regardless of the mapping):**
 
-## Effort & approval per step
-
-Codex GPT-5.6 exposes `low/medium/high/xhigh/max`; Claude exposes up to `xhigh` — where a row
-says `max`, use the highest level the picker lists. Use the lowest level that reliably works;
-spend effort on what a reviewer would catch (signatures, schemas, contract versions), not rote
-edits.
-
-| Phase / work | Model | Effort | Approval |
-|---|---|---|---|
-| Phase 0 — brainstorm | Copilot Sonnet 5 (fallback: Terra) | medium | — (dialogue) |
-| Phase 1 — spec | Codex Terra (fallback: GPT-5.5) | high | — (read-only) |
-| Phase 2 — audit & plan | Copilot Opus 4.8 (fallback: Sonnet 5 `xhigh`) | high; xhigh hardest cases | — (read-only) |
-| Phase 3 — mechanical edits | Codex Luna | low → medium | auto |
-| Phase 3 — logic-bearing edits | Codex Terra | high | review each diff |
-| Phase 3 — schema/SQL/contract | Codex Sol | xhigh | review each diff |
-| Phase 4 — review | Copilot Opus 4.8 (fallback: Sonnet 5 `xhigh`) | max | — (read-only) |
-| Patch plan (any severity) | Copilot Opus 4.8 (fallback: Sonnet 5) | high | — |
-| Fix P0s | Codex Sol | high | review each diff |
-| Fix P1/P2/P3s | Codex Terra | medium | auto |
-| Final check & wrap-up | Copilot Sonnet 5 / Codex Terra | medium | auto |
-| TODO intake (`workflow todo`) | Copilot Sonnet 5 / Codex Terra | medium | auto (writes only `TODO.md`) |
-
-Set effort in `/model`; Copilot also accepts `--reasoning-effort`, Codex `model_reasoning_effort`
-in `~/.codex/config.toml`. Phase 3 in Copilot: mirror Luna/Terra/Sol, or Sonnet 5 with effort
-scaled to the same shape — one approach per session.
-
-**GPT-5.6 `ultra` — narrow, read-only exception.** Ultra parallelizes across Sol's internal
-subagents: it buys *breadth*, not depth. Allowed only on a read-only seat in Codex (Phase 2/4, or
-a hard read-only investigation) when the problem is genuinely wide — many files/subsystems
-checkable independently. Never for anything that writes (Phase 3, fixes, wrap): parallel writers
-break one-step-at-a-time and contract lockstep. Same output contract as the normal seat, and its
-findings get the *verify, don't trust* treatment — confirm flagged signatures/versions against
-real code. Ultra multiplies token burn; default to Sol `max` unless breadth is the bottleneck.
+- **Cross-vendor review.** The strict reviewer is a different vendor from whichever model wrote
+  the code. A same-vendor review is a degraded mode — note it when unavoidable.
+- **Two harnesses, no double work.** Never run the same step in both harnesses.
+- **Availability first.** Check the harness's model picker at session start; walk ROUTING.md's
+  fallback chain in order; never retry blindly or silently switch to an auto/default model.
+- **Effort scales with risk, not habit.** Use the lowest level that reliably works; mechanical
+  work lowest, schema/contract and review highest (exact levels in ROUTING.md). Before *raising*
+  effort on a struggling step, first check whether the step is missing a success criterion or
+  verification check — a clearer completion bar usually beats more thinking. When a new model
+  takes a seat, baseline at the incumbent's effort and test one level lower.
+- **Approval scales with blast radius.** Read-only seats need none; mechanical-lane edits
+  auto-approve; logic-bearing and schema/contract edits are reviewed diff by diff (the full
+  phase→approval map is in ROUTING.md alongside the efforts).
+- **Sub-agent/parallel modes are for read-only breadth only.** A harness mode that fans work out
+  to internal sub-agents is allowed only on a read-only seat (Phase 2/4 or a wide read-only
+  investigation) when many files/subsystems can be checked *independently* — it buys breadth,
+  not depth. Never on anything that writes: parallel writers break one-step-at-a-time and
+  contract lockstep. Findings from such a run get the *verify, don't trust* treatment.
 
 ## Context hygiene
 
-`/clear` at every phase handoff (0→1→2→3→4 and into wrap) — re-ground from `.workflow/*.md` + git
-instead of dragging the previous phase's context (or the wrong model's mindset) forward; in
-Copilot the reset precedes the Sonnet 5→Opus 4.8 swap. Mid-phase: Phase 3 persists state to
-`.workflow/plan.md` after **every** step (checklist + `## Execution state` block), so any
-compaction — manual or automatic — can never strand the run; when `/context` shows the window
-filling, run `workflow compact` between steps (see `references/compact.md`) — don't hand-write a
-`/compact` focus and don't let the CLI auto-compact decide what survives. After *any* compaction,
-re-read the plan's `Execution state` block before the next step. Never compact at a
-handoff or mid-verification-critical-step: summaries silently drop exact signatures and contract
-versions.
+Reset the session (`/clear` or your harness's equivalent) at every phase handoff (0→1→2→3→4 and
+into wrap) — re-ground from `.workflow/*.md` + git instead of dragging the previous phase's
+context (or the wrong seat's mindset) forward; the reset is also where the seat's model swap
+happens. Mid-phase: Phase 3 persists state to `.workflow/plan.md` after **every** step
+(checklist + `## Execution state` block), so any compaction — manual or automatic — can never
+strand the run; when the context meter shows the window filling, run `workflow compact` between
+steps (see `references/compact.md`) — don't hand-write a summary focus and don't let the harness
+auto-compact decide what survives. After *any* compaction, re-read the plan's `Execution state`
+block before the next step. Never compact at a handoff or mid-verification-critical-step:
+summaries silently drop exact signatures and contract versions.
 
 ## Next recommended step — `workflow next` (or bare `/workflow`)
 
@@ -158,14 +130,14 @@ work (re-ground via *Where are we?* first). Print exactly this shape:
 
 | # | Step | Setting |
 |---|------|---------|
-| 1 | `/clear`? | Yes — reset before the handoff (or *No — continue this session*) |
-| 2 | CLI · model · effort | from the tables above, with fallback |
+| 1 | Reset session? | Yes — reset before the handoff (or *No — continue this session*) |
+| 2 | Harness · model · effort | the next phase's seat, mapped via `ROUTING.md`, with its fallback |
 | 3 | Ground in | exact files to read first |
 | 4 | Invoke | the `workflow <phase>` command to send |
 
-**GPT `/goal`:** yes/no (+why) · **GPT `/fast`:** yes/no (+why) · **Sub-agents:** none — except `ultra` per the read-only exception above
+**Harness toggles:** autonomy/speed modes per ROUTING.md notes (default: none) · **Sub-agents:** none — except the read-only breadth exception above
 
-**Compact?** \<one of:> No — `/clear` at this handoff (never compact between phases) · No — window fine, just continue · Yes — mid-phase and `/context` is filling: run `workflow compact` between steps. Never hand-write `/compact`; the only `/compact` to run is the line `workflow compact` prints.
+**Compact?** \<one of:> No — reset at this handoff (never compact between phases) · No — window fine, just continue · Yes — mid-phase and the window is filling: run `workflow compact` between steps. Never hand-write a compact; the only compact command to run is the line `workflow compact` prints.
 
 Paste next:
 ```text
@@ -173,14 +145,13 @@ Paste next:
 ```
 ---
 
-Toggle defaults: `/clear` Yes at every handoff, No only for continued same-model work. **Compact**
-by the rule on the card — the decision is: phase boundary → `/clear`, never compact; mid-phase +
-window filling (check `/context`, roughly >70%) → `workflow compact` between steps, never
-mid-step; otherwise nothing. Model/effort straight from the tables above. Ground in: the
-`.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md`
-when product/UI is in scope, `git diff`/`git log` for review/wrap. `/goal` default No (only
-whole-plan Phase 3 in Codex, keeping review-each-diff on SQL/contract steps). `/fast` default No
-(only mechanical auto-approve rows; never logic/schema or Phase 2/4). When the run is finished —
+Toggle defaults: reset Yes at every handoff, No only for continued same-seat work. **Compact** by
+the rule on the card — phase boundary → reset, never compact; mid-phase + window filling
+(roughly >70%) → `workflow compact` between steps, never mid-step; otherwise nothing.
+Harness/model/effort straight from ROUTING.md. Ground in: the `.workflow/*.md` files that phase
+reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md` when product/UI is in scope,
+`git diff`/`git log` for review/wrap. Autonomy/speed toggles default No — only where ROUTING.md's
+harness notes sanction them, never on review seats or risky lanes. When the run is finished —
 plan checked off, review clean or patched, learnings routed, scratch cleared — print the ✅ done
 card instead: one line on what shipped; recommended next (`workflow brainstorm <topic>` or
 `workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; open a PR if not committing to
@@ -196,7 +167,8 @@ card instead: one line on what shipped; recommended next (`workflow brainstorm <
 
 ## Command index
 
-Read the listed reference before acting. `status` and `next` need only this file.
+Read the listed reference before acting. `status` and `next` need only this file (plus
+ROUTING.md for the card's seat mapping).
 
 | Command | Reference |
 |---|---|
@@ -214,7 +186,12 @@ Read the listed reference before acting. `status` and `next` need only this file
 
 When the workflow's shape genuinely changes, edit these files directly — they are the one source
 of truth. **Growth rule:** a new feature or use case = a new (or extended) reference file plus
-one Command-index line; this router stays under ~200 lines, and model/effort facts are edited
-ONLY in the two tables above. Before changing model names or effort levels, verify Codex against
-the current official model guide and Copilot with `/model` or `copilot help config`; never infer
-one CLI's availability from the other's.
+one Command-index line; this hub stays under ~200 lines. **Vendor rule:** `ROUTING.md` is the
+only file that names harnesses, vendors, or models — a brand name anywhere else in this skill is
+a bug; seats and portable invariants live here, mappings live there. **Prompt-style rule (when
+editing paste blocks and instructions):** state each rule exactly once — a contradiction or
+duplicate is worse than a missing detail; define the outcome, constraints, and completion bar
+rather than prescribing every step; reserve ALWAYS/NEVER for true process invariants; don't
+scatter "ask first"/"wait for approval" — approval scope is stated once, in ROUTING.md. Before
+changing ROUTING.md, verify model names and effort levels against each harness's own picker and
+current official model guide; never infer one harness's availability from another's.
