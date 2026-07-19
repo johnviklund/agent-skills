@@ -46,6 +46,7 @@ Effort scales: Codex GPT-5.6 exposes `low/medium/high/xhigh/max`; Claude models 
 | Fix P1/P2/P3s | Default executor | medium | auto |
 | Final check & wrap-up | Brainstorm partner (Copilot) / Default executor (Codex) | medium | auto |
 | TODO intake (`workflow todo`) | Brainstorm partner | medium | auto (writes only `TODO.md`) |
+| Bootstrap (`workflow bootstrap`) | Brainstorm partner (docs) + Strict reviewer (audit) | high | propose each doc, confirm before writing |
 
 Single-harness sessions: staying in Codex — Terra for Phase 0/1, Luna/Terra/Sol by step shape for
 Phase 3, Sol for Phase 2/4 (degraded same-vendor review). Staying in Copilot — Sonnet 5 for

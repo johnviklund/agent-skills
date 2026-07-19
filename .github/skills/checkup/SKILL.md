@@ -132,7 +132,7 @@ ls MEMORY.proposed.md MEMORY_ARCHIVE.proposed.md skill-promotion-candidates.prop
 ### 4. Workspace cleanliness
 
 ```sh
-ls .workflow/{brainstorm,spec,plan,patch_plan,learnings}.md 2>/dev/null   # leftover run scratch
+ls .workflow/{brainstorm,spec,plan,patch_plan,review,learnings}.md 2>/dev/null   # leftover run scratch
 git status --porcelain 2>/dev/null                                        # uncommitted work
 git log @{u}.. --oneline 2>/dev/null                                      # unpushed commits
 git ls-files | grep -Ei '(^|/)\.DS_Store$|(^|/)\.env$|/node_modules/|/\.venv|\.pyc$' 2>/dev/null

@@ -6,6 +6,12 @@ only judgment calls are commit messages that read as worklog lines and `memory.r
 routing decisions, which rules out the mechanical lane but doesn't justify a heavy or reviewer
 seat; the hard reasoning already happened in review.
 
+**Precondition — review evidence.** Before anything else, confirm `.workflow/review.md` exists,
+its verdict is clean or every finding is dispositioned, and it names the current HEAD (no code
+commits after the reviewed sha). If it's missing or stale, don't lecture that review "hasn't
+run" — it may have run before this artifact existed — say the evidence is missing/stale and
+print the next-step card routing to `workflow review`.
+
 **Escalate on failure, don't fix in wrap:** if step 1's final checks surface a regression, stop —
 that's a mini review→patch cycle (route it through the patch-cycle models in `SKILL.md`), not
 something to patch inline at wrap's effort/approval settings.
@@ -26,7 +32,8 @@ Commit, push, curate, and clean up — in one go:
    list plus anything done in passing: move completed/subsumed items to Archived with a one-line
    pointer (commit sha or the initiative that subsumed them); rewrite items whose scope this run
    changed so they match the code that now exists; check off Small UI Changes shipped along the
-   way. Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
+   way; if `ROADMAP.md` exists, check off items this run completed (pointer updates only —
+   same boundaries). Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
    only add items the human explicitly deferred during this run, in the right section); and
    `PRODUCT.md` stays the source of truth for product state — if this run changed product
    direction, that edit goes to `PRODUCT.md`, and the TODO entry should point at it, not
@@ -45,8 +52,8 @@ Commit, push, curate, and clean up — in one go:
 8. Once `memory.remember` confirms every line is routed and step 6's cases are deposited,
    delete `.workflow/brainstorm.md`,
    `.workflow/spec.md`, `.workflow/plan.md` (including its `## Execution state` block — session
-   scratch, not a durable doc), `.workflow/patch_plan.md` (if present), and
-   `.workflow/learnings.md`.
+   scratch, not a durable doc), `.workflow/patch_plan.md` and `.workflow/review.md` (if
+   present), and `.workflow/learnings.md`.
 
 **Why this order:** commits are local — nothing leaves the machine until push. Code → learnings
 routed, evals deposited, and committed → **push** → clear scratch. Delete all the run files, not

@@ -37,4 +37,5 @@ each step (see `ROUTING.md` harness notes) — worth knowing about, but not the 
 only reach for it if explicitly asked, and keep review-each-diff on SQL/contract steps even
 under such a loop.
 
-Close with the next-step card (format in `SKILL.md`).
+Close with the next-step card (format in `SKILL.md`) — mandatory when the plan finishes:
+asking "want me to proceed to review?" without the card is the bug, not a substitute for it.

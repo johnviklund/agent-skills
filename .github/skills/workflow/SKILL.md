@@ -5,7 +5,7 @@ description: >
   mapping in ROUTING.md): brainstorm, spec, audit & plan, execute, review, then wrap-up
   (learning capture). Only trigger on an explicit, deliberate invocation of the form "workflow
   [command] ..." or "/workflow [command] ..." where command is brainstorm, spec, plan, execute,
-  review, learn, wrap, status, next, log, compact, todo, or improve -- e.g. "workflow spec the
+  review, learn, wrap, status, next, log, compact, todo, bootstrap, or improve -- e.g. "workflow spec the
   retry mechanism", "workflow todo [idea]", "workflow improve [feature] - goal: [goal]", or a
   bare "/workflow" (treated as next). Do NOT trigger on casual mentions of spec, plan, execute,
   review, or learn elsewhere in a message -- this skill is intentionally narrow and explicit,
@@ -46,9 +46,12 @@ Report which phase is next without acting, then wait for an explicit `workflow <
 - `brainstorm.md` only → Phase 1 (Spec).
 - `+ spec.md` → Phase 2 (Audit & Plan).
 - `+ plan.md`, no "Deviations", checklist incomplete → Phase 3 (Execute).
-- `plan.md` checklist complete → Phase 4 (Review).
+- `plan.md` checklist complete, but no `review.md` — or `review.md` names an older commit than
+  the current HEAD → Phase 4 (Review). Review is otherwise read-only, so `review.md` is its
+  *only* evidence: never infer "review done" without it.
 - `+ patch_plan.md` → mid patch cycle (see `references/phase-4-review.md`).
-- Everything present, plan checked off, review clean → wrap-up.
+- `review.md` present, verdict clean or every finding dispositioned, reviewing the current
+  HEAD → wrap-up.
 
 If a given `workflow <phase>` mismatches the file state (e.g. `execute` with no `plan.md`), say
 so and ask before proceeding. Also read `AGENTS.md`, `MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if
@@ -120,8 +123,14 @@ summaries silently drop exact signatures and contract versions.
 
 ## Next recommended step — `workflow next` (or bare `/workflow`)
 
-Every phase response ends with this card; `workflow next` prints it on demand without doing phase
-work (re-ground via *Where are we?* first). Print exactly this shape:
+Every phase response ends with this card — **mandatory, with no substitute**: a conversational
+closer ("Next is workflow execute. Want me to proceed?") is not the card; if in doubt, print
+the card. Row 2 must be **resolved from `ROUTING.md` at print time** — open it and print the
+concrete harness, model, and effort for the next phase's seat plus its first fallback. Printing
+a seat name or "see ROUTING.md" instead is a failure of the card's purpose: the human should
+never have to open a file to learn which model to select next. `workflow next` prints the card
+on demand without doing phase work (re-ground via *Where are we?* first). Print exactly this
+shape:
 
 ---
 ### ▶ Next recommended step
@@ -131,7 +140,7 @@ work (re-ground via *Where are we?* first). Print exactly this shape:
 | # | Step | Setting |
 |---|------|---------|
 | 1 | Reset session? | Yes — reset before the handoff (or *No — continue this session*) |
-| 2 | Harness · model · effort | the next phase's seat, mapped via `ROUTING.md`, with its fallback |
+| 2 | Harness · model · effort | resolved values, e.g. "<harness> · <model> · <effort> — fallback: <model> <effort>" |
 | 3 | Ground in | exact files to read first |
 | 4 | Invoke | the `workflow <phase>` command to send |
 
@@ -181,6 +190,7 @@ ROUTING.md for the card's seat mapping).
 | `workflow learn`, `workflow log` | `references/learning-worklog.md` |
 | `workflow compact` | `references/compact.md` |
 | `workflow todo [idea]` | `references/todo.md` |
+| `workflow bootstrap [PRD.md]` | `references/bootstrap.md` |
 
 ## Keeping this skill alive
 

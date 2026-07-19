@@ -7,6 +7,12 @@ such. A harness parallel-breadth mode is permitted if the diff is wide (many fil
 reviewable independently) per the read-only-breadth invariant in `SKILL.md` — same P0–P3 output
 contract, and verify its flagged signatures against real code before acting.
 
+**Persist the verdict — review's only artifact.** Review is read-only against the code, so the
+state machine can only see it happened through `.workflow/review.md`: after the review (and
+after every re-review), write it — date, the HEAD commit sha reviewed, the P0–P3 findings with
+dispositions, and the explicit verdict. Without this file, `workflow status` and `workflow
+wrap` will correctly claim review hasn't run.
+
 Review the changes against `.workflow/plan.md` as a strict senior engineer, including any
 "Deviations" logged during execution. Verify empirically — compile, run tests, trace
 producer↔consumer, run live queries. Flag: missing error handling, resource leaks, security
@@ -19,7 +25,7 @@ they aren't mistaken for regressions.
 If handing this to a fresh session on the strict-reviewer seat, paste:
 
 ```text
-Review the changes against .workflow/plan.md as a strict senior engineer, including any "Deviations" it logged during execution. Verify empirically — compile, run tests, trace producer↔consumer, run live queries. Flag: missing error handling, resource leaks, security flaws, syntax/compile regressions, and logic that defeats the feature's own guarantees (e.g. a gate that can never fire). Output P0 (blocker) / P1 (high) / P2 (medium) / P3 (low), and an explicit verdict — "ship as-is" if there's nothing worth acting on, otherwise the smallest disposition per issue (fix now / defer / wontfix, with a one-line reason). List pre-existing/environmental failures separately so they aren't mistaken for regressions.
+Review the changes against .workflow/plan.md as a strict senior engineer, including any "Deviations" it logged during execution. Verify empirically — compile, run tests, trace producer↔consumer, run live queries. Flag: missing error handling, resource leaks, security flaws, syntax/compile regressions, and logic that defeats the feature's own guarantees (e.g. a gate that can never fire). Output P0 (blocker) / P1 (high) / P2 (medium) / P3 (low), and an explicit verdict — "ship as-is" if there's nothing worth acting on, otherwise the smallest disposition per issue (fix now / defer / wontfix, with a one-line reason). List pre-existing/environmental failures separately so they aren't mistaken for regressions. Save the verdict, findings with dispositions, and the HEAD commit sha you reviewed to .workflow/review.md.
 ```
 
 **Optional — quiz before merging:** a diff only gives a light read of what happened, since
