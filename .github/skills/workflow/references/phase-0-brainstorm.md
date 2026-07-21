@@ -1,5 +1,8 @@
 # Phase 0 — Brainstorm — `workflow brainstorm` / `workflow improve`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 Seat: **brainstorm partner** — mapping in `ROUTING.md`. Rationale: knowledge-shaped dialogue
 with no execution payoff — the cheap conversational seat wins; never spend a reviewer- or
 heavy-executor-tier model here.

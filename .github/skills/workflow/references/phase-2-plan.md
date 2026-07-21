@@ -1,5 +1,8 @@
 # Phase 2 — Audit & Plan — `workflow plan`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 Seat: **strict reviewer** — mapping in `ROUTING.md`. Rationale: this is the deepest-reasoning
 read-only work, and the auditor should be a *different vendor* from the spec's author —
 cross-vendor scrutiny catches hallucinated signatures and blind spots the generator's own

@@ -15,6 +15,9 @@ description: >
 
 # Workflow
 
+> ⚠️ **This skill must be invoked, not skimmed.** A message of the form `workflow <command>` / `/workflow <command>` is a deliberate invocation: invoke this skill as the first action, before reading references, running commands, or emitting output. Reading `SKILL.md` or `references/*.md` directly is not a substitute for invoking the skill.
+
+
 A personal five-phase workflow built on **seats** — jobs with an output contract and effort
 profile, filled by whatever model currently earns them: one brainstorm partner, pragmatic
 executors, one strict reviewer. Two harnesses (CLI coding agents) stay in the loop on purpose:

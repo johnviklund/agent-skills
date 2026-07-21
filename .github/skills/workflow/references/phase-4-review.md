@@ -1,5 +1,8 @@
 # Phase 4 — Review — `workflow review` (+ what happens after)
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 Seat: **strict reviewer** — mapping in `ROUTING.md`. Rationale: the strongest hard-engineering
 reasoner *and* an independent set of eyes — the reviewer should be a different vendor from
 whichever model wrote the code; a same-vendor review is a degraded mode and should be noted as

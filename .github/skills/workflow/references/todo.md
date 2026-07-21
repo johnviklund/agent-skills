@@ -1,5 +1,8 @@
 # TODO intake — `workflow todo [idea]`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 Seat: **brainstorm partner** at medium effort — mapping in `ROUTING.md`. Rationale: this is
 knowledge-shaped intake dialogue with no execution payoff — the same seat as brainstorm, and
 it's a quick command; never spend a heavy or reviewer seat on it. Runs anytime, in any

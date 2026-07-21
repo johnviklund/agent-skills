@@ -1,5 +1,8 @@
 # Final check & wrap-up — `workflow wrap`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 Seat: wrap runs on a mid-tier seat at medium effort, auto-approve, in either harness — mapping
 and the practical after-review model swap in `ROUTING.md`. Rationale: wrap is procedural — the
 only judgment calls are commit messages that read as worklog lines and `memory.remember`'s

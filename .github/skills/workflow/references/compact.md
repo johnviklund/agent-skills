@@ -1,5 +1,8 @@
 # Mid-execution compaction — `workflow compact`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 **When to run what (the decision rule, also printed on every next-step card):**
 
 - Phase boundary → `/clear` and re-ground. Never compact between phases.

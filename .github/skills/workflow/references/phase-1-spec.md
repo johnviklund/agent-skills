@@ -1,5 +1,8 @@
 # Phase 1 — Spec — `workflow spec`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 Seat: **default executor** — mapping in `ROUTING.md`. Rationale: scoped,
 verify-against-the-code work — the value lane at high effort.
 

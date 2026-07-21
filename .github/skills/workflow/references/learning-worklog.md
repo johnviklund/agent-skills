@@ -1,5 +1,8 @@
 # Learning loop & Worklog — `workflow learn` / `workflow log`
 
+> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
+
+
 ## Learning loop — `workflow learn`
 
 Commits save *what* changed; `MEMORY.md`, skills, and `DESIGN.md` save *why*. This is the point
