@@ -46,7 +46,35 @@ human prefers; it lives in git either way) and note in `PRODUCT.md`'s header tha
 the PRD as of the bootstrap date.
 
 **5. Wire the hygiene.** `.gitignore` with `.workflow/` plus the usual junk (`.DS_Store`,
-`.env`, venvs, build output); create `WORKLOG.md` with its bounded-rolling header.
+`.env*`, venvs, build output); create `WORKLOG.md` with its bounded-rolling header.
+
+**5b. Git-host account isolation (conditional, run automatically).** If this repo belongs to a
+different GitHub account than the machine's `gh` default, wire per-shell isolation so `gh` here
+targets the right account without a global `gh auth switch` (which races across concurrent
+terminals). Detect by comparing the repo's remote owner to `gh api user --jq .login`; if they
+match, skip this step entirely.
+
+When they differ, and `gh auth status` shows the repo-owner account is already logged in:
+1. Extract that account's token into `~/.config/gh-tokens/<owner>` **without printing it**: with
+   the repo-owner account active, redirect `gh auth token` straight into the file under a strict
+   umask, then `chmod 600` it — e.g. `mkdir -p ~/.config/gh-tokens && (umask 177; gh auth token >
+   ~/.config/gh-tokens/<owner>)`. Never echo the token to stdout, and never write it inside the
+   repo. Restore the machine's default account afterward if you switched it to read the token.
+2. Add a repo-root `.envrc` that only *references* the file (no secret in the repo):
+   `export GH_TOKEN="$(cat "$HOME/.config/gh-tokens/<owner>" 2>/dev/null)"`. Force-add it past
+   the `.env*` ignore (`git add -f .envrc`) — it holds no secret. If the file is absent later,
+   `GH_TOKEN` is empty and `gh` safely falls back to the keyring default.
+3. Ensure the shell's direnv hook exists (`eval "$(direnv hook zsh)"` in `~/.zshrc`, or the
+   bash/fish equivalent; `brew install direnv` if missing), then `direnv allow` the repo.
+4. Add a **GitHub CLI account** section to `AGENTS.md` documenting both paths: interactive
+   terminals get the account via direnv on `cd`; agent-run `gh` (fresh non-interactive shells
+   that do *not* trigger direnv) must prefix commands with
+   `GH_TOKEN="$(cat "$HOME/.config/gh-tokens/<owner>")" gh <args>` and must **not** use
+   `gh auth switch`. `git push`/`pull` use SSH and are unaffected — this applies to `gh` only.
+
+If the repo-owner account is *not* yet logged in, don't invent a token: leave a one-line note in
+the handoff telling the human to `gh auth login` as `<owner>`, then re-run this wiring. This
+step is per-shell and idempotent — safe to re-apply.
 
 **6. Audit before committing (recommended, strict-reviewer seat, fresh session).** Check every
 claim in `PRODUCT.md` and `ROADMAP.md` traces to the PRD or an explicit human answer from step
