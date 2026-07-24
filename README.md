@@ -44,9 +44,17 @@ this setup.
   (registered in `~/.copilot/config.json`'s `installedPlugins`, confirm with `copilot plugin
   list`). This is **not** a symlink — Copilot downloads a snapshot of the repo into its own cache
   (`~/.copilot/installed-plugins/_direct/jviklun1--agent-skills`), so after editing a skill here
-  and pushing, run `copilot plugin update agent-skills` to refresh Copilot's copy. A root-level
-  `skills/` folder (symlinking into `.github/skills/`) exists only so Copilot's installer finds
-  the skills at the path it expects; `.github/skills/` stays the one place to actually edit.
+  and pushing, refresh Copilot's copy with a **clean reinstall**, not `plugin update`:
+  `copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`.
+  A root-level `skills/` folder (symlinking into `.github/skills/`) exists only so Copilot's
+  installer finds the skills at the path it expects; `.github/skills/` stays the one place to
+  actually edit.
+  **Why uninstall+install instead of `copilot plugin update`:** the installer materializes
+  *both* the top-level `skills/` shims (dereferenced into real files) and the canonical
+  `.github/skills/` tree into its snapshot. Copilot only scans `skills/`, so the `.github/skills/`
+  copy is inert — but an incremental `plugin update` has been observed to refresh `skills/` while
+  leaving the `.github/skills/` copy **stale**, drifting the two trees apart. A full uninstall+install
+  wipes the snapshot and rematerializes both from one commit, so they can't drift.
   Note: `copilot plugin install` currently warns that direct repo/URL/local-path installs are
   deprecated in favor of `plugin@marketplace` installs — if that stops working in a future
   Copilot CLI release, register this repo as a marketplace instead
@@ -61,8 +69,9 @@ install) and let Copilot write its own `config.json` entry.
 ## Adding a new global skill
 
 Add a new folder under `.github/skills/<name>/SKILL.md`, symlink it from `skills/<name>` at the
-repo root, commit and push, then run `copilot plugin update agent-skills` and add a matching
-symlink under `~/.codex/skills/<name>`.
+repo root, commit and push, then clean-reinstall the Copilot plugin
+(`copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`) and add
+a matching symlink under `~/.codex/skills/<name>`.
 
 **Known gotcha — Copilot silently drops skills with a long `description`.** Confirmed
 empirically: a description field somewhere between ~1033 and ~1078 characters causes Copilot's
