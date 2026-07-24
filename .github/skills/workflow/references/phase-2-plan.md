@@ -1,13 +1,12 @@
 # Phase 2 — Audit & Plan — `workflow plan`
 
-> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
-
+> ⚠️ **Invoke the `workflow` skill before acting on this file** — reading it raw is how the closing next-step card gets dropped.
 
 Seat: **strict reviewer** — mapping in `ROUTING.md`. Rationale: this is the deepest-reasoning
 read-only work, and the auditor should be a *different vendor* from the spec's author —
 cross-vendor scrutiny catches hallucinated signatures and blind spots the generator's own
-family shares. A harness parallel-breadth mode is permitted for a genuinely wide audit (many
-files/subsystems verifiable independently) per the read-only-breadth invariant in `SKILL.md`.
+family shares. A harness parallel-breadth mode is permitted here per `SKILL.md`'s
+read-only-breadth invariant.
 
 Read `.workflow/spec.md`, the repo, and `PRODUCT.md`/`DESIGN.md` if relevant (flag conflicts).
 Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm
@@ -46,4 +45,4 @@ If handing this to a fresh session on the strict-reviewer seat, paste:
 Read .workflow/spec.md, the repo, and PRODUCT.md/DESIGN.md if this touches product or UI (flag anything that conflicts with either). Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm against the real code. Then rewrite it as a sequential, file-by-file checklist, core interfaces before consumers, each step with a verification check. Lead the checklist with whatever's most likely to need a human tweak (data model/schema shape, type interfaces, user-facing behavior) — put mechanical/rote steps at the bottom. Also: enumerate the available custom skills (repo skill directories + installed skills, frontmatter name/description only) and give every step a "Skills:" line naming the skill(s) that genuinely match that step's work, or "Skills: none" — match on task shape, don't pad. Then cross-check TODO.md at the repo root (if present): propose (don't auto-include) any cheap adjacent TODO item touching the same files as an optional step, and list every TODO item this plan would complete, partially complete, obsolete, or conflict with under "## TODO impacts" at the bottom of the plan. Save to .workflow/plan.md.
 ```
 
-Close with the next-step card (format in `SKILL.md`).
+**Close with the next-step card** (format in `SKILL.md`) — mandatory, no substitute. A conversational closer ("want me to proceed?") is not the card; if in doubt, print it.

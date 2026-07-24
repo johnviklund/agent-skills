@@ -32,8 +32,8 @@ because the shape turned out to be portable.
 | `ROUTING.md` | **Your mapping**: seat → (harness · model · effort), fallbacks, harness quirks | **Yes — this is the whole setup** |
 | `references/*.md` | Full instructions per command, loaded one-per-invocation | No |
 
-`SKILL.md` and `references/` contain no vendor names by design; a brand name outside
-`ROUTING.md` is a bug. The shipped `ROUTING.md` is the author's real mapping (Codex CLI +
+`SKILL.md` and `references/` contain no vendor names by design; a brand name in either is a
+bug. This README is reader-facing and names tools freely. The shipped `ROUTING.md` is the author's real mapping (Codex CLI +
 Copilot CLI) plus an example Claude Code pairing for forks.
 
 ## Install

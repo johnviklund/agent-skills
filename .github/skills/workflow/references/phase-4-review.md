@@ -1,14 +1,12 @@
 # Phase 4 — Review — `workflow review` (+ what happens after)
 
-> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
-
+> ⚠️ **Invoke the `workflow` skill before acting on this file** — reading it raw is how the closing next-step card gets dropped.
 
 Seat: **strict reviewer** — mapping in `ROUTING.md`. Rationale: the strongest hard-engineering
 reasoner *and* an independent set of eyes — the reviewer should be a different vendor from
 whichever model wrote the code; a same-vendor review is a degraded mode and should be noted as
-such. A harness parallel-breadth mode is permitted if the diff is wide (many files/subsystems
-reviewable independently) per the read-only-breadth invariant in `SKILL.md` — same P0–P3 output
-contract, and verify its flagged signatures against real code before acting.
+such. A harness parallel-breadth mode is permitted on a wide diff per `SKILL.md`'s
+read-only-breadth invariant — same P0–P3 output contract either way.
 
 **Persist the verdict — review's only artifact.** Review is read-only against the code, so the
 state machine can only see it happened through `.workflow/review.md`: after the review (and
@@ -60,4 +58,4 @@ anything — don't auto-fix everything listed, especially anything marked "defer
 now: fix one at a time, check + commit after each; leave "defer"/"wontfix" alone (confirm the
 reasoning still holds, don't implement it). Re-run Phase 4 review on the fixes before wrap-up.
 
-Close with the next-step card (format in `SKILL.md`).
+**Close with the next-step card** (format in `SKILL.md`) — mandatory, no substitute. A conversational closer ("want me to proceed?") is not the card; if in doubt, print it.

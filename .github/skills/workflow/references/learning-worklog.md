@@ -1,7 +1,6 @@
 # Learning loop & Worklog — `workflow learn` / `workflow log`
 
-> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
-
+> ⚠️ **Invoke the `workflow` skill before acting on this file** — reading it raw is how the closing next-step card gets dropped.
 
 ## Learning loop — `workflow learn`
 
@@ -55,7 +54,7 @@ source of truth and **not** an archive — git is the source of truth for *what*
 repo's canonical docs (`PRODUCT.md`/`DESIGN.md`/`AGENTS.md`) own *what we're building*.
 `WORKLOG.md` only **points into git**; the diffs live in the commits.
 
-**Anti-bloat is the whole point** (learned from bounded-memory designs like Hermes): the file is
+**Anti-bloat is the whole point**: the file is
 capped and rolls off. Never let it grow into a second memory file that confuses future sessions.
 
 - **Cap:** keep roughly the **15 most recent entries** (about one screen). Before appending, if

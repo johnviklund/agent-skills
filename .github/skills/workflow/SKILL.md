@@ -19,17 +19,14 @@ description: >
 
 
 A personal five-phase workflow built on **seats** — jobs with an output contract and effort
-profile, filled by whatever model currently earns them: one brainstorm partner, pragmatic
-executors, one strict reviewer. Two harnesses (CLI coding agents) stay in the loop on purpose:
-separate token/quota pools buy more total throughput, and splitting writer and reviewer across
-vendors buys independence — a different vendor's model catches blind spots the writer's own
-family shares.
+profile, filled by whatever model currently earns them. Two harnesses stay in the loop on
+purpose: separate quota pools buy throughput, and splitting writer from reviewer across vendors
+buys independence — a different family catches blind spots the writer's own siblings share.
 
 **This file is the hub, and it is vendor-neutral.** Full instructions per command live in
-`references/` (read the one file for the invoked command, per the *Command index*). The concrete
-mapping of seats to CLIs, models, efforts, and fallbacks lives in **`ROUTING.md`** next to this
-file — the *only* file that names vendors. Edit ROUTING.md to fit your own tools; nothing else
-should need to change.
+`references/` (read the one file for the invoked command, per the *Command index*). Seats map to
+CLIs, models, efforts, and fallbacks in **`ROUTING.md`** — the only file that names vendors, and
+the only one a fork edits.
 
 ## Invocation — deliberate, not ambient
 
@@ -106,34 +103,26 @@ that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not
   auto-approve; logic-bearing and schema/contract edits are reviewed diff by diff (the full
   phase→approval map is in ROUTING.md alongside the efforts).
 - **Sub-agent/parallel modes are for read-only breadth only.** A harness mode that fans work out
-  to internal sub-agents is allowed only on a read-only seat (Phase 2/4 or a wide read-only
-  investigation) when many files/subsystems can be checked *independently* — it buys breadth,
-  not depth. Never on anything that writes: parallel writers break one-step-at-a-time and
-  contract lockstep. Findings from such a run get the *verify, don't trust* treatment.
+  to internal sub-agents is allowed only on a read-only seat, only when many files/subsystems can
+  be checked *independently* — breadth, not depth, and its findings still get *verify, don't
+  trust*. Never on anything that writes: parallel writers break one-step-at-a-time and lockstep.
 
 ## Context hygiene
 
 Reset the session (`/clear` or your harness's equivalent) at every phase handoff (0→1→2→3→4 and
 into wrap) — re-ground from `.workflow/*.md` + git instead of dragging the previous phase's
 context (or the wrong seat's mindset) forward; the reset is also where the seat's model swap
-happens. Mid-phase: Phase 3 persists state to `.workflow/plan.md` after **every** step
-(checklist + `## Execution state` block), so any compaction — manual or automatic — can never
-strand the run; when the context meter shows the window filling, run `workflow compact` between
-steps (see `references/compact.md`) — don't hand-write a summary focus and don't let the harness
-auto-compact decide what survives. After *any* compaction, re-read the plan's `Execution state`
-block before the next step. Never compact at a handoff or mid-verification-critical-step:
-summaries silently drop exact signatures and contract versions.
+happens. Mid-phase is the opposite case: Phase 3 persists state to `.workflow/plan.md` after
+**every** step, so compaction can never strand a run — `references/compact.md` owns when and how.
 
 ## Next recommended step — `workflow next` (or bare `/workflow`)
 
 Every phase response ends with this card — **mandatory, with no substitute**: a conversational
-closer ("Next is workflow execute. Want me to proceed?") is not the card; if in doubt, print
-the card. Row 2 must be **resolved from `ROUTING.md` at print time** — open it and print the
-concrete harness, model, and effort for the next phase's seat plus its first fallback. Printing
-a seat name or "see ROUTING.md" instead is a failure of the card's purpose: the human should
-never have to open a file to learn which model to select next. `workflow next` prints the card
-on demand without doing phase work (re-ground via *Where are we?* first). Print exactly this
-shape:
+closer ("Next is workflow execute. Want me to proceed?") is not the card. Row 2 is **resolved
+from `ROUTING.md` at print time** — the concrete harness, model, and effort for the next seat
+plus its first fallback; a seat name or "see ROUTING.md" defeats the card's whole purpose, which
+is that the human never opens a file to learn which model to pick. `workflow next` prints the
+card on demand without doing phase work (re-ground via *Where are we?* first). Exact shape:
 
 ---
 ### ▶ Next recommended step
@@ -157,20 +146,15 @@ Paste next:
 ```
 ---
 
-Toggle defaults: reset Yes at every handoff, No only for continued same-seat work. **Compact** by
-the rule on the card — phase boundary → reset, never compact; mid-phase → the *human* measures
-(`/context`, ~70% is the trigger) and runs `workflow compact` between steps, never mid-step.
-The model cannot see the context meter: never assert the window is filling without evidence in
-the session (a harness context warning, or the human saying so) — a guessed "compact now" on a
-near-empty session wastes context for nothing.
-Harness/model/effort straight from ROUTING.md. Ground in: the `.workflow/*.md` files that phase
-reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md` when product/UI is in scope,
-`git diff`/`git log` for review/wrap. Autonomy/speed toggles default No — only where ROUTING.md's
-harness notes sanction them, never on review seats or risky lanes. When the run is finished —
-plan checked off, review clean or patched, learnings routed, scratch cleared — print the ✅ done
-card instead: one line on what shipped; recommended next (`workflow brainstorm <topic>` or
-`workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; open a PR if not committing to
-`main`).
+Defaults: reset Yes at every handoff, No only for continued same-seat work; autonomy/speed
+toggles No unless ROUTING.md's harness notes sanction them, never on review seats. Row 3 grounds
+in the `.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/
+`DESIGN.md` when product/UI is in scope, `git diff`/`git log` for review/wrap.
+
+When the run is finished — plan checked off, review clean or patched, learnings routed, scratch
+cleared — print the ✅ done card instead: one line on what shipped; recommended next
+(`workflow brainstorm <topic>` or `workflow improve ...`; `memory.compact` if `MEMORY.md` has
+grown; open a PR if not committing to `main`).
 
 ## Ground rules (every phase)
 
@@ -202,14 +186,16 @@ ROUTING.md for the card's seat mapping).
 
 When the workflow's shape genuinely changes, edit these files directly — they are the one source
 of truth. **Growth rule:** a new feature or use case = a new (or extended) reference file plus
-one Command-index line; this hub stays under ~200 lines. **Vendor rule:** `ROUTING.md` is the
-only file that names harnesses, vendors, or models — a brand name anywhere else in this skill is
-a bug; seats and portable invariants live here, mappings live there. **Prompt-style rule (when
-editing paste blocks and instructions):** state each rule exactly once (sanctioned exception:
-the ⚠️ invoke-don't-skim banner repeats verbatim in every file, because it defends the
-raw-read path a once-only statement can't reach) — a contradiction or
+one Command-index line; this hub stays under ~200 lines. **Vendor rule:** `ROUTING.md` is the only file that names harnesses,
+vendors, or models — a brand name anywhere in `SKILL.md` or `references/` is a bug (`README.md`
+is reader-facing and exempt); seats and invariants live here, mappings live there. **Prompt-style rule (when
+editing paste blocks and instructions):** state each rule exactly once (two sanctioned exceptions,
+both defending paths a once-only statement can't reach: the ⚠️ head note repeated in every
+reference defends the raw-read path, and the closing card imperative repeated at every phase
+tail defends against tail-position card drops) — a contradiction or
 duplicate is worse than a missing detail; define the outcome, constraints, and completion bar
 rather than prescribing every step; reserve ALWAYS/NEVER for true process invariants; don't
-scatter "ask first"/"wait for approval" — approval scope is stated once, in ROUTING.md. Before
+scatter "ask first"/"wait for approval" — the approval *principle* is stated once here, the
+phase-by-phase *mapping* once in ROUTING.md, and nowhere else. Before
 changing ROUTING.md, verify model names and effort levels against each harness's own picker and
 current official model guide; never infer one harness's availability from another's.

@@ -1,7 +1,6 @@
 # Phase 0 — Brainstorm — `workflow brainstorm` / `workflow improve`
 
-> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
-
+> ⚠️ **Invoke the `workflow` skill before acting on this file** — reading it raw is how the closing next-step card gets dropped.
 
 Seat: **brainstorm partner** — mapping in `ROUTING.md`. Rationale: knowledge-shaped dialogue
 with no execution payoff — the cheap conversational seat wins; never spend a reviewer- or
@@ -46,8 +45,7 @@ Read PRODUCT.md and DESIGN.md first, if they exist and this touches product dire
   named file/library/component as the reference for shape/behavior, then brainstorm how it adapts
   here.
 - **Improve** (command: `workflow improve <feature> - goal: <goal>`) — brainstorm seeded by a
-  real code audit instead of a blank idea, loosely inspired by shadcn/improve but scoped to one
-  feature and one pass, no sub-agent fan-out, no multi-file plan backlog. Find and read the
+  real code audit instead of a blank idea, scoped to one feature and one pass, no sub-agent fan-out, no multi-file plan backlog. Find and read the
   named feature's actual code first. Look for concrete, evidence-backed improvement
   opportunities in it (correctness, tech debt, performance, missing tests, docs/DX) — every
   finding cites `file:line`, no generic suggestions. Weigh each finding against the stated goal:
@@ -58,4 +56,4 @@ Read PRODUCT.md and DESIGN.md first, if they exist and this touches product dire
   findings and why, open questions) to `.workflow/brainstorm.md` — same file, same shape as a
   regular Phase 0 brainstorm, so `workflow spec` picks it up identically either way.
 
-Close with the next-step card (format in `SKILL.md`).
+**Close with the next-step card** (format in `SKILL.md`) — mandatory, no substitute. A conversational closer ("want me to proceed?") is not the card; if in doubt, print it.

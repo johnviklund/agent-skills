@@ -1,7 +1,6 @@
 # Bootstrap a new project — `workflow bootstrap [PRD.md]`
 
-> ⚠️ **Invoke the `workflow` skill — do not just read this file.** If you reached this reference without invoking the `workflow` skill this turn, stop and invoke it first. These reference files are the skill's controlling contract (seat, verification bar, and the mandatory closing next-step card); reading them raw skips that contract — which is how required plan/execute steps get silently dropped.
-
+> ⚠️ **Invoke the `workflow` skill before acting on this file** — reading it raw is how the closing next-step card gets dropped.
 
 Turns a finished PRD into a workflow-ready repo: the canonical doc set, the empty growing files,
 and the hygiene wiring — so the first real `workflow brainstorm` starts on solid ground instead
