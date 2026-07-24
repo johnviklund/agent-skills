@@ -7,6 +7,9 @@
 
 - Phase boundary → `/clear` and re-ground. Never compact between phases.
 - Mid-phase + `/context` filling (roughly >70%) → run `workflow compact`, between steps only.
+  **The human measures** — the model can't see the meter and must not recommend compaction
+  without session evidence (a harness warning, or the human's reading). ~70% is deliberate
+  headroom: this command still needs room to do its reconcile before printing the line.
 - Never hand-write `/compact` — the only `/compact` the human runs is the line this command
   prints.
 - Window fine → do nothing.
@@ -54,6 +57,13 @@ the response with that line as the paste block of the next-step card.
   re-read the plan's `Execution state` block after *any* compaction, manual or automatic, before
   touching the next step. Run `workflow compact` proactively when `/context` shows the window
   filling — before the auto-compact fires, not after.
+- **Race safety.** Keep step 1 *bounded*: it's a verification pass over state that per-step
+  persistence already keeps current — no large file re-reads, no content dumps. If the window
+  is already critically full, skip straight to step 2 and print the line; the plan file is the
+  safety net. If the harness auto-compacts before or during this command, that is the
+  insurance working, not a failure: re-read the `## Execution state` block, **skip the manual
+  compact line** (a second compaction right after the automatic one just burns more context),
+  and continue the plan.
 - **Verification-critical steps still don't compact.** If the *current* step is
   schema/SQL/contract-coupled and mid-flight, finish and commit it first, then compact; a summary
   dropping one contract version literal costs more than the tokens saved.

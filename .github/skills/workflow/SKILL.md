@@ -149,7 +149,7 @@ shape:
 
 **Harness toggles:** autonomy/speed modes per ROUTING.md notes (default: none) · **Sub-agents:** none — except the read-only breadth exception above
 
-**Compact?** \<one of:> No — reset at this handoff (never compact between phases) · No — window fine, just continue · Yes — mid-phase and the window is filling: run `workflow compact` between steps. Never hand-write a compact; the only compact command to run is the line `workflow compact` prints.
+**Compact?** \<one of:> No — reset at this handoff (never compact between phases) · Mid-phase: your call — run `workflow compact` between steps when *your* context meter reads ~70%; the model can't see the meter · Yes — the harness warned about context (evidence in this session). Never hand-write a compact; the only compact command to run is the line `workflow compact` prints.
 
 Paste next:
 ```text
@@ -158,8 +158,11 @@ Paste next:
 ---
 
 Toggle defaults: reset Yes at every handoff, No only for continued same-seat work. **Compact** by
-the rule on the card — phase boundary → reset, never compact; mid-phase + window filling
-(roughly >70%) → `workflow compact` between steps, never mid-step; otherwise nothing.
+the rule on the card — phase boundary → reset, never compact; mid-phase → the *human* measures
+(`/context`, ~70% is the trigger) and runs `workflow compact` between steps, never mid-step.
+The model cannot see the context meter: never assert the window is filling without evidence in
+the session (a harness context warning, or the human saying so) — a guessed "compact now" on a
+near-empty session wastes context for nothing.
 Harness/model/effort straight from ROUTING.md. Ground in: the `.workflow/*.md` files that phase
 reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md` when product/UI is in scope,
 `git diff`/`git log` for review/wrap. Autonomy/speed toggles default No — only where ROUTING.md's
@@ -202,7 +205,9 @@ of truth. **Growth rule:** a new feature or use case = a new (or extended) refer
 one Command-index line; this hub stays under ~200 lines. **Vendor rule:** `ROUTING.md` is the
 only file that names harnesses, vendors, or models — a brand name anywhere else in this skill is
 a bug; seats and portable invariants live here, mappings live there. **Prompt-style rule (when
-editing paste blocks and instructions):** state each rule exactly once — a contradiction or
+editing paste blocks and instructions):** state each rule exactly once (sanctioned exception:
+the ⚠️ invoke-don't-skim banner repeats verbatim in every file, because it defends the
+raw-read path a once-only statement can't reach) — a contradiction or
 duplicate is worse than a missing detail; define the outcome, constraints, and completion bar
 rather than prescribing every step; reserve ALWAYS/NEVER for true process invariants; don't
 scatter "ask first"/"wait for approval" — approval scope is stated once, in ROUTING.md. Before
