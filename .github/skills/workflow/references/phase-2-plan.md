@@ -8,41 +8,36 @@ cross-vendor scrutiny catches hallucinated signatures and blind spots the genera
 family shares. A harness parallel-breadth mode is permitted here per `SKILL.md`'s
 read-only-breadth invariant.
 
-Read `.workflow/spec.md`, the repo, and `PRODUCT.md`/`DESIGN.md` if relevant (flag conflicts).
-Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm
-against the real code. Rewrite as a sequential, file-by-file checklist, core interfaces before
-consumers, each step with a verification check. Lead with whatever's most likely to need a human
-tweak (data model/schema shape, type interfaces, user-facing behavior); put mechanical steps at
-the bottom. Save to `.workflow/plan.md`.
+Four things the plan depends on and a fresh reader won't infer:
 
-**Suggested skills per step.** Before writing the checklist, enumerate the available custom
-skills — repo-local skill directories plus installed/plugin skills — reading only each skill's
-frontmatter (name + description), the same inventory `memory.remember` does. Then give every
-step a `Skills:` line: the skill(s) whose description genuinely matches that step's work, or
-`Skills: none`. Match on the step's task shape, not keywords; most steps legitimately need none —
-never pad. If two skills overlap, name the more specific one. Step shape in the plan:
+- **Write the plan as you draft it.** Open `.workflow/plan.md` with `Status: drafting` before
+  drafting anything, then append each step as it is settled — an audit held in context is one
+  context death from gone, and resetting mid-audit should cost the re-read, not the work.
+  `## TODO impacts` and `## Product doc impacts` are written last; they and a finished checklist flip `Status` to
+  `complete`. Until then Phase 3 must refuse the plan: a half-drafted checklist looks exactly like
+  a finished one.
 
-```markdown
-- [ ] Step N — <what> (<files>)
-  - Check: <verification>
-  - Skills: <skill-name>[, <skill-name>] | none
-```
+- **Step shape.** Every checklist step carries a verification check and a `Skills:` line:
 
-This is what makes execution pick up the right repo conventions: Phase 3 reads the `Skills:`
-line per step and loads those skills before touching the files.
+  ```markdown
+  - [ ] Step N — <what> (<files>)
+    - Check: <verification>
+    - Skills: <path/to/SKILL.md>[, <path/to/SKILL.md>] | none
+  ```
 
-**TODO impact check.** After drafting the checklist, cross-check repo-root `TODO.md` (if
-present): (a) a cheap adjacent TODO item touching the *same files* as a plan step may be worth
-folding in — propose it as an explicit optional step and ask, never auto-include; (b) flag every
-TODO item this plan would complete, partially complete, make obsolete, or conflict with, and
-list them at the bottom of the plan under `## TODO impacts` (item name → expected effect). Wrap
-uses that list to update `TODO.md`, which is what keeps the scratchpad synced to the codebase
-instead of drifting.
+- **Why paths, not names.** Phase 3 has to *open* those files before touching the code, and
+  name-only skill lookup is not portable across harnesses. A bare name is a step Phase 3 cannot
+  act on; a resolved path is what makes execution pick up the right repo conventions.
+- **`## TODO impacts` and `## Product doc impacts` are wrap's input.** Wrap reads those lists to
+  update `TODO.md` and the product docs, which is the whole mechanism keeping them synced to the
+  codebase instead of drifting. A plan that omits a section leaves that doc stale. The audit is
+  already reading `PRODUCT.md`/`DESIGN.md` to flag conflicts — this is where that flag becomes
+  durable instead of evaporating with the session.
 
-If handing this to a fresh session on the strict-reviewer seat, paste:
+Run it directly, or hand it to a fresh session on the strict-reviewer seat by pasting:
 
 ```text
-Read .workflow/spec.md, the repo, and PRODUCT.md/DESIGN.md if this touches product or UI (flag anything that conflicts with either). Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm against the real code. Then rewrite it as a sequential, file-by-file checklist, core interfaces before consumers, each step with a verification check. Lead the checklist with whatever's most likely to need a human tweak (data model/schema shape, type interfaces, user-facing behavior) — put mechanical/rote steps at the bottom. Also: enumerate the available custom skills (repo skill directories + installed skills, frontmatter name/description only) and give every step a "Skills:" line naming the skill(s) that genuinely match that step's work, or "Skills: none" — match on task shape, don't pad. Then cross-check TODO.md at the repo root (if present): propose (don't auto-include) any cheap adjacent TODO item touching the same files as an optional step, and list every TODO item this plan would complete, partially complete, obsolete, or conflict with under "## TODO impacts" at the bottom of the plan. Save to .workflow/plan.md.
+Read .workflow/spec.md, the repo, and PRODUCT.md/DESIGN.md if this touches product or UI (flag anything that conflicts with either). Find architectural blind spots, circular dependencies, and hallucinated signatures — confirm against the real code. Then rewrite it as a sequential, file-by-file checklist, core interfaces before consumers, each step with a verification check. Lead the checklist with whatever's most likely to need a human tweak (data model/schema shape, type interfaces, user-facing behavior) — put mechanical/rote steps at the bottom. Also, before writing the checklist: enumerate the available custom skills (repo skill directories + installed skills, frontmatter name/description only — the same inventory memory.remember takes) and give every step a "Skills:" line recording the resolved SKILL.md path of each skill that genuinely matches that step's work, or "Skills: none" — match on the step's task shape rather than keywords, don't pad, and expect most steps to genuinely need none; if two skills overlap, name the more specific one. Then cross-check TODO.md at the repo root (if present): propose (don't auto-include) any cheap adjacent TODO item touching the same files as an optional step, and list every TODO item this plan would complete, partially complete, obsolete, or conflict with under "## TODO impacts" at the bottom of the plan, as item name → expected effect. Then do the same for the product docs that exist — PRODUCT.md, DESIGN.md, ROADMAP.md — under "## Product doc impacts": for each, either "no statement changes" or the specific statements this plan would make untrue and what should replace them. Three kinds matter and are the ones that get missed: a statement of current state, scope or stack this makes stale; an open decision this work resolves; and a settled principle or boundary this work contradicts — mark that third kind ESCALATE, because changing it is a product decision for the human, not a doc edit. Write .workflow/plan.md BEFORE you start drafting, with a five-line provenance header — Command, Created (date), Base (current git sha), Inputs (.workflow/spec.md @ its own Base sha), Status (drafting) — and append each step to the file as you settle it rather than holding the checklist in context and saving at the end. Write "## TODO impacts" and "## Product doc impacts" last, then set Status to complete. If you are resuming a drafting plan.md, continue after the last step already written rather than starting over.
 ```
 
 **Close with the next-step card** (format in `SKILL.md`) — mandatory, no substitute. A conversational closer ("want me to proceed?") is not the card; if in doubt, print it.

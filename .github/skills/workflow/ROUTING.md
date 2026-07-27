@@ -17,6 +17,20 @@ Default harness split: Phase 0/2/4 in Copilot (Claude seats), Phase 1/3 in Codex
 separate quota pools + cross-vendor review (GPT-5.6 writes, Claude audits/reviews). Every phase
 must still run in either harness; single-harness equivalents are listed below.
 
+## Harness verbs
+
+`SKILL.md` and `references/` name only the verb; the literal command lives here. Verify each cell
+against the harness's own `/` menu — these drift.
+
+| Harness | Reset session | Compact | Context meter | Model picker | Explicit skill invocation |
+|---|---|---|---|---|---|
+| Codex CLI | `/new` (`/clear` also starts a fresh chat) | `/compact` | `/status` (context usage + rate limits) | `/model` | `$workflow` |
+| Copilot CLI | `/clear` | `/compact` | `/context` (tokens used, buffer left) | `/model` | none for project skills — description-matched; `/skills list\|info\|reload` inspects, and a plugin-installed skill becomes `/<plugin>:workflow` |
+| Claude Code | `/clear` | `/compact` | `/context` | `/model` | `/workflow` (the skill's directory name is the command) |
+
+Copilot CLI auto-compacts at roughly 80% of the window, which is why `references/compact.md` puts
+the manual threshold at ~70% — below the automatic trigger, with room to reconcile first.
+
 ## Seat mapping
 
 | Seat | Primary (harness · model · effort) | Fallback chain |

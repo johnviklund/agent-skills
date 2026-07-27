@@ -8,7 +8,7 @@ Commits save *what* changed; `MEMORY.md`, skills, and `DESIGN.md` save *why*. Th
 of the workflow, not an afterthought: **solve a real problem → remember it. Do the same kind of
 thing 3+ times → turn it into a skill.**
 
-Append one line per learning to `.workflow/learnings.md` before any `/clear` or `/compact`, and
+Append one line per learning to `.workflow/learnings.md` before any reset, and
 any time something worth keeping gets solved — don't wait for wrap-up:
 
 ```text
@@ -16,27 +16,37 @@ any time something worth keeping gets solved — don't wait for wrap-up:
 - [durable→memory] <the fix, gotcha, or decision>
 - [durable→skill] <the transferable principle, stripped of concrete schema/names/logic>
 - [durable→design] <the UI pattern/convention/token decision>
-- [durable→eval] <seat> — <what the golden case proves> (artifacts: <which .workflow files / diff / output>)
+- [durable→eval] <shape> — <what the golden case proves> (artifacts: <which .workflow files / diff / output>)
 - [drop] <one-off noise>
 ```
 
 ### `[durable→eval]` — every run should exam future models
 
 Evals are a side effect of shipping, never separate work: each run's approved artifacts become
-golden test cases that future models must pass before earning a seat in the routing tables. The
-seats and their natural case shapes:
+golden test cases that future models must pass before earning a seat in the routing tables. Cases
+are filed under the **seat** they exam — the same seat names `ROUTING.md` maps — while the *shape*
+of the case lives in the filename, so one seat can hold more than one kind of exam:
 
-- **spec seat** (Phase 1): this run's `brainstorm.md` → the *approved* `spec.md`.
-- **plan seat** (Phase 2): the approved `spec.md` → the *approved* `plan.md`.
-- **reviewer seat** (Phase 4): a diff containing a *confirmed* P0/P1 → the finding that caught
-  it. These are the most valuable cases — a candidate reviewer must catch everything the
-  incumbent caught.
-- **mechanical lane** (Phase 3): a transform prompt with known-correct output.
+| Case shape | Seat directory | Input → approved output |
+|---|---|---|
+| `spec` | `default-executor` | this run's `brainstorm.md` → the *approved* `spec.md` |
+| `plan-audit` | `strict-reviewer` | the approved `spec.md` → the *approved* `plan.md` |
+| `code-review` | `strict-reviewer` | a diff containing a *confirmed* P0/P1 → the finding that caught it |
+| `mechanical-transform` | `mechanical-lane` | a transform prompt with known-correct output |
+
+Tag the line with the **shape**; wrap resolves the seat directory from this table. `code-review`
+cases are the most valuable — a candidate reviewer must catch everything the incumbent caught.
+`brainstorm-partner` and `heavy-executor` are real seats with no admitted case shape yet; leave
+those directories absent rather than inventing a shape to fill them.
 
 **Admission test — deposit only discriminating cases:** a case earns a slot only if it would
 plausibly separate models (the approved output required real judgment, or a model actually got
-it wrong first). Routine cases teach nothing. **Cap: ~15 cases per seat, rolling** — when full,
-a new case must displace the weakest, not append. Wrap performs the deposit (see
+it wrong first). Routine cases teach nothing. **Cap: ~15 cases per case shape, rolling** — per
+shape, not per directory, so `strict-reviewer` holds up to ~15 `plan-audit` cases *and* ~15
+`code-review` cases. When full, a new case displaces the weakest *of its own shape*, never one of
+another shape and never a plain append: ranking a plan audit against a code review is meaningless
+because they exam different capabilities, and a shared pool would let one shape crowd the other
+out of the exam entirely. Wrap performs the deposit (see
 `references/wrap.md`); tag the line any time during the run, at latest before wrap.
 
 Then invoke `memory.remember` (a sibling skill in this same repo, available from both CLIs) to
@@ -64,11 +74,15 @@ capped and rolls off. Never let it grow into a second memory file that confuses 
   session). Shape:
 
   ```markdown
-  ## YYYY-MM-DD · <one-line what> · <CLI/model>
+  ## YYYY-MM-DD · <one-line what> · <harness> · <model>
   - <1–4 terse bullets: what shipped / changed>
   - Commits: <sha> <sha> ... (+ <other-repo> <sha> if it spanned repos)
+  - Review: <verdict> @ <reviewed sha>   (workflow runs only — omit when no review ran)
   - Why: <one line>
   ```
+
+  The `Review:` field exists because `.workflow/review.md` is deleted at wrap and gitignored, so
+  this line is the only surviving trace that the verdict was reached and against which commit.
 
 - **When it's written:**
   - `workflow wrap` appends an entry automatically as part of wrap-up.

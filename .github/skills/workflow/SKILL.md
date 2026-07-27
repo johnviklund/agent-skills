@@ -1,16 +1,11 @@
 ---
 name: workflow
 description: >
-  Runs a personal five-phase solo-dev coding workflow across CLI coding agents (CLI/model
-  mapping in ROUTING.md): brainstorm, spec, audit & plan, execute, review, then wrap-up
-  (learning capture). Only trigger on an explicit, deliberate invocation of the form "workflow
-  [command] ..." or "/workflow [command] ..." where command is brainstorm, spec, plan, execute,
-  review, learn, wrap, status, next, log, compact, todo, bootstrap, or improve -- e.g. "workflow spec the
-  retry mechanism", "workflow todo [idea]", "workflow improve [feature] - goal: [goal]", or a
-  bare "/workflow" (treated as next). Do NOT trigger on casual mentions of spec, plan, execute,
-  review, or learn elsewhere in a message -- this skill is intentionally narrow and explicit,
-  never a broad natural-language matcher. Thin and single-voice -- no reviewer
-  personas, no sub-agents (harness parallel modes only on read-only seats).
+  Trigger ONLY on a message of the form "workflow <command>" or "/workflow <command>" — a
+  deliberate invocation of this personal five-phase solo-dev coding workflow; never on casual
+  mentions of spec, plan, execute, review, or learn elsewhere in a message. Commands: brainstorm,
+  improve, spec, plan, execute, review, learn, wrap, status, next, log, todo, bootstrap;
+  bare "workflow" = next.
 ---
 
 # Workflow
@@ -40,21 +35,24 @@ treated as `workflow next`. **Do not** treat unprefixed mentions of "spec", "pla
 ## Where are we? (re-grounding) — `workflow status`
 
 Report which phase is next without acting, then wait for an explicit `workflow <phase>`. Check
-`.workflow/` first — file presence/absence is the state machine, more trustworthy than memory:
+`.workflow/` first — the files are the state machine, more trustworthy than memory. Every artifact
+header carries `Status:`, and **`drafting` means resume that phase, never advance past it**. Review
+is read-only, so `review.md` is its *only* evidence — never infer "review done" without it. With
+every artifact `complete`:
 
-- No files yet → Phase 0 (Brainstorm).
-- `brainstorm.md` only → Phase 1 (Spec).
-- `+ spec.md` → Phase 2 (Audit & Plan).
-- `+ plan.md`, no "Deviations", checklist incomplete → Phase 3 (Execute).
-- `plan.md` checklist complete, but no `review.md` — or `review.md` names an older commit than
-  the current HEAD → Phase 4 (Review). Review is otherwise read-only, so `review.md` is its
-  *only* evidence: never infer "review done" without it.
-- `+ patch_plan.md` → mid patch cycle (see `references/phase-4-review.md`).
-- `review.md` present, verdict clean or every finding dispositioned, reviewing the current
-  HEAD → wrap-up.
+| `.workflow/` | Next |
+|---|---|
+| empty | Phase 0 — Brainstorm |
+| `brainstorm.md` | Phase 1 — Spec |
+| `+ spec.md` | Phase 2 — Audit & Plan |
+| `+ plan.md`, checklist incomplete | Phase 3 — Execute |
+| checklist complete; no `review.md`, or its `Base` ≠ HEAD | Phase 4 — Review |
+| `+ patch_plan.md` | mid patch cycle — `references/phase-4-review.md` |
+| `review.md`, verdict clean or all findings dispositioned, `Base` = HEAD | wrap-up |
 
 If a given `workflow <phase>` mismatches the file state (e.g. `execute` with no `plan.md`), say
-so and ask before proceeding. Also read `AGENTS.md`, `MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if
+so and ask before proceeding. Also read `ROUTING.md` (which seat this phase wants, and the mapping
+every card resolves at print time), `AGENTS.md`, `MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if
 product/UI is in scope), repo-root `TODO.md` (intake scratchpad — relevant to Phase 0, Phase 2's
 TODO-impact check, and wrap's TODO hygiene), and `git log --oneline -15` / `git status` as part
 of grounding.
@@ -71,7 +69,7 @@ interpretation in one sentence, "I read this as X — correct?"); **silent assum
 lifting** (surface the assumption instead of building on it). State what *is* understood, then
 ask — prefer "I'm about to do X, which I read as Y — confirm or correct" over "what do you
 want?". Skip the gate for mechanical, low-risk, clearly-specified work (mechanical-lane edits,
-`status`, `next`, `log`, `compact`, `todo` — which has its own question step). This complements
+`status`, `next`, `log`, `todo` — which has its own question step). This complements
 the in-phase rules (Phase 0 dialogue, Phase 3 stop-on-deviation); it doesn't replace them.
 
 ## Seats — roles, not vendors
@@ -109,11 +107,13 @@ that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not
 
 ## Context hygiene
 
-Reset the session (`/clear` or your harness's equivalent) at every phase handoff (0→1→2→3→4 and
+Reset the session at every phase handoff (0→1→2→3→4 and
 into wrap) — re-ground from `.workflow/*.md` + git instead of dragging the previous phase's
 context (or the wrong seat's mindset) forward; the reset is also where the seat's model swap
-happens. Mid-phase is the opposite case: Phase 3 persists state to `.workflow/plan.md` after
-**every** step, so compaction can never strand a run — `references/compact.md` owns when and how.
+happens. Mid-phase, reset is the answer too: every phase writes its artifact incrementally, so a
+reset costs warm cache and nothing else, and unlike compaction it is safe at any fullness. This file and `references/` name only the verb — *reset*, *compact*, *context meter*, *model
+picker*, *explicit invocation*; the literal command per harness is `ROUTING.md`'s **Harness verbs**
+table.
 
 ## Next recommended step — `workflow next` (or bare `/workflow`)
 
@@ -138,7 +138,6 @@ card on demand without doing phase work (re-ground via *Where are we?* first). E
 
 **Harness toggles:** autonomy/speed modes per ROUTING.md notes (default: none) · **Sub-agents:** none — except the read-only breadth exception above
 
-**Compact?** \<one of:> No — reset at this handoff (never compact between phases) · Mid-phase: your call — run `workflow compact` between steps when *your* context meter reads ~70%; the model can't see the meter · Yes — the harness warned about context (evidence in this session). Never hand-write a compact; the only compact command to run is the line `workflow compact` prints.
 
 Paste next:
 ```text
@@ -152,9 +151,9 @@ in the `.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `P
 `DESIGN.md` when product/UI is in scope, `git diff`/`git log` for review/wrap.
 
 When the run is finished — plan checked off, review clean or patched, learnings routed, scratch
-cleared — print the ✅ done card instead: one line on what shipped; recommended next
-(`workflow brainstorm <topic>` or `workflow improve ...`; `memory.compact` if `MEMORY.md` has
-grown; open a PR if not committing to `main`).
+cleared — print the ✅ done card instead: one line on what shipped; one line on product-doc truth
+(what was corrected, or none); recommended next (`workflow brainstorm <topic>` or `workflow
+improve ...`; `memory.compact` if `MEMORY.md` has grown; open a PR if not committing to `main`).
 
 ## Ground rules (every phase)
 
@@ -162,6 +161,11 @@ grown; open a PR if not committing to `main`).
   signature, column against real code; a generated spec is a hypothesis.
 - **No backward-compat shims** unless asked; contract versions in lockstep producer→validator→consumer.
 - **Handoff files live in `.workflow/`** (gitignored scratch); commit after each verified step.
+- **Provenance header** — every `.workflow/` artifact opens with five lines written at creation:
+  `Command:`, `Created:` (date), `Base:` (git sha), `Inputs:` (`<artifact> @ <its Base sha>` or `none`),
+  `Status:` (`drafting` until the phase writes its closing section, then `complete`). At phase entry
+  check your input's header holds — `Status: complete`, `Inputs` untouched since its `Created` (git
+  log or mtime), `Base` still an ancestor of HEAD — else name the staleness and ask first.
 - **Always close with the next-step card** (or ✅ done card).
 
 ## Command index
@@ -178,7 +182,6 @@ ROUTING.md for the card's seat mapping).
 | `workflow review` (+ patch cycle) | `references/phase-4-review.md` |
 | `workflow wrap` | `references/wrap.md` |
 | `workflow learn`, `workflow log` | `references/learning-worklog.md` |
-| `workflow compact` | `references/compact.md` |
 | `workflow todo [idea]` | `references/todo.md` |
 | `workflow bootstrap [PRD.md]` | `references/bootstrap.md` |
 
@@ -186,13 +189,14 @@ ROUTING.md for the card's seat mapping).
 
 When the workflow's shape genuinely changes, edit these files directly — they are the one source
 of truth. **Growth rule:** a new feature or use case = a new (or extended) reference file plus
-one Command-index line; this hub stays under ~200 lines. **Vendor rule:** `ROUTING.md` is the only file that names harnesses,
+one Command-index line; this hub stays under ~205 lines. **Vendor rule:** `ROUTING.md` is the only file that names harnesses,
 vendors, or models — a brand name anywhere in `SKILL.md` or `references/` is a bug (`README.md`
 is reader-facing and exempt); seats and invariants live here, mappings live there. **Prompt-style rule (when
-editing paste blocks and instructions):** state each rule exactly once (two sanctioned exceptions,
-both defending paths a once-only statement can't reach: the ⚠️ head note repeated in every
-reference defends the raw-read path, and the closing card imperative repeated at every phase
-tail defends against tail-position card drops) — a contradiction or
+editing paste blocks and instructions):** state each rule exactly once (four sanctioned exceptions,
+all defending paths a once-only statement can't reach: the ⚠️ head note defends the raw-read path;
+the closing card imperative at every phase tail defends against tail-position card drops; the
+Harness-verbs pointer may repeat wherever a file emits a literal harness command; and paste blocks
+restate the provenance-header fields, since they reach sessions that never load this file) — a contradiction or
 duplicate is worse than a missing detail; define the outcome, constraints, and completion bar
 rather than prescribing every step; reserve ALWAYS/NEVER for true process invariants; don't
 scatter "ask first"/"wait for approval" — the approval *principle* is stated once here, the

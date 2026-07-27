@@ -15,7 +15,7 @@ because the shape turned out to be portable.
   the code — an independent family catches blind spots the writer's siblings share.
 - **Files are the state machine.** Every phase reads and writes `.workflow/*.md`, so any fresh
   session re-grounds from disk instead of trusting its own memory. Execution persists state
-  after *every* step; a context compaction (manual or automatic) can never strand a run.
+  after *every* step, so a reset — or an unplanned auto-compaction — can never strand a run.
 - **Learning compounds.** Each run routes durable lessons to memory/skills/design docs, keeps a
   bounded worklog, and deposits **golden eval cases** — approved specs, plans, and
   caught-bug/finding pairs — so future models must pass an exam built from your real work
@@ -63,7 +63,6 @@ casual mentions of "plan" or "review" never trigger it.
 | `workflow review` | Strict senior review, empirical verification, P0–P3 verdict; bounded patch cycle |
 | `workflow wrap` | Final checks, commit/push, route learnings, deposit eval cases, update `TODO.md` + worklog, clear scratch |
 | `workflow todo <idea>` | Capture an idea into `TODO.md`, well-placed and well-shaped |
-| `workflow compact` | Persist-first context compaction mid-run; prints the exact compact line to paste |
 | `workflow status` / `next` / `log` / `learn` | Where am I / what's the next step card / ad-hoc worklog entry / capture a learning |
 
 Every phase response ends with a **next-step card**: reset-or-continue, which harness/model/

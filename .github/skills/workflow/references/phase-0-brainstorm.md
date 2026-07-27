@@ -6,34 +6,26 @@ Seat: **brainstorm partner** — mapping in `ROUTING.md`. Rationale: knowledge-s
 with no execution payoff — the cheap conversational seat wins; never spend a reviewer- or
 heavy-executor-tier model here.
 
-Read `PRODUCT.md`/`DESIGN.md` if they exist and this touches product direction or UI, then run
-the brainstorm directly — ask clarifying questions one at a time (prioritize whichever answer
-would change architecture/scope the most), explore 2-3 approaches with tradeoffs, push back on
-shaky assumptions or oversized scope. Don't write a spec yet. When converged, save a short
-summary (problem statement, chosen approach, explicit non-goals, open questions) to
-`.workflow/brainstorm.md`.
+Three things the dialogue depends on and a fresh reader won't infer:
 
-**TODO intake.** Also read repo-root `TODO.md` if present — the human's intake scratchpad, never
-a roadmap or product truth (`PRODUCT.md` owns product state; TODO entries point at it, they don't
-duplicate it). Two directions:
+- **`TODO.md` is intake, not truth.** It is the human's scratchpad; `PRODUCT.md` owns product
+  state and TODO entries point at it rather than duplicating it. Scratchpad paths, column names
+  and assumptions drift against the code — which is why seeding from an item means re-verifying
+  it, not trusting it.
+- **Ask in a way that survives a distracted reader.** This seat is a strong reasoner told to
+  prioritise the questions that most change architecture or scope, and its natural output is one
+  sentence carrying three decisions and two pieces of jargon. That question isn't wrong — it's
+  unanswerable in thirty seconds, and a rushed guess at a scope question costs more than the
+  question was ever worth. Simplify the packaging, never the thinking: same question, one
+  decision, plain words, options on the table.
+- **Downstream reads this file.** Phase 2 and review both work from `.workflow/brainstorm.md` and
+  nothing else from this phase. An item considered and rejected here gets quietly re-imported
+  later unless it is named under non-goals.
 
-- **Topic matches a TODO item/initiative** → seed the brainstorm from its user story / purpose /
-  definition of done and original details instead of re-deriving from scratch — but verify the
-  details against the current codebase first (paths, column names, and assumptions in a
-  scratchpad drift); treat stale details as questions, not facts.
-- **Otherwise** → scan Active Initiatives, Small UI Changes, and Open Questions for items
-  touching the same feature/files, list the related ones, and ask which to fold into scope and
-  which to leave. Record the outcome in `.workflow/brainstorm.md`: folded items go into the
-  problem statement/scope; consciously excluded ones go under non-goals *by name*, so Phase 2
-  and review don't re-import them.
-
-Honor the file's own header rule: never implement a TODO item just because it's listed —
-confirm scope with the human first.
-
-If handing this to a fresh session on the brainstorm seat, paste:
+Run the brainstorm directly, or hand it to a fresh session on the brainstorm seat by pasting:
 
 ```text
-Read PRODUCT.md and DESIGN.md first, if they exist and this touches product direction or UI, so we don't relitigate settled decisions. Also read TODO.md at the repo root if present — it's my intake scratchpad, not a roadmap: if this brainstorm matches a listed item, seed from its user story/purpose/DoD but verify the details against the current code; otherwise list related TODO items and ask which to fold into scope and which to exclude (record exclusions by name under non-goals). Let's brainstorm before we spec anything: [describe the idea, problem, or need]. Ask me clarifying questions one at a time, prioritizing whichever question's answer would change the architecture or scope the most. Explore 2-3 different approaches with tradeoffs, and push back on any assumption that seems shaky or any scope that seems bigger than the actual need. Don't write a spec yet. When we've converged, save a short summary (problem statement, chosen approach, explicit non-goals, open questions) to .workflow/brainstorm.md.
+Read PRODUCT.md and DESIGN.md first, if they exist and this touches product direction or UI, so we don't relitigate settled decisions. Also read TODO.md at the repo root if present — it's my intake scratchpad, not a roadmap: if this brainstorm matches a listed item, seed from its user story/purpose/DoD and original details but verify every detail against the current code and treat anything stale as a question rather than a fact; otherwise scan Active Initiatives, Small UI Changes and Open Questions for items touching the same feature or files, list the related ones, and ask which to fold into scope and which to leave out. Never treat an item being listed as approval to implement it — confirm scope with me first. Let's brainstorm before we spec anything: [describe the idea, problem, or need]. Ask me clarifying questions one at a time, prioritizing whichever question's answer would change the architecture or scope the most, and make each one easy to answer in a hurry: one decision per question; the question itself first, in plain language, two sentences at most; the realistic options on their own lines where there are any, so I can answer with a letter; and one line on what changes depending on my answer. Don't use a term I haven't used myself unless you define it in the same breath. Keep the depth in your thinking rather than in the sentence — if a question genuinely can't be asked simply without losing the decision, give me two lines of plain background first, then ask it. When misreading my answer would be expensive, play back what you understood in one line before moving on. Explore 2-3 different approaches with tradeoffs, and push back on any assumption that seems shaky or any scope that seems bigger than the actual need. Don't write a spec yet. When we've converged, save a short summary to .workflow/brainstorm.md: problem statement and scope (including anything folded in from TODO.md), chosen approach, explicit non-goals (including every excluded TODO item by name), and open questions. Start that file with a five-line provenance header: Command, Created (date), Base (current git sha), Inputs (none — a brainstorm has no upstream artifact), Status (complete).
 ```
 
 ## Variants
