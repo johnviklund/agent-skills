@@ -28,8 +28,10 @@ against the harness's own `/` menu — these drift.
 | Copilot CLI | `/clear` | `/compact` | `/context` (tokens used, buffer left) | `/model` | none for project skills — description-matched; `/skills list\|info\|reload` inspects, and a plugin-installed skill becomes `/<plugin>:workflow` |
 | Claude Code | `/clear` | `/compact` | `/context` | `/model` | `/workflow` (the skill's directory name is the command) |
 
-Copilot CLI auto-compacts at roughly 80% of the window, which is why `references/compact.md` puts
-the manual threshold at ~70% — below the automatic trigger, with room to reconcile first.
+Where a harness compacts on its own — Copilot CLI does, at roughly 80% of the window — treat that
+as a deadline rather than a safety net: a reset at a step boundary is lossless and an automatic
+summary is not. The standing rule after either is the same and lives in
+`references/phase-3-execute.md`: re-read the artifact before continuing.
 
 ## Seat mapping
 
