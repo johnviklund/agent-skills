@@ -32,19 +32,30 @@ from both Codex CLI and GitHub Copilot CLI.
 
 ## How this repo is wired up
 
-`.github/skills/` is the canonical source for skill content. Codex reaches it via a direct
-symlink; Copilot reaches it through its own plugin install mechanism, which needs a **separate,
+`.github/skills/` is the canonical source for skill content. Codex reaches it via direct
+symlinks; Copilot reaches it through its own plugin install mechanism, which needs a **separate,
 independently-updated copy** — see the update step below, that's the one non-obvious part of
 this setup.
 
-- **Codex CLI:** `~/.codex/skills/memory.remember` and `~/.codex/skills/memory.compact` are
-  symlinks straight into this repo's `.github/skills/`. Edits here are live for Codex immediately
-  after a commit — no extra step needed.
+**The clone lives at `~/Documents/Projects/agent-skills`.** Every Codex symlink points at that
+absolute path, so the clone is load-bearing infrastructure, not a scratch checkout — moving or
+deleting it silently breaks all five skills in Codex (Copilot is unaffected, since it installs
+from GitHub into its own cache). If it must move, re-point the symlinks in the same change.
+
+- **Codex CLI:** `~/.codex/skills/<name>` is a symlink straight into this repo's
+  `.github/skills/<name>`, one per skill — currently `checkup`, `evals`, `memory.compact`,
+  `memory.remember`, and `workflow`. Edits here are live for Codex immediately, no commit or
+  reinstall needed. Codex discovers personal skills **only** in `$CODEX_HOME/skills`
+  (`~/.codex/skills` by default) and a project's `.codex/skills/` — it does *not* read
+  `~/.agents/skills/`, so a skill dropped there alone will load in Copilot and never appear in
+  Codex. Verify with `ls -la ~/.codex/skills/` (every link must resolve) and `/skills` in a
+  session.
 - **Copilot CLI:** installed as a real plugin via `copilot plugin install jviklun1/agent-skills`
   (registered in `~/.copilot/config.json`'s `installedPlugins`, confirm with `copilot plugin
   list`). This is **not** a symlink — Copilot downloads a snapshot of the repo into its own cache
-  (`~/.copilot/installed-plugins/_direct/jviklun1--agent-skills`), so after editing a skill here
-  and pushing, refresh Copilot's copy with a **clean reinstall**, not `plugin update`:
+  (`~/.copilot/installed-plugins/_direct/jviklun1--agent-skills`), so a local edit is invisible to
+  Copilot until it is **committed, pushed, and reinstalled**. Refresh with a **clean reinstall**,
+  not `plugin update`:
   `copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`.
   A root-level `skills/` folder (symlinking into `.github/skills/`) exists only so Copilot's
   installer finds the skills at the path it expects; `.github/skills/` stays the one place to
@@ -60,6 +71,14 @@ this setup.
   Copilot CLI release, register this repo as a marketplace instead
   (`copilot plugin marketplace add jviklun1/agent-skills`) and install from there.
 
+### Updating a skill
+
+1. Edit under `.github/skills/<name>/` (never the root `skills/` shims — they're symlinks).
+2. Commit and push. Codex is already live at this point; Copilot is not.
+3. `copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`.
+4. Verify both: `diff -rq ~/.codex/skills/<name> .github/skills/<name>` and
+   `diff -rq ~/.copilot/installed-plugins/_direct/jviklun1--agent-skills/.github/skills/<name> .github/skills/<name>`.
+
 Earlier setup attempt for the record: hand-creating a directory under
 `~/.copilot/installed-plugins/local/` with a `.codex-plugin/plugin.json` does **not** register a
 plugin — it's invisible to `copilot plugin list` and never actually loads. The only way to
@@ -71,7 +90,8 @@ install) and let Copilot write its own `config.json` entry.
 Add a new folder under `.github/skills/<name>/SKILL.md`, symlink it from `skills/<name>` at the
 repo root, commit and push, then clean-reinstall the Copilot plugin
 (`copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`) and add
-a matching symlink under `~/.codex/skills/<name>`.
+a matching symlink under `~/.codex/skills/<name>` pointing at the absolute path
+`~/Documents/Projects/agent-skills/.github/skills/<name>`.
 
 **Known gotcha — Copilot silently drops skills with a long `description`.** Confirmed
 empirically: a description field somewhere between ~1033 and ~1078 characters causes Copilot's

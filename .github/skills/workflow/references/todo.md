@@ -24,7 +24,9 @@ duplicates settled product truth; point at it instead.
 - **New initiative-sized idea** → new Active Initiative in the file's standard shape (user
   story / purpose / definition of done / details — intentionally light, not a spec).
 - **Small, concrete UI tweak** → checkbox under the right Small UI Changes subsection.
-- **Genuine unknown needing a decision first** → Open Questions.
+- **Genuine unknown needing a decision first** → Open Questions — unless it is a *product*
+  decision (scope, direction, a stated boundary, the stack), which belongs in `PRODUCT.md`'s
+  open-decisions list instead. Two lists of open decisions is how one of them goes stale.
 - **Raw note that doesn't fit yet** → Misc / Scratchpad (Unsorted).
 - **Already shipped or archived** (check Archived and, if cheap, the code) → say so; nothing to
   add.

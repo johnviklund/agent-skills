@@ -37,7 +37,9 @@ questions can wait; identity questions cannot.
 Boundary rules that make the set stable: `PRODUCT.md` holds *what and why* (current + desired
 end state); `ROADMAP.md` holds *in what order*; `TODO.md` holds *not-yet-decided intake*. A
 roadmap item is a pointer to a future workflow run, not a second product description — when the
-same sentence appears in two docs, one of them is wrong.
+same sentence appears in two docs, one of them is wrong. Unresolved decisions get one home each:
+product decisions (scope, direction, boundaries, stack) live in `PRODUCT.md`'s open-decisions
+list, every other unknown in `TODO.md`'s Open Questions.
 
 **4. Retire the PRD.** The PRD is frozen input, not a living doc — once `PRODUCT.md` exists,
 maintaining both guarantees drift. Move it to `docs/archive/PRD-<date>.md` (or delete it if the
@@ -58,7 +60,7 @@ ROADMAP.md initiative>` — from here on, the normal cycle owns everything.
 
 ## Afterwards
 
-- ROADMAP.md status updates ride along with wrap's TODO-hygiene step: items a run completed get
+- ROADMAP.md status updates belong to wrap's product-doc step: items a run completed get
   checked off there, with the same boundaries (point at commits, don't grow prose).
 - Re-running bootstrap on a bootstrapped repo is an error — refuse and point at `workflow
   brainstorm` / `workflow todo` instead.

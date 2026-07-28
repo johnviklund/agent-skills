@@ -44,7 +44,11 @@ Commit, push, curate, and clean up — in one go:
    For each of `PRODUCT.md`, `DESIGN.md` and `ROADMAP.md` that exists, state either "no statement
    changed" or the edit made — a stale statement of current state/scope/stack corrected, an open
    decision this run resolved moved out of the open list and recorded as decided, a completed
-   roadmap item checked off. **Never rewrite a settled principle or a stated boundary to match the
+   roadmap item checked off. **Include the decisions nobody listed**: shipping is how most product
+   decisions actually get made, and one settled in passing and never written down is the commonest
+   way `PRODUCT.md` goes stale. If this run fixed how something works, that answer belongs in
+   `PRODUCT.md` whether or not anyone had thought to ask the question first.
+   **Never rewrite a settled principle or a stated boundary to match the
    code**: that inverts the source of truth. Stop, name the contradiction, and print the card
    routing it to the human as a product decision — the code may be the thing that's wrong. Commit
    doc edits before step 6 so `TODO.md` points at truth rather than duplicating a stale claim.
@@ -52,8 +56,16 @@ Commit, push, curate, and clean up — in one go:
    list plus anything done in passing: move completed/subsumed items to Archived with a one-line
    pointer (commit sha or the initiative that subsumed them); rewrite items whose scope this run
    changed so they match the code that now exists; check off Small UI Changes shipped along the
-   way; if `ROADMAP.md` exists, check off items this run completed (pointer updates only —
-   same boundaries). Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
+   way. Roadmap status belongs to step 5, not here.
+
+   Then reconcile the two, so intake and committed direction can't drift apart: no open `TODO.md`
+   item may duplicate an active `ROADMAP.md` item — point it at the roadmap item or archive it;
+   every roadmap item step 5 just checked off has its `TODO.md` entries archived with a pointer to
+   that item; and a roadmap item this run descoped or abandoned lands back in `TODO.md` as a
+   deferred entry, naming what it was and why it stopped. A committed item may leave the roadmap,
+   but it never simply disappears.
+
+   Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
    only add items the human explicitly deferred during this run, in the right section); and the
    TODO entry points at the product docs step 5 just corrected, it never duplicates them.
 7. **Eval deposit** — for every `[durable→eval]` line in `.workflow/learnings.md`, resolve its

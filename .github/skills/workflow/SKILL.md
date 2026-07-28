@@ -152,8 +152,8 @@ in the `.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `P
 
 When the run is finished — plan checked off, review clean or patched, learnings routed, scratch
 cleared — print the ✅ done card instead: one line on what shipped; one line on product-doc truth
-(what was corrected, or none); recommended next (`workflow brainstorm <topic>` or `workflow
-improve ...`; `memory.compact` if `MEMORY.md` has grown; open a PR if not committing to `main`).
+(corrected what, or none); recommended next (`workflow brainstorm <next ROADMAP.md initiative>`
+or `workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; PR if not on `main`).
 
 ## Ground rules (every phase)
 
