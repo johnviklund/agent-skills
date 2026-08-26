@@ -32,66 +32,50 @@ from both Codex CLI and GitHub Copilot CLI.
 
 ## How this repo is wired up
 
-`.github/skills/` is the canonical source for skill content. Codex reaches it via direct
-symlinks; Copilot reaches it through its own plugin install mechanism, which needs a **separate,
-independently-updated copy** — see the update step below, that's the one non-obvious part of
-this setup.
+**Both Codex CLI and Copilot CLI (and other agent CLIs) read the same shared directory:
+`~/.agents/skills/`.** It's managed by a separate, multi-source skill installer that also pulls
+third-party skills (e.g. `last30days` from someone else's repo) — its state lives in
+`~/.agents/.skill-lock.json`. Because that directory is shared infrastructure for *any* skill
+source, it is not simply `git clone`-able as this repo.
 
-**The clone lives at `~/Documents/Projects/agent-skills`.** Every Codex symlink points at that
-absolute path, so the clone is load-bearing infrastructure, not a scratch checkout — moving or
-deleting it silently breaks all five skills in Codex (Copilot is unaffected, since it installs
-from GitHub into its own cache). If it must move, re-point the symlinks in the same change.
+`.github/skills/` is still the canonical source for this repo's own skill content (`checkup`,
+`evals`, `memory.compact`, `memory.remember`, `workflow`). **The clone lives at
+`~/Documents/Projects/skills/agent-skills`** — inside a dedicated `~/Documents/Projects/skills/`
+folder that also holds one flat convenience symlink per owned skill
+(`~/Documents/Projects/skills/<name>` → `agent-skills/.github/skills/<name>`), so the skill
+content is browsable at a short path without duplicating it.
 
-- **Codex CLI:** `~/.codex/skills/<name>` is a symlink straight into this repo's
-  `.github/skills/<name>`, one per skill — currently `checkup`, `evals`, `memory.compact`,
-  `memory.remember`, and `workflow`. Edits here are live for Codex immediately, no commit or
-  reinstall needed. Codex discovers personal skills **only** in `$CODEX_HOME/skills`
-  (`~/.codex/skills` by default) and a project's `.codex/skills/` — it does *not* read
-  `~/.agents/skills/`, so a skill dropped there alone will load in Copilot and never appear in
-  Codex. Verify with `ls -la ~/.codex/skills/` (every link must resolve) and `/skills` in a
-  session.
-- **Copilot CLI:** installed as a real plugin via `copilot plugin install jviklun1/agent-skills`
-  (registered in `~/.copilot/config.json`'s `installedPlugins`, confirm with `copilot plugin
-  list`). This is **not** a symlink — Copilot downloads a snapshot of the repo into its own cache
-  (`~/.copilot/installed-plugins/_direct/jviklun1--agent-skills`), so a local edit is invisible to
-  Copilot until it is **committed, pushed, and reinstalled**. Refresh with a **clean reinstall**,
-  not `plugin update`:
-  `copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`.
-  A root-level `skills/` folder (symlinking into `.github/skills/`) exists only so Copilot's
-  installer finds the skills at the path it expects; `.github/skills/` stays the one place to
-  actually edit.
-  **Why uninstall+install instead of `copilot plugin update`:** the installer materializes
-  *both* the top-level `skills/` shims (dereferenced into real files) and the canonical
-  `.github/skills/` tree into its snapshot. Copilot only scans `skills/`, so the `.github/skills/`
-  copy is inert — but an incremental `plugin update` has been observed to refresh `skills/` while
-  leaving the `.github/skills/` copy **stale**, drifting the two trees apart. A full uninstall+install
-  wipes the snapshot and rematerializes both from one commit, so they can't drift.
-  Note: `copilot plugin install` currently warns that direct repo/URL/local-path installs are
-  deprecated in favor of `plugin@marketplace` installs — if that stops working in a future
-  Copilot CLI release, register this repo as a marketplace instead
-  (`copilot plugin marketplace add jviklun1/agent-skills`) and install from there.
+`~/.agents/skills/<name>` is then itself a symlink to `~/Documents/Projects/skills/<name>` — one
+per owned skill. This means both Codex and Copilot resolve straight through to the git clone with
+**no separate per-tool install step, no reinstall, and no drift between copies**: edit under
+`.github/skills/<name>/`, commit, push — done. (An older setup used per-tool Codex symlinks plus
+a separately-installed Copilot plugin snapshot requiring reinstall after every change; that's
+gone now in favor of the single shared directory both tools already read.)
+
+**Caveat:** the multi-source skill installer that owns `~/.agents/skills/` could in principle
+overwrite one of these symlinks with a fresh directory copy during some future "update" pass
+across all installed skills. If a skill stops picking up edits, check
+`ls -la ~/.agents/skills/<name>` — if it's a plain directory again instead of a symlink, re-run:
+`ln -sf ~/Documents/Projects/skills/<name> ~/.agents/skills/<name>`.
 
 ### Updating a skill
 
-1. Edit under `.github/skills/<name>/` (never the root `skills/` shims — they're symlinks).
-2. Commit and push. Codex is already live at this point; Copilot is not.
-3. `copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`.
-4. Verify both: `diff -rq ~/.codex/skills/<name> .github/skills/<name>` and
-   `diff -rq ~/.copilot/installed-plugins/_direct/jviklun1--agent-skills/.github/skills/<name> .github/skills/<name>`.
-
-Earlier setup attempt for the record: hand-creating a directory under
-`~/.copilot/installed-plugins/local/` with a `.codex-plugin/plugin.json` does **not** register a
-plugin — it's invisible to `copilot plugin list` and never actually loads. The only way to
-register a plugin is to run `copilot plugin install <source>` (or `plugin marketplace add` +
-install) and let Copilot write its own `config.json` entry.
+1. Edit under `.github/skills/<name>/` in `~/Documents/Projects/skills/agent-skills` (or via
+   either symlink path — same files).
+2. Commit and push. Both Codex and Copilot are live immediately; no reinstall needed.
+3. Verify: `readlink ~/.agents/skills/<name>` resolves through
+   `~/Documents/Projects/skills/<name>` to `.github/skills/<name>`.
 
 ## Adding a new global skill
 
-Add a new folder under `.github/skills/<name>/SKILL.md`, symlink it from `skills/<name>` at the
-repo root, commit and push, then clean-reinstall the Copilot plugin
-(`copilot plugin uninstall agent-skills && copilot plugin install jviklun1/agent-skills`) and add
-a matching symlink under `~/.codex/skills/<name>` pointing at the absolute path
-`~/Documents/Projects/agent-skills/.github/skills/<name>`.
+1. Add a new folder under `.github/skills/<name>/SKILL.md`.
+2. Symlink it from `skills/<name>` at the repo root (`../.github/skills/<name>`) — this is only
+   for Claude Code's plugin discovery (`.claude-plugin/plugin.json`), unrelated to the local dev
+   setup below.
+3. Commit and push.
+4. Add the two local convenience symlinks so Codex/Copilot pick it up immediately:
+   `ln -s agent-skills/.github/skills/<name> ~/Documents/Projects/skills/<name>` then
+   `ln -s ~/Documents/Projects/skills/<name> ~/.agents/skills/<name>`.
 
 **Known gotcha — Copilot silently drops skills with a long `description`.** Confirmed
 empirically: a description field somewhere between ~1033 and ~1078 characters causes Copilot's
