@@ -71,8 +71,12 @@ the next-step card routed to the human. Never a fourth blind cycle.
 
 **P0/P1 present** (models/efforts per the patch-cycle rows in `ROUTING.md`):
 1. **Patch plan**: group P0/P1/P2/P3 into a file-by-file patch plan, core interfaces first, each
-   with a local check — same step shape as Phase 2, including a `Skills:` line per step.
-   Save to `.workflow/patch_plan.md`.
+   with a local check — same step shape as Phase 2, including a `Skills:` line per step. Scope
+   each check to exactly what that step changes (the phrase removed, the phrase added), not a
+   global count of a substring that can legitimately appear elsewhere (e.g. reserve `wc -l` for a
+   file with a real line budget, not as a stand-in for "did the edit land"); before writing a
+   "count is 0" check, grep the plan's own other steps for a collision. A check that stops a
+   correct edit costs a whole cycle. Save to `.workflow/patch_plan.md`.
 2. **Fix P0s** (review each diff): fix only the P0s, one at a time, check + commit after each.
    Don't touch P1/P2 yet.
 3. **Fix P1/P2/P3s** (auto): fix the rest, verify no regressions.

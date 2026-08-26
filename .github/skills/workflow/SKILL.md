@@ -4,14 +4,13 @@ description: >
   Trigger ONLY on a message of the form "workflow <command>" or "/workflow <command>" — a
   deliberate invocation of this personal five-phase solo-dev coding workflow; never on casual
   mentions of spec, plan, execute, review, or learn elsewhere in a message. Commands: brainstorm,
-  improve, spec, plan, execute, review, learn, wrap, status, next, log, todo, bootstrap;
+  improve, spec, plan, execute, review, learn, wrap, status, next, log, todo, bootstrap, realign;
   bare "workflow" = next.
 ---
 
 # Workflow
 
 > ⚠️ **This skill must be invoked, not skimmed.** A message of the form `workflow <command>` / `/workflow <command>` is a deliberate invocation: invoke this skill as the first action, before reading references, running commands, or emitting output. Reading `SKILL.md` or `references/*.md` directly is not a substitute for invoking the skill.
-
 
 A personal five-phase workflow built on **seats** — jobs with an output contract and effort
 profile, filled by whatever model currently earns them. Two harnesses stay in the loop on
@@ -36,8 +35,8 @@ treated as `workflow next`. **Do not** treat unprefixed mentions of "spec", "pla
 
 Report which phase is next without acting, then wait for an explicit `workflow <phase>`. Check
 `.workflow/` first — the files are the state machine, more trustworthy than memory. Every artifact
-header carries `Status:`, and **`drafting` means resume that phase, never advance past it**. Review
-is read-only, so `review.md` is its *only* evidence — never infer "review done" without it. With
+header carries `Status:`, and **`drafting` means resume that phase, never advance past it**; ignore
+standalone `realign.md` here because it is not phase state. Review is read-only, so `review.md` is its *only* evidence — never infer "review done" without it. With
 every artifact `complete`:
 
 | `.workflow/` | Next |
@@ -80,7 +79,7 @@ the in-phase rules (Phase 0 dialogue, Phase 3 stop-on-deviation); it doesn't rep
 | Default executor | Specs and everyday logic-bearing implementation; best quality-per-cost | Phase 1, Phase 3 (logic), P1–P3 fixes, wrap |
 | Heavy executor | Schema/SQL/contract-coupled edits, hardest multi-file work; best long-horizon agentic model | Phase 3 (schema/contract), P0 fixes |
 | Mechanical lane | Transforms with an explicit expected result; cheapest/fastest | Phase 3 (mechanical) |
-| Strict reviewer | Deepest read-only reasoning; the workflow's skeptic | Phase 2, Phase 4, patch plans |
+| Strict reviewer | Deepest reasoning; the workflow's skeptic — read-only except `realign` | Phase 2, Phase 4, patch plans; `realign` (canonical-doc writes, per-candidate human approval) |
 
 Which model fills each seat, in which harness, at what effort, with what fallback chain —
 that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not by novelty.
@@ -97,7 +96,7 @@ that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not
   effort on a struggling step, first check whether the step is missing a success criterion or
   verification check — a clearer completion bar usually beats more thinking. When a new model
   takes a seat, baseline at the incumbent's effort and test one level lower.
-- **Approval scales with blast radius.** Read-only seats need none; mechanical-lane edits
+- **Approval scales with blast radius.** Read-only work needs none; mechanical-lane edits
   auto-approve; logic-bearing and schema/contract edits are reviewed diff by diff (the full
   phase→approval map is in ROUTING.md alongside the efforts).
 - **Sub-agent/parallel modes are for read-only breadth only.** A harness mode that fans work out
@@ -117,12 +116,14 @@ table.
 
 ## Next recommended step — `workflow next` (or bare `/workflow`)
 
-Every phase response ends with this card — **mandatory, with no substitute**: a conversational
-closer ("Next is workflow execute. Want me to proceed?") is not the card. Row 2 is **resolved
-from `ROUTING.md` at print time** — the concrete harness, model, and effort for the next seat
-plus its first fallback; a seat name or "see ROUTING.md" defeats the card's whole purpose, which
-is that the human never opens a file to learn which model to pick. `workflow next` prints the
-card on demand without doing phase work (re-ground via *Where are we?* first). Exact shape:
+Every phase ends with this card as the turn's **last user-visible output** — **mandatory, with no
+substitute**: a conversational closer ("Next is workflow execute. Want me to proceed?") is not the
+card, and where a harness ends the turn with a completion/summary tool the card belongs *inside*
+that summary, or it never reaches the human. Row 2 is **resolved from `ROUTING.md` at print time**
+— the concrete harness, model, and effort for the next seat plus its first fallback; a seat name
+or "see ROUTING.md" defeats the card's whole purpose, which is that the human never opens a file
+to learn which model to pick. `workflow next` prints the card on demand without doing phase work
+(re-ground via *Where are we?* first). Exact shape:
 
 ---
 ### ▶ Next recommended step
@@ -138,7 +139,6 @@ card on demand without doing phase work (re-ground via *Where are we?* first). E
 
 **Harness toggles:** autonomy/speed modes per ROUTING.md notes (default: none) · **Sub-agents:** none — except the read-only breadth exception above
 
-
 Paste next:
 ```text
 <the exact prompt or `workflow <phase>` line to send>
@@ -150,8 +150,8 @@ toggles No unless ROUTING.md's harness notes sanction them, never on review seat
 in the `.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/
 `DESIGN.md` when product/UI is in scope, `git diff`/`git log` for review/wrap.
 
-When the run is finished — plan checked off, review clean or patched, learnings routed, scratch
-cleared — print the ✅ done card instead: one line on what shipped; one line on product-doc truth
+When the run is finished — plan checked off, review clean or patched, learnings routed, `.workflow/`
+dispositioned — print the ✅ done card instead: one line on what shipped; one line on product-doc truth
 (corrected what, or none); recommended next (`workflow brainstorm <next ROADMAP.md initiative>`
 or `workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; PR if not on `main`).
 
@@ -160,7 +160,8 @@ or `workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; PR if not 
 - **Clarify before you build** (gate above). **Verify, don't trust** — check every interface,
   signature, column against real code; a generated spec is a hypothesis.
 - **No backward-compat shims** unless asked; contract versions in lockstep producer→validator→consumer.
-- **Handoff files live in `.workflow/`** (gitignored scratch); commit after each verified step.
+- **Handoff files live in `.workflow/`** — run scratch, **tracked in some repos, gitignored in
+  others** (check; it decides if wrap's clean-up is recoverable); commit after each verified step.
 - **Provenance header** — every `.workflow/` artifact opens with five lines written at creation:
   `Command:`, `Created:` (date), `Base:` (git sha), `Inputs:` (`<artifact> @ <its Base sha>` or `none`),
   `Status:` (`drafting` until the phase writes its closing section, then `complete`). At phase entry
@@ -184,6 +185,7 @@ ROUTING.md for the card's seat mapping).
 | `workflow learn`, `workflow log` | `references/learning-worklog.md` |
 | `workflow todo [idea]` | `references/todo.md` |
 | `workflow bootstrap [PRD.md]` | `references/bootstrap.md` |
+| `workflow realign` | `references/realign.md` |
 
 ## Keeping this skill alive
 

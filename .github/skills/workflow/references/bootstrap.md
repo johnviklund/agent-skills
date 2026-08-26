@@ -46,14 +46,18 @@ maintaining both guarantees drift. Move it to `docs/archive/PRD-<date>.md` (or d
 human prefers; it lives in git either way) and note in `PRODUCT.md`'s header that it supersedes
 the PRD as of the bootstrap date.
 
-**5. Wire the hygiene.** `.gitignore` with `.workflow/` plus the usual junk (`.DS_Store`,
-`.env*`, venvs, build output); create `WORKLOG.md` with its bounded-rolling header.
+**5. Wire the hygiene.** `.gitignore` with the usual junk (`.DS_Store`, `.env*`, venvs, build
+output); create `WORKLOG.md` with its bounded-rolling header. Decide `.workflow/` deliberately and
+say which you chose: ignore it (scratch stays private, wrap's deletes are unrecoverable) or track
+it (run artifacts and receipts are archived and recoverable, and wrap's clean-up is a reviewable
+commit) — see `references/wrap.md` step 9c.
 
 **6. Audit before committing (recommended, strict-reviewer seat, fresh session).** Check every
 claim in `PRODUCT.md` and `ROADMAP.md` traces to the PRD or an explicit human answer from step
 2 — invented commitments in a north-star doc are the most expensive hallucinations there are.
-Check the ownership boundaries don't overlap. Fix, then commit everything as the bootstrap
-commit, and append the first `WORKLOG.md` entry.
+Check the ownership boundaries don't overlap. Then run `references/direction-stress-tests.md`
+against the freshly drafted north-star docs and feed the human's answers back into them. Fix,
+then commit everything as the bootstrap commit, and append the first `WORKLOG.md` entry.
 
 **7. Hand off.** Close with the next-step card recommending `workflow brainstorm <first
 ROADMAP.md initiative>` — from here on, the normal cycle owns everything.

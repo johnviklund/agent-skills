@@ -81,8 +81,11 @@ capped and rolls off. Never let it grow into a second memory file that confuses 
   - Why: <one line>
   ```
 
-  The `Review:` field exists because `.workflow/review.md` is deleted at wrap and gitignored, so
-  this line is the only surviving trace that the verdict was reached and against which commit.
+  For a completed `workflow realign` evidence review that accepted no redline, the entry may use
+  `Commits: none — docs confirmed current`; omit `Review:` because this is not a standard workflow run.
+
+  The `Review:` field exists because `.workflow/review.md` is deleted at wrap and is not reliably
+  in git, so this line is the only surviving trace that the verdict was reached and against which commit.
 
 - **When it's written:**
   - `workflow wrap` appends an entry automatically as part of wrap-up.

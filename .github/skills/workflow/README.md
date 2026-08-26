@@ -42,7 +42,9 @@ mapping (Codex CLI + Copilot CLI) plus an example Claude Code pairing for forks.
 
 ## What a run writes
 
-Run scratch lives in `.workflow/` (gitignored). Every artifact opens with a five-line provenance
+Run scratch lives in `.workflow/` — ignore it or track it, your call (see `references/wrap.md`
+step 9c; tracking makes wrap's clean-up recoverable and reviewable). Every artifact opens with a
+five-line provenance
 header, and the state machine reads it rather than guessing from which files exist:
 
 ```
@@ -74,7 +76,7 @@ follows a symlink, so keep one canonical copy and point the others at it:
 mkdir -p .agents/skills && cp -r workflow .agents/skills/workflow   # canonical copy
 mkdir -p .claude/skills && ln -s ../../.agents/skills/workflow .claude/skills/workflow
 mkdir -p .codex/skills  && ln -s ../../.agents/skills/workflow .codex/skills/workflow
-echo '.workflow/' >> .gitignore
+echo '.workflow/' >> .gitignore   # optional — track .workflow/ instead if you want recoverable run artifacts
 ```
 
 Copilot CLI reads `.agents/skills/` directly, so the canonical copy already covers it.
@@ -134,9 +136,10 @@ casual mentions of "plan" or "review" never trigger it.
 | `workflow plan` | Cross-vendor audit → file-by-file checklist with per-step verification + suggested skills → `plan.md` |
 | `workflow execute` | One step at a time: edit, check, diff, commit, persist state |
 | `workflow review` | Strict senior review, empirical verification, P0–P3 verdict; patch cycle bounded at 3 |
-| `workflow wrap` | Final checks, commit/push, reconcile product docs, route learnings, deposit eval cases, update `TODO.md` + worklog, clear scratch |
+| `workflow wrap` | Final checks, commit/push, reconcile product docs, route learnings, deposit eval cases, update `TODO.md` + worklog, disposition everything in `.workflow/` |
 | `workflow todo <idea>` | Capture an idea into `TODO.md`, well-placed and well-shaped |
 | `workflow bootstrap` | Stand up `AGENTS.md`/`MEMORY.md`/`TODO.md` and repo conventions in a fresh project |
+| `workflow realign` | Evidence-backed, human-approved re-check of `PRODUCT.md`/`DESIGN.md` against what actually shipped |
 | `workflow status` / `next` / `log` / `learn` | Where am I / what's the next step card / ad-hoc worklog entry / capture a learning |
 
 Every phase response ends with a **next-step card**: reset-or-continue, which harness/model/
