@@ -77,12 +77,14 @@ across all installed skills. If a skill stops picking up edits, check
    `ln -s agent-skills/.github/skills/<name> ~/Documents/Projects/skills/<name>` then
    `ln -s ~/Documents/Projects/skills/<name> ~/.agents/skills/<name>`.
 
-**Known gotcha — Copilot silently drops skills with a long `description`.** Confirmed
-empirically: a description field somewhere between ~1033 and ~1078 characters causes Copilot's
-plugin loader to install the plugin successfully (no error) but silently omit that one skill from
-`copilot skill list` — the skill name and content aren't the cause (tested independently), only
-description length is. Codex is unaffected (it reads `SKILL.md` directly, no such limit
-observed). Keep each skill's `description` under ~900 characters to stay safely clear of this,
-and after adding or editing a skill, verify it actually registered:
-`copilot skill list --json | grep '"name": "<your-skill>"'` — don't just trust the "Updated N
-skills" success message, since that prints even when a skill was silently dropped.
+**Known gotcha — Copilot's skill loader can silently drop a skill with a long `description`.**
+Confirmed empirically (under the old `copilot plugin install` mechanism, since replaced by the
+symlink setup above): a description field somewhere between ~1033 and ~1078 characters caused
+Copilot to load successfully (no error) but silently omit that one skill from `copilot skill
+list` — the skill name and content weren't the cause (tested independently), only description
+length was. Not re-tested against the current `~/.agents/skills/` discovery path, but the safe
+margin still applies: keep each skill's `description` under ~900 characters, and after adding or
+editing a skill, verify it actually registered —
+`copilot skill list --json | grep -A2 '"name": "<your-skill>"'` (current sources report as
+`inherited` or `personal-agents`) — don't just trust a success message, since one could print
+even when a skill was silently dropped.
