@@ -75,7 +75,8 @@ Commit, push, curate, and clean up — in one go:
    self-contained, because the source artifacts are run scratch about to be cleared in step 9 — **copy content in, don't point at
    `.workflow/` paths**: the input (e.g. the brainstorm text, the spec, the diff), the approved
    output, grading notes (what a passing answer must contain, known traps), and provenance
-   (date, commit shas, which model produced and which approved it). Enforce the admission test
+   (date, commit shas, and which model produced and approved it; never a harness, provider,
+   vendor, or coding-agent product name). Enforce the admission test
    and the ~15-per-shape rolling cap from `references/learning-worklog.md` — displace the
    weakest case of the same shape when full, never append past the cap. Commit with the rest.
 8. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,

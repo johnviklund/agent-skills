@@ -1,7 +1,7 @@
 ---
 name: workflow
 description: >
-  Trigger ONLY on a message of the form "workflow <command>" or "/workflow <command>" — a
+  Trigger ONLY on a message of the form "workflow COMMAND" or "/workflow COMMAND" — a
   deliberate invocation of this personal five-phase solo-dev coding workflow; never on casual
   mentions of spec, plan, execute, review, or learn elsewhere in a message. Commands: brainstorm,
   improve, spec, plan, execute, review, learn, wrap, status, next, log, todo, bootstrap, realign;
@@ -87,7 +87,7 @@ that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not
 **Portable invariants (hold regardless of the mapping):**
 
 - **Cross-vendor review.** The strict reviewer is a different vendor from whichever model wrote
-  the code. A same-vendor review is a degraded mode — note it when unavoidable.
+  the code; same-vendor review is degraded but handled operationally, never recorded in artifacts.
 - **Two harnesses, no double work.** Never run the same step in both harnesses.
 - **Availability first.** Check the harness's model picker at session start; walk ROUTING.md's
   fallback chain in order; never retry blindly or silently switch to an auto/default model.
@@ -120,10 +120,9 @@ Every phase ends with this card as the turn's **last user-visible output** — *
 substitute**: a conversational closer ("Next is workflow execute. Want me to proceed?") is not the
 card, and where a harness ends the turn with a completion/summary tool the card belongs *inside*
 that summary, or it never reaches the human. Row 2 is **resolved from `ROUTING.md` at print time**
-— the concrete harness, model, and effort for the next seat plus its first fallback; a seat name
-or "see ROUTING.md" defeats the card's whole purpose, which is that the human never opens a file
-to learn which model to pick. `workflow next` prints the card on demand without doing phase work
-(re-ground via *Where are we?* first). Exact shape:
+— the concrete model and effort for the next seat plus its first model fallback, with harness and
+provider names omitted. `workflow next` prints the card on demand after re-grounding via *Where
+are we?*. Exact shape:
 
 ---
 ### ▶ Next recommended step
@@ -133,7 +132,7 @@ to learn which model to pick. `workflow next` prints the card on demand without 
 | # | Step | Setting |
 |---|------|---------|
 | 1 | Reset session? | Yes — reset before the handoff (or *No — continue this session*) |
-| 2 | Harness · model · effort | resolved values, e.g. "<harness> · <model> · <effort> — fallback: <model> <effort>" |
+| 2 | Model · effort | resolved values, e.g. "<model> · <effort> — fallback: <model> <effort>" |
 | 3 | Ground in | exact files to read first |
 | 4 | Invoke | the `workflow <phase>` command to send |
 
@@ -162,6 +161,9 @@ or `workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; PR if not 
 - **No backward-compat shims** unless asked; contract versions in lockstep producer→validator→consumer.
 - **Handoff files live in `.workflow/`** — run scratch, **tracked in some repos, gitignored in
   others** (check; it decides if wrap's clean-up is recoverable); commit after each verified step.
+- **Provider-free attribution** — files may record the active model name, but never its harness,
+  provider, vendor, or coding-agent product. Use `Writer: <model>` when authorship is useful;
+  preserve technical provenance such as command, date, commit SHA, inputs, checks, and status.
 - **Provenance header** — every `.workflow/` artifact opens with five lines written at creation:
   `Command:`, `Created:` (date), `Base:` (git sha), `Inputs:` (`<artifact> @ <its Base sha>` or `none`),
   `Status:` (`drafting` until the phase writes its closing section, then `complete`). At phase entry
@@ -190,18 +192,14 @@ ROUTING.md for the card's seat mapping).
 ## Keeping this skill alive
 
 When the workflow's shape genuinely changes, edit these files directly — they are the one source
-of truth. **Growth rule:** a new feature or use case = a new (or extended) reference file plus
-one Command-index line; this hub stays under ~205 lines. **Vendor rule:** `ROUTING.md` is the only file that names harnesses,
-vendors, or models — a brand name anywhere in `SKILL.md` or `references/` is a bug (`README.md`
-is reader-facing and exempt); seats and invariants live here, mappings live there. **Prompt-style rule (when
-editing paste blocks and instructions):** state each rule exactly once (four sanctioned exceptions,
-all defending paths a once-only statement can't reach: the ⚠️ head note defends the raw-read path;
-the closing card imperative at every phase tail defends against tail-position card drops; the
-Harness-verbs pointer may repeat wherever a file emits a literal harness command; and paste blocks
-restate the provenance-header fields, since they reach sessions that never load this file) — a contradiction or
-duplicate is worse than a missing detail; define the outcome, constraints, and completion bar
-rather than prescribing every step; reserve ALWAYS/NEVER for true process invariants; don't
-scatter "ask first"/"wait for approval" — the approval *principle* is stated once here, the
-phase-by-phase *mapping* once in ROUTING.md, and nowhere else. Before
-changing ROUTING.md, verify model names and effort levels against each harness's own picker and
-current official model guide; never infer one harness's availability from another's.
+of truth. **Growth rule:** a new feature or use case = a new/extended reference plus one Command-index
+line; this hub stays under ~205 lines. **Vendor rule:** `ROUTING.md` alone names harnesses, vendors,
+or models; a brand in `SKILL.md` or `references/` is a bug (`README.md` is reader-facing and exempt).
+**Prompt-style rule:** state each rule once, except five path-defending repeats: the ⚠️ head note
+for raw reads; the closing-card imperative at phase tails; the Harness-verbs pointer where a file
+emits a literal command; provenance fields in standalone paste blocks; and provider-free attribution
+in direct artifact-writing instructions. A contradiction or duplicate is worse than a missing
+detail; define the outcome, constraints, and completion bar rather than prescribing every step;
+reserve ALWAYS/NEVER for true invariants. Don't scatter approval prompts — the principle lives
+here and the phase mapping in `ROUTING.md`. Before changing that file, verify model names and effort
+levels against each harness's own picker and official guide; never infer availability across tools.

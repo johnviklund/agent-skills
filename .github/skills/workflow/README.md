@@ -12,8 +12,8 @@ because the shape turned out to be portable.
   heavy executor, mechanical lane, strict reviewer. `ROUTING.md` maps those to your actual
   tools. Swapping models is a one-file edit; the workflow never changes.
 - **Cross-vendor review.** The strict reviewer should be a different vendor from whichever model
-  wrote the code. Each run records its writer, so the reviewer detects a same-vendor pairing and
-  declares degraded mode itself instead of relying on being told.
+  wrote the code. Runs persist model names only; routing resolves independence without copying
+  harness or provider names into artifacts.
 - **Files are the state machine.** Every phase reads and writes `.workflow/*.md`, so any fresh
   session re-grounds from disk instead of trusting its own memory. Every phase persists *as it
   goes* — findings as they're confirmed, plan steps as they settle, execution state after every
@@ -63,7 +63,8 @@ silently building on it.
 Durable output goes to the repo: commits, `WORKLOG.md`, `MEMORY.md`, `TODO.md`, product docs, and
 golden eval cases at `evals/<seat-slug>/<shape>-<YYYY-MM-DD>-<slug>.md` — seat slugs matching
 `ROUTING.md` (`strict-reviewer`, `default-executor`, …) and shape one of `spec`, `plan-audit`,
-`code-review`, `mechanical-transform`.
+`code-review`, `mechanical-transform`. Runtime files may record model names, but never the active
+harness, provider, vendor, or coding-agent product.
 
 ## Install
 
@@ -142,8 +143,8 @@ casual mentions of "plan" or "review" never trigger it.
 | `workflow realign` | Evidence-backed, human-approved re-check of `PRODUCT.md`/`DESIGN.md` against what actually shipped |
 | `workflow status` / `next` / `log` / `learn` | Where am I / what's the next step card / ad-hoc worklog entry / capture a learning |
 
-Every phase response ends with a **next-step card**: reset-or-continue, which harness/model/
-effort (from `ROUTING.md`), what to read, and the exact line to paste. There is no compact
+Every phase response ends with a **next-step card**: reset-or-continue, the next model/effort,
+what to read, and the exact line to paste. There is no compact
 command — resetting is lossless and safe at any context fullness, so it replaced compaction
 entirely.
 

@@ -41,7 +41,7 @@ summary is not. The standing rule after either is the same and lives in
 | Default executor | Codex · GPT-5.6 Terra · per phase table | GPT-5.5 · closest effort; in Copilot: Sonnet 5 |
 | Heavy executor | Codex · GPT-5.6 Sol · xhigh (P0 fixes: high) | GPT-5.5 · xhigh; in Copilot: Sonnet 5 · xhigh |
 | Mechanical lane | Codex · GPT-5.6 Luna · low→medium | GPT-5.5 · low; in Copilot: Sonnet 5 · low |
-| Strict reviewer | Copilot · Claude Opus 4.8 · high (review: max) | Sonnet 5 · xhigh; in Codex: GPT-5.6 Sol (degraded: same-vendor review — note it) |
+| Strict reviewer | Copilot · Claude Opus 4.8 · high (review: max) | Sonnet 5 · xhigh; in Codex: GPT-5.6 Sol (degraded: handle operationally; never persist provider/harness identity) |
 
 Effort scales: Codex GPT-5.6 exposes `low/medium/high/xhigh/max`; Claude models expose up to
 `xhigh` — where a row says `max`, use the highest level the picker actually lists.
