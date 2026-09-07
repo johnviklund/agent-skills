@@ -76,11 +76,20 @@ it within scope while implementation continues.
 
 ## State and continuity
 
-For work spanning sessions, keep one concise `.workflow/plan.md` (or the user's existing plan):
-objective and scope; next demonstrable outcomes and checks; material decisions; current state
-and blockers; links to evidence. Detail the next slice, with later work coarse. Update at useful
-checkpoints or before handoff. Keep execution history in commits or linked evidence instead of
-appending every command and approval to the plan.
+For work that may span compactions or sessions, keep one concise `.workflow/plan.md` (or the
+user's existing plan): objective and scope; next outcomes and checks; material decisions with
+reasons and superseded choices; current state and blockers; scoped authorization and receipt
+links. Save decisions when established and progress at useful checkpoints, not only at wrap.
+Detail the next slice; keep later work coarse and execution history in linked evidence.
+
+Before a deliberate compaction, reset, or handoff, save the current operation, uncommitted work,
+last verified result, next action, and any pending learning. Automatic compaction may occur
+without a save opportunity, so capture important state as work happens. After compaction or
+resuming in a fresh session, re-read this skill, applicable project instructions, the active
+plan and its relevant decision/learning references; check actual files and Git state before
+continuing. Reconcile receipts before retrying an operation whose outcome is uncertain. Do not
+reopen settled decisions or repeat completed work just because the conversation was shortened.
+These are agent instructions, not an automatic save hook or a guarantee of lossless memory.
 
 A new task must not overwrite an unrelated active plan. Name a separate task file when needed.
 For a persisted artifact, record its task, date, source revision if available, and whether it is

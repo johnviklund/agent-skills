@@ -1,7 +1,10 @@
 # Learn and log — `workflow learn` / `workflow log`
 
 Capture lessons that a future session could not readily infer from the code or existing docs.
-Use the final verified behavior and later decisions, not a superseded intermediate assumption.
+Save a verified lesson when established, not only at wrap or on an explicit `learn` command.
+If its durable destination is not yet appropriate, keep a short pending-learning note in the
+active plan and resolve it at closeout. Mark unverified observations provisional. Use the final
+verified behavior and later decisions, not a superseded intermediate assumption.
 Put each lesson in its existing home: environment facts in memory, reusable task guidance in a
 skill, product/design decisions in their canonical document. Do not turn one incident into a
 universal requirement or require another skill invocation to write a straightforward entry.
