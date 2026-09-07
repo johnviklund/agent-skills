@@ -74,7 +74,7 @@ capped and rolls off. Never let it grow into a second memory file that confuses 
   session). Shape:
 
   ```markdown
-  ## YYYY-MM-DD · <one-line what> · <harness> · <model>
+  ## YYYY-MM-DD · <one-line what> · <model>
   - <1–4 terse bullets: what shipped / changed>
   - Commits: <sha> <sha> ... (+ <other-repo> <sha> if it spanned repos)
   - Review: <verdict> @ <reviewed sha>   (workflow runs only — omit when no review ran)

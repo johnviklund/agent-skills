@@ -5,7 +5,7 @@ Not a source of truth and not an archive — canonical docs and the (absent, her
 that; entries only point at commits. Cap: keep roughly the 15 most recent entries; delete the
 oldest when appending would exceed that.
 
-## 2026-08-26 · `workflow realign` command specified, planned, executed, reviewed · Copilot CLI · Claude Sonnet 5
+## 2026-08-26 · `workflow realign` command specified, planned, executed, reviewed · Claude Sonnet 5
 - Added `references/realign.md` (new `workflow realign` command: canonical-doc drift check against
   code, per-candidate human-approved rewrite) and wired it into `SKILL.md` (seat table, command
   index) and `ROUTING.md` (model/effort/approval mapping).
