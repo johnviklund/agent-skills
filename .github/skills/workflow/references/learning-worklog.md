@@ -18,5 +18,5 @@ provenance. Approved prose is not automatically a good golden answer. Keep about
 per shape, replacing weaker cases only when recoverable. No case deposit is required for routine
 work. Historical cases do not make historical phase rules mandatory.
 
-Runtime artifacts may identify the writer model when useful; avoid adding harness/provider names
-to attribution. Preserve technical provenance such as commands, versions, dates, and revisions.
+Follow the hub's [model-only attribution](../SKILL.md#model-only-attribution) rule for every saved
+entry. Preserve technical provenance such as commands, versions, dates, and revisions.

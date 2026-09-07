@@ -97,6 +97,16 @@ Keep one executor's context through a coherent change. Use the selected level's 
 capability and independent review; reset or hand off only when it helps that work. No required
 phase-by-phase model swaps or next-step cards.
 
+## Model-only attribution
+
+In saved artifacts, logs, worklogs, review/handoff records, commit messages, and PR descriptions,
+identify the writer or reviewer only by the actual model used. Never add its provider, vendor,
+harness, or coding-agent product. Strip provider branding from model display names: use fields
+such as `Writer: GPT-6 Astra` and `Reviewer: Sonnet 5`. If the model is unknown, say unknown;
+do not infer it from the tool. Apply the same rule to prose and generated metadata. Review
+independence may be recorded generically as independent or self-review, without provider names.
+This governs agent attribution; preserve task-relevant technical facts, commands, and evidence.
+
 ## Completion
 
 Verify behavior against the user's objective, with checks appropriate to the change. Report
