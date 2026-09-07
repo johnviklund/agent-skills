@@ -1,25 +1,10 @@
-# Memory
+# Workflow skill maintenance
 
-Active, bounded memory for this repo. Read at session startup. Not a changelog (see
-`WORKLOG.md`) and not a product/design ledger (see `PRODUCT.md`/`DESIGN.md` if this repo grows
-them) — entries here are environment facts, gotchas, preferences, and open gaps that fit nowhere
-else.
+Before committing, establish which directory is the real Git checkout. Installed skill paths can
+be symlinks or snapshots; an inaccessible parent directory is not proof that the project lacks Git.
+The repository is `johnviklund/agent-skills`, with skill source at `.github/skills/workflow/`.
+Preserve local changes when reconciling against a remote checkout.
 
-### A loaded skill folder can be a disconnected snapshot, not this repo
-- **Topic:** Environment — installed working copy vs. the real clone
-- **Status:** current
-- **Decision:** A CLI can load this skill's content from a path like
-  `~/.agents/skills/workflow` that has **no `.git` at all** — a plugin-install snapshot, not the
-  canonical clone. The canonical, push-able clone lives at
-  `~/Documents/Projects/agent-skills` (see root `README.md`, "How this repo is wired up"). A
-  workflow run that executes entirely inside the disconnected snapshot has no commits, no diffs,
-  and no `Base` shas — every phase that assumes Git must fall back to file-based verification and
-  say so explicitly. Before committing/pushing any workflow-skill change, confirm which copy is
-  actually being edited (`git -C <dir> rev-parse --is-inside-work-tree`); if it's the snapshot,
-  sync the diff into `~/Documents/Projects/agent-skills/.github/skills/workflow/` and commit
-  there, not in the snapshot.
-- **Supersedes:** —
-- **Superseded by:** —
-- **Last confirmed:** 2026-08-26
-- **Source:** `workflow realign` run — drafted in the disconnected snapshot, reconciled into the
-  real clone at wrap+commit time
+The v1 baseline is the `workflow-v1.0.0` tag. V2 replaces the fixed phase chain with optional
+assessment and outcome-based execution. Historical evaluation cases test review judgment; they
+do not require the old workflow mechanics.

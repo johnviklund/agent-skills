@@ -11,11 +11,11 @@ from both Codex CLI and GitHub Copilot CLI.
 - **`memory.compact`** — manual, occasional cleanup of a repo's `MEMORY.md`: groups entries by
   topic, flags stale/duplicate/superseded entries and skill-promotion candidates, and writes
   proposal files for review. Never runs automatically.
-- **`workflow`** — a personal five-phase solo-dev workflow (brainstorm → spec →
-  audit & plan → execute → review → wrap-up) split across Codex CLI and Copilot CLI on purpose
-  (separate token/quota pools). This is the canonical source for that workflow — there is no
-  separate markdown doc to keep in sync; edit this skill directly when the workflow's shape
-  changes.
+- **`workflow`** — task-adaptive execution: `workflow assess` recommends the smallest useful
+  process; `workflow run` continues through authorized implementation and verification. Clear
+  tasks skip phase prerequisites. Existing commands and v1 plans remain usable. The five-phase
+  baseline is preserved in the `workflow-v1.0.0` release; `.github/skills/workflow/` remains the
+  canonical source.
 - **`checkup`** — manual, read-first workspace health check (inspired by a `/checkup` command):
   audits skill hygiene (plugin name collisions, folder-vs-frontmatter name, description length,
   Codex symlink parity, self-publish drift), memory hygiene (MEMORY.md size/staleness/superseded,

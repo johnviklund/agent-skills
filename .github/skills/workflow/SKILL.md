@@ -1,205 +1,120 @@
 ---
 name: workflow
 description: >
-  Trigger ONLY on a message of the form "workflow COMMAND" or "/workflow COMMAND" — a
-  deliberate invocation of this personal five-phase solo-dev coding workflow; never on casual
-  mentions of spec, plan, execute, review, or learn elsewhere in a message. Commands: brainstorm,
-  improve, spec, plan, execute, review, learn, wrap, status, next, log, todo, bootstrap, realign;
-  bare "workflow" = next.
+  Use only when explicitly invoked as workflow COMMAND, /workflow COMMAND, or by
+  selecting the workflow skill. Assess a task and recommend the smallest useful
+  process, or execute it with proportionate planning and verification. Commands:
+  assess, run, brainstorm, improve, spec, plan, execute, review, wrap, status, next,
+  learn, log, todo, bootstrap, realign. Bare workflow means next. Casual mentions
+  of planning, execution, or review do not invoke this skill.
 ---
 
-# Workflow
+# Workflow v2
 
-> ⚠️ **This skill must be invoked, not skimmed.** A message of the form `workflow <command>` / `/workflow <command>` is a deliberate invocation: invoke this skill as the first action, before reading references, running commands, or emitting output. Reading `SKILL.md` or `references/*.md` directly is not a substitute for invoking the skill.
+Get the user's intended outcome working and verified. Choose preparation to resolve real
+uncertainty; do not make an already clear task pass through a fixed chain of phases.
 
-A personal five-phase workflow built on **seats** — jobs with an output contract and effort
-profile, filled by whatever model currently earns them. Two harnesses stay in the loop on
-purpose: separate quota pools buy throughput, and splitting writer from reviewer across vendors
-buys independence — a different family catches blind spots the writer's own siblings share.
+## Entry commands
 
-**This file is the hub, and it is vendor-neutral.** Full instructions per command live in
-`references/` (read the one file for the invoked command, per the *Command index*). Seats map to
-CLIs, models, efforts, and fallbacks in **`ROUTING.md`** — the only file that names vendors, and
-the only one a fork edits.
+- `workflow assess <task or artifact path>` inspects enough context to recommend an approach.
+  It is advisory: no implementation, plan file, commits, or external mutations. Read
+  [assessment](references/assess.md).
+- `workflow run <task or artifact path>` makes the same short assessment, then continues
+  through the authorized work, verification, and outcome report. It does not stop for the user
+  to invoke the recommended command. Read [assessment](references/assess.md), then only the
+  reference needed for the work that follows.
+- `workflow execute [task or plan path]` starts or resumes implementation directly. A separate
+  brainstorm, spec, or plan file is not a prerequisite. Read [execution](references/phase-3-execute.md).
+- `workflow status` reports the intended outcome, verified progress, actual blockers, and next
+  useful action. `workflow next` (also bare `workflow`) recommends that action and a command;
+  both are advisory. Use current conversation and relevant artifacts, not a phase-state table.
 
-## Invocation — deliberate, not ambient
+An explicitly requested command bounds the work: `plan` produces a plan, `review` reviews,
+`assess` recommends. A later instruction to continue or implement authorizes continuing within
+that scope. Do not reinterpret an advisory request as permission to build.
 
-Most CLIs reserve `/` for built-ins (skills trigger via description matching), so there is no
-*true* `/workflow` command. The required form is a message starting with `workflow` or
-`/workflow` plus a command word (see *Command index*). Try `/workflow ...` first; if the CLI
-swallows the slash, drop it — both forms are identical. A **bare** `workflow`/`/workflow` is
-treated as `workflow next`. **Do not** treat unprefixed mentions of "spec", "plan", "execute",
-"review", or "learn" in normal conversation as an invocation.
+## Choose the smallest useful process
 
-## Where are we? (re-grounding) — `workflow status`
-
-Report which phase is next without acting, then wait for an explicit `workflow <phase>`. Check
-`.workflow/` first — the files are the state machine, more trustworthy than memory. Every artifact
-header carries `Status:`, and **`drafting` means resume that phase, never advance past it**; ignore
-standalone `realign.md` here because it is not phase state. Review is read-only, so `review.md` is its *only* evidence — never infer "review done" without it. With
-every artifact `complete`:
-
-| `.workflow/` | Next |
+| Evidence about the task | Approach |
 |---|---|
-| empty | Phase 0 — Brainstorm |
-| `brainstorm.md` | Phase 1 — Spec |
-| `+ spec.md` | Phase 2 — Audit & Plan |
-| `+ plan.md`, checklist incomplete | Phase 3 — Execute |
-| checklist complete; no `review.md`, or its `Base` ≠ HEAD | Phase 4 — Review |
-| `+ patch_plan.md` | mid patch cycle — `references/phase-4-review.md` |
-| `review.md`, verdict clean or all findings dispositioned, `Base` = HEAD | wrap-up |
+| Clear change with a known local verification | Inspect, implement, verify. No planning artifact needed. |
+| Clear outcome involving several dependent changes | Short plan of demonstrable outcomes, then execute the first coherent slice. |
+| Important unknown about behavior, design, integration, or feasibility | Resolve that particular unknown through a focused inspection, experiment, or question; then proceed. |
+| Migration, expensive operation, or consequential release | Add the specific contract, rehearsal, recovery, or approval work its actual risk requires. |
 
-If a given `workflow <phase>` mismatches the file state (e.g. `execute` with no `plan.md`), say
-so and ask before proceeding. Also read `ROUTING.md` (which seat this phase wants, and the mapping
-every card resolves at print time), `AGENTS.md`, `MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if
-product/UI is in scope), repo-root `TODO.md` (intake scratchpad — relevant to Phase 0, Phase 2's
-TODO-impact check, and wrap's TODO hygiene), and `git log --oneline -15` / `git status` as part
-of grounding.
+These approaches can combine. File count alone does not require a spec; a schema edit alone
+does not require a new interview. A failing feature usually needs diagnosis, not brainstorming.
+Stop preparing when the next coherent change and its verification are clear. Reassess only
+when new evidence changes the approach, not before every step.
 
-## Clarify before running a phase (every phase)
+## Grounding and scope
 
-After re-grounding, before the first edit or line of output: **is anything material unclear, or
-is a misunderstanding here expensive?** If yes, ask one round of max 2–3 targeted questions
-(prioritized by which answer changes the outcome most) and wait. If no, act — this gate must not
-turn every phase into an interview. Ask when: **ambiguous target/scope** (matches more than one
-thing, or scope reads two ways); **command/state mismatch** (per *Where are we?*);
-**high-cost-if-wrong work ahead** (schema/SQL/contract, migrations, deletions — restate the
-interpretation in one sentence, "I read this as X — correct?"); **silent assumptions doing heavy
-lifting** (surface the assumption instead of building on it). State what *is* understood, then
-ask — prefer "I'm about to do X, which I read as Y — confirm or correct" over "what do you
-want?". Skip the gate for mechanical, low-risk, clearly-specified work (mechanical-lane edits,
-`status`, `next`, `log`, `todo` — which has its own question step). This complements
-the in-phase rules (Phase 0 dialogue, Phase 3 stop-on-deviation); it doesn't replace them.
+Read applicable `AGENTS.md`, the user's named inputs, and the relevant source or diff. Consult
+memory, product/design documents, roadmap, or TODO entries only where they affect this task.
+Check Git state before edits so existing work is preserved. Do not scan every installed skill
+or expand the task to adjacent TODO items; load a skill when its guidance is actually needed.
 
-## Seats — roles, not vendors
+Use settled decisions and authorization already in the conversation. Ask only when a missing
+answer materially changes the outcome and cannot be established from available evidence.
+Continue independent work while a necessary decision is pending. Resolve routine implementation
+choices and failures yourself. Do not require approval of each local diff.
 
-| Seat | Job | Used by |
-|---|---|---|
-| Brainstorm partner | Knowledge-shaped dialogue, intake; cheap, conversational | Phase 0, `workflow todo`, wrap |
-| Default executor | Specs and everyday logic-bearing implementation; best quality-per-cost | Phase 1, Phase 3 (logic), P1–P3 fixes, wrap |
-| Heavy executor | Schema/SQL/contract-coupled edits, hardest multi-file work; best long-horizon agentic model | Phase 3 (schema/contract), P0 fixes |
-| Mechanical lane | Transforms with an explicit expected result; cheapest/fastest | Phase 3 (mechanical) |
-| Strict reviewer | Deepest reasoning; the workflow's skeptic — read-only except `realign` | Phase 2, Phase 4, patch plans; `realign` (canonical-doc writes, per-candidate human approval) |
+Task authorization does not imply unrelated actions. Honor explicit limits on spend, live data,
+promotion, publication, or deployment. Prepare the concrete change, checks, recovery, and any
+cost cap before requesting missing authority. Do not ask again for authority already granted.
+Surface a delivery dependency such as hosting, credentials, or access early; make progress on
+it within scope while implementation continues.
 
-Which model fills each seat, in which harness, at what effort, with what fallback chain —
-that's `ROUTING.md`. A model earns a seat by winning the eval (`evals.run`), not by novelty.
+## State and continuity
 
-**Portable invariants (hold regardless of the mapping):**
+For work spanning sessions, keep one concise `.workflow/plan.md` (or the user's existing plan):
+objective and scope; next demonstrable outcomes and checks; material decisions; current state
+and blockers; links to evidence. Detail the next slice, with later work coarse. Update at useful
+checkpoints or before handoff. Keep execution history in commits or linked evidence instead of
+appending every command and approval to the plan.
 
-- **Cross-vendor review.** The strict reviewer is a different vendor from whichever model wrote
-  the code; same-vendor review is degraded but handled operationally, never recorded in artifacts.
-- **Two harnesses, no double work.** Never run the same step in both harnesses.
-- **Availability first.** Check the harness's model picker at session start; walk ROUTING.md's
-  fallback chain in order; never retry blindly or silently switch to an auto/default model.
-- **Effort scales with risk, not habit.** Use the lowest level that reliably works; mechanical
-  work lowest, schema/contract and review highest (exact levels in ROUTING.md). Before *raising*
-  effort on a struggling step, first check whether the step is missing a success criterion or
-  verification check — a clearer completion bar usually beats more thinking. When a new model
-  takes a seat, baseline at the incumbent's effort and test one level lower.
-- **Approval scales with blast radius.** Read-only work needs none; mechanical-lane edits
-  auto-approve; logic-bearing and schema/contract edits are reviewed diff by diff (the full
-  phase→approval map is in ROUTING.md alongside the efforts).
-- **Sub-agent/parallel modes are for read-only breadth only.** A harness mode that fans work out
-  to internal sub-agents is allowed only on a read-only seat, only when many files/subsystems can
-  be checked *independently* — breadth, not depth, and its findings still get *verify, don't
-  trust*. Never on anything that writes: parallel writers break one-step-at-a-time and lockstep.
+A new task must not overwrite an unrelated active plan. Name a separate task file when needed.
+For a persisted artifact, record its task, date, source revision if available, and whether it is
+still being drafted or ready for its stated use. Status describes the artifact, not delivery.
+`drafting` forbids blindly treating the whole document as executable; verified, settled work
+can proceed from the user's clear instructions while an unrelated section remains unresolved.
 
-## Context hygiene
+Existing v1 artifacts are inputs, not gates. Resume relevant unfinished work after checking it
+against current code and later user decisions. Preserve meaningful decisions and evidence; do
+not regenerate missing phases, reset completed work, or equate checked steps with deployment.
+Revalidate stale assumptions where they matter rather than rejecting a whole plan on timestamps.
 
-Reset the session at every phase handoff (0→1→2→3→4 and
-into wrap) — re-ground from `.workflow/*.md` + git instead of dragging the previous phase's
-context (or the wrong seat's mindset) forward; the reset is also where the seat's model swap
-happens. Mid-phase, reset is the answer too: every phase writes its artifact incrementally, so a
-reset costs warm cache and nothing else, and unlike compaction it is safe at any fullness. This file and `references/` name only the verb — *reset*, *compact*, *context meter*, *model
-picker*, *explicit invocation*; the literal command per harness is `ROUTING.md`'s **Harness verbs**
-table.
+Stay in the current session and model by default. Reset or hand off only for a concrete context,
+capability, or review need. Read [routing](ROUTING.md) only when a model recommendation or handoff
+is useful. No mandatory model swaps, vendor checks, next-step cards, or subagent fan-out.
 
-## Next recommended step — `workflow next` (or bare `/workflow`)
+## Completion
 
-Every phase ends with this card as the turn's **last user-visible output** — **mandatory, with no
-substitute**: a conversational closer ("Next is workflow execute. Want me to proceed?") is not the
-card, and where a harness ends the turn with a completion/summary tool the card belongs *inside*
-that summary, or it never reaches the human. Row 2 is **resolved from `ROUTING.md` at print time**
-— the concrete model and effort for the next seat plus its first model fallback, with harness and
-provider names omitted. `workflow next` prints the card on demand after re-grounding via *Where
-are we?*. Exact shape:
+Verify behavior against the user's objective, with checks appropriate to the change. Report
+what works, the evidence, and what remains. Distinguish implemented, locally verified, deployed,
+and accessible when relevant. If delivery is blocked, state the actual dependency and next
+action; do not mark the objective complete because preparation is complete.
 
----
-### ▶ Next recommended step
+Commits should group coherent changes, not individual files. Commit, push, open a PR, or publish
+when requested or authorized by the task; a workflow command alone grants none of those beyond
+its described scope. Keep historical evidence and unrelated work intact.
 
-**You are here:** Phase N (\<name>) → **Next:** Phase M (\<name>)
+## Other commands
 
-| # | Step | Setting |
-|---|------|---------|
-| 1 | Reset session? | Yes — reset before the handoff (or *No — continue this session*) |
-| 2 | Model · effort | resolved values, e.g. "<model> · <effort> — fallback: <model> <effort>" |
-| 3 | Ground in | exact files to read first |
-| 4 | Invoke | the `workflow <phase>` command to send |
+These are optional tools, not sequential prerequisites. Read only the applicable reference.
 
-**Harness toggles:** autonomy/speed modes per ROUTING.md notes (default: none) · **Sub-agents:** none — except the read-only breadth exception above
-
-Paste next:
-```text
-<the exact prompt or `workflow <phase>` line to send>
-```
----
-
-Defaults: reset Yes at every handoff, No only for continued same-seat work; autonomy/speed
-toggles No unless ROUTING.md's harness notes sanction them, never on review seats. Row 3 grounds
-in the `.workflow/*.md` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/
-`DESIGN.md` when product/UI is in scope, `git diff`/`git log` for review/wrap.
-
-When the run is finished — plan checked off, review clean or patched, learnings routed, `.workflow/`
-dispositioned — print the ✅ done card instead: one line on what shipped; one line on product-doc truth
-(corrected what, or none); recommended next (`workflow brainstorm <next ROADMAP.md initiative>`
-or `workflow improve ...`; `memory.compact` if `MEMORY.md` has grown; PR if not on `main`).
-
-## Ground rules (every phase)
-
-- **Clarify before you build** (gate above). **Verify, don't trust** — check every interface,
-  signature, column against real code; a generated spec is a hypothesis.
-- **No backward-compat shims** unless asked; contract versions in lockstep producer→validator→consumer.
-- **Handoff files live in `.workflow/`** — run scratch, **tracked in some repos, gitignored in
-  others** (check; it decides if wrap's clean-up is recoverable); commit after each verified step.
-- **Provider-free attribution** — files may record the active model name, but never its harness,
-  provider, vendor, or coding-agent product. Use `Writer: <model>` when authorship is useful;
-  preserve technical provenance such as command, date, commit SHA, inputs, checks, and status.
-- **Provenance header** — every `.workflow/` artifact opens with five lines written at creation:
-  `Command:`, `Created:` (date), `Base:` (git sha), `Inputs:` (`<artifact> @ <its Base sha>` or `none`),
-  `Status:` (`drafting` until the phase writes its closing section, then `complete`). At phase entry
-  check your input's header holds — `Status: complete`, `Inputs` untouched since its `Created` (git
-  log or mtime), `Base` still an ancestor of HEAD — else name the staleness and ask first.
-- **Always close with the next-step card** (or ✅ done card).
-
-## Command index
-
-Read the listed reference before acting. `status` and `next` need only this file (plus
-ROUTING.md for the card's seat mapping).
-
-| Command | Reference |
+| Command | Purpose and reference |
 |---|---|
-| `workflow brainstorm`, `workflow improve` | `references/phase-0-brainstorm.md` |
-| `workflow spec` | `references/phase-1-spec.md` |
-| `workflow plan` | `references/phase-2-plan.md` |
-| `workflow execute` | `references/phase-3-execute.md` |
-| `workflow review` (+ patch cycle) | `references/phase-4-review.md` |
-| `workflow wrap` | `references/wrap.md` |
-| `workflow learn`, `workflow log` | `references/learning-worklog.md` |
-| `workflow todo [idea]` | `references/todo.md` |
-| `workflow bootstrap [PRD.md]` | `references/bootstrap.md` |
-| `workflow realign` | `references/realign.md` |
+| `brainstorm`, `improve` | Resolve unclear direction or inspect an improvement opportunity: [direction](references/phase-0-brainstorm.md) |
+| `spec` | Settle a contract or design that needs a durable explanation: [spec](references/phase-1-spec.md) |
+| `plan` | Produce a short executable plan from the request or existing material: [plan](references/phase-2-plan.md) |
+| `review` | Review the actual change and its behavior: [review](references/phase-4-review.md) |
+| `wrap` | Verify the outcome, update affected docs, and report remaining delivery: [wrap](references/wrap.md) |
+| `learn`, `log` | Capture useful lessons or a concise worklog entry: [learning](references/learning-worklog.md) |
+| `todo` | Record the user's idea without starting implementation: [intake](references/todo.md) |
+| `bootstrap` | Establish only the project guidance needed now: [bootstrap](references/bootstrap.md) |
+| `realign` | Compare product direction with shipped evidence: [realignment](references/realign.md) |
 
-## Keeping this skill alive
-
-When the workflow's shape genuinely changes, edit these files directly — they are the one source
-of truth. **Growth rule:** a new feature or use case = a new/extended reference plus one Command-index
-line; this hub stays under ~205 lines. **Vendor rule:** `ROUTING.md` alone names harnesses, vendors,
-or models; a brand in `SKILL.md` or `references/` is a bug (`README.md` is reader-facing and exempt).
-**Prompt-style rule:** state each rule once, except five path-defending repeats: the ⚠️ head note
-for raw reads; the closing-card imperative at phase tails; the Harness-verbs pointer where a file
-emits a literal command; provenance fields in standalone paste blocks; and provider-free attribution
-in direct artifact-writing instructions. A contradiction or duplicate is worse than a missing
-detail; define the outcome, constraints, and completion bar rather than prescribing every step;
-reserve ALWAYS/NEVER for true invariants. Don't scatter approval prompts — the principle lives
-here and the phase mapping in `ROUTING.md`. Before changing that file, verify model names and effort
-levels against each harness's own picker and official guide; never infer availability across tools.
+Maintain this skill by replacing rules that cause demonstrated friction. Add detail only when
+it changes a decision or protects a concrete invariant; do not accumulate procedures for every
+past failure. Historical evaluation cases remain evidence, not additional workflow instructions.
