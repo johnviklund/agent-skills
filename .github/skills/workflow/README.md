@@ -57,6 +57,13 @@ Extract `.github/skills/workflow/` from that release's source archive to recover
 Existing v1 plans remain usable. Resume from verified work and current decisions; do not recreate
 missing phases. Assessment is optional, and requesting a plan does not authorize implementation.
 
+## Visible progress
+
+Longer tasks use a short checkbox plan with **Now / Next / Blocked** and an updated timestamp at
+the top. The active outcome is marked IN PROGRESS; verified outcomes are checked off with evidence.
+The agent updates these markers as work changes and ties progress messages to the same items.
+Long active outcomes can have a few observable substeps without expanding the entire plan.
+
 ## What to do next
 
 Every workflow response ends with a compact next-action recommendation: what to do, whether to

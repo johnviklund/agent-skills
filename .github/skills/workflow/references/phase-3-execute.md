@@ -19,7 +19,8 @@ changes it; obtain a decision only for a real scope/direction ambiguity or missi
 Keep related contract producers, validators, consumers, and operator instructions consistent.
 Local staged edits do not prove a live deployment or a successful native-runtime rehearsal.
 
-Persist concise progress at useful checkpoints. Continue through all authorized milestones,
+Maintain the hub's Now / Next / Blocked summary and outcome checkboxes as work proceeds.
+Keep progress messages aligned with that tracker. Continue through all authorized milestones,
 without waiting for approval of each file or local diff. Commit coherent verified changes when
 committing is authorized. Review consequential changes using the [review guidance](phase-4-review.md)
 within the run; small reversible edits need only proportionate verification. Finish with the

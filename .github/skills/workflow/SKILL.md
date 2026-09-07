@@ -82,6 +82,20 @@ reasons and superseded choices; current state and blockers; scoped authorization
 links. Save decisions when established and progress at useful checkpoints, not only at wrap.
 Detail the next slice; keep later work coarse and execution history in linked evidence.
 
+Make the plan scannable: put an updated timestamp and **Now / Next / Blocked** at the top.
+Use Markdown checkboxes for meaningful outcomes: `[ ]` pending, `[ ] **IN PROGRESS**` for the
+active work, and `[x]` only when its stated check passes. Name the blocker on a blocked item;
+keep it unchecked. Give each outcome a completion check and a short evidence link when done.
+Split a long active outcome into a few observable substeps when that improves visibility;
+do not expand the whole task into a file-by-file checklist. Track preparation, live execution,
+review, and closeout separately when they have different completion evidence.
+
+Mark an item active before starting it. Refresh progress when it completes, becomes blocked,
+or changes direction, and before yielding or compaction. During longer work, give brief progress
+updates using the same outcome labels so the user can follow the work between checkpoints.
+Update the tracker in place; do not append a transcript or claim activity based on stale notes.
+These updates do not require a commit or user approval at each checkbox.
+
 Before a deliberate compaction, reset, or handoff, save the current operation, uncommitted work,
 last verified result, next action, and any pending learning. Automatic compaction may occur
 without a save opportunity, so capture important state as work happens. After compaction or

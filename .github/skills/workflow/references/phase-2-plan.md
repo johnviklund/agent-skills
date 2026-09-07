@@ -4,9 +4,9 @@ Plan from the task, supplied artifact, and current code; a separate spec is opti
 interfaces and dependencies that can invalidate the approach. Surface a material conflict with
 settled product direction; resolve routine engineering choices directly.
 
-Write a short plan of demonstrable outcomes, not a sequential inventory of files. Usually a few
-coherent milestones suffice; this is guidance, not a quota. For each, state what becomes usable
-and the meaningful check that proves it. Detail the next slice; expand later milestones only
+Write a short checkbox plan of demonstrable outcomes using the hub's progress format. Usually
+a few coherent milestones suffice; this is guidance, not a quota. For each, state what becomes
+usable and the meaningful check that proves it. Detail the next slice; expand later milestones only
 when the next implementation decision needs it. Group producer/consumer changes coherently.
 
 Record objective, scope, material decisions, and any actual delivery blockers alongside the
