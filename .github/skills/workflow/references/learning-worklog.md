@@ -9,6 +9,10 @@ Put each lesson in its existing home: environment facts in memory, reusable task
 skill, product/design decisions in their canonical document. Do not turn one incident into a
 universal requirement or require another skill invocation to write a straightforward entry.
 
+Durable entries must cite durable files or verified commits, never depend on `.workflow/` files.
+If a lesson needs a scratch artifact as evidence, preserve that artifact in its durable location
+before writing the citation. The active plan can hold the pending lesson until that is done.
+
 `workflow log` adds a concise dated entry to `WORKLOG.md`: outcome, reason, and verified commit
 or evidence link. State explicitly if the work is uncommitted or not deployed. Keep roughly 15
 recent entries where older entries are recoverable; avoid duplicating the execution transcript.

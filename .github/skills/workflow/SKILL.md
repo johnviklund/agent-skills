@@ -76,6 +76,12 @@ it within scope while implementation continues.
 
 ## State and continuity
 
+`.workflow/` is temporary run state, not long-term storage. Durable memory, docs, code, and tests
+must not depend on files there. Put operational scripts and evidence needed after the run in the
+repo's appropriate durable locations before linking them from durable records. Active plans may
+reference run scratch. At closeout, preserve needed artifacts outside `.workflow/`, update their
+consumers, verify the moves, then clear the completed run's scratch per [wrap](references/wrap.md).
+
 For work that may span compactions or sessions, keep one concise `.workflow/plan.md` (or the
 user's existing plan): objective and scope; next outcomes and checks; material decisions with
 reasons and superseded choices; current state and blockers; scoped authorization and receipt

@@ -72,6 +72,13 @@ chooses the next action from the actual state, including outstanding review or l
 A completed checkpoint stays distinct from the delivered outcome. Fully completed work ends
 with Done; the recommendation does not force extra phases or interrupt authorized execution.
 
+## Scratch and durable records
+
+`.workflow/` holds temporary state for active work. Durable memory and project files must not
+depend on it. At closeout, the agent saves useful scripts, evidence, and lessons in their proper
+locations outside `.workflow/`, fixes references, verifies them, and clears the completed run's
+scratch. Ongoing work keeps its tracker; cleanup must not break another active task.
+
 ## Files and installation
 
 `SKILL.md` is the entrypoint. References hold optional command-specific guidance. `ROUTING.md`
