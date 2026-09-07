@@ -94,8 +94,8 @@ not regenerate missing phases, reset completed work, or equate checked steps wit
 Revalidate stale assumptions where they matter rather than rejecting a whole plan on timestamps.
 
 Keep one executor's context through a coherent change. Use the selected level's routing for
-capability and independent review; reset or hand off only when it helps that work. No required
-phase-by-phase model swaps or next-step cards.
+capability and independent review; reset or hand off only when it helps that work. Model swaps
+are driven by the task, not a fixed phase sequence.
 
 ## Model-only attribution
 
@@ -117,6 +117,24 @@ action; do not mark the objective complete because preparation is complete.
 Commits should group coherent changes, not individual files. Commit, push, open a PR, or publish
 when requested or authorized by the task; a workflow command alone grants none of those beyond
 its described scope. Keep historical evidence and unrelated work intact.
+
+## Always end with the next action
+
+Whenever a workflow command yields to the user, end with a short **Next** recommendation.
+Choose one action from the actual outcome and outstanding work, including review and learning
+capture when needed. Give the user the exact command or decision to send, not a menu or an
+instruction to inspect the plan. Include:
+
+- **Next:** the concrete action and why it is next; distinguish a finished checkpoint from delivery.
+- **Model/session:** continue the current model/session, or name the recommended model and supported
+  effort plus the reason for a handoff. Use model names only; disclose unknown availability.
+- **Send:** one copyable command/prompt with the task or artifact path and selected workflow level.
+  When blocked on a decision or approval, state that exact decision instead of an executable command.
+
+When the requested outcome is complete, say **Done** and name any remaining closeout action;
+otherwise say no further action is needed. Do not invent another phase or roadmap commitment.
+This closing recommendation is not a stopping gate: `run` and `execute` continue authorized work
+until completion or a real dependency requires the user. Keep the recommendation compact.
 
 ## Other commands
 

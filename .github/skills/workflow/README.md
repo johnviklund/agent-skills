@@ -57,6 +57,14 @@ Extract `.github/skills/workflow/` from that release's source archive to recover
 Existing v1 plans remain usable. Resume from verified work and current decisions; do not recreate
 missing phases. Assessment is optional, and requesting a plan does not authorize implementation.
 
+## What to do next
+
+Every workflow response ends with a compact next-action recommendation: what to do, whether to
+continue with the current model/session, and the exact command or decision to send. The agent
+chooses the next action from the actual state, including outstanding review or learning capture.
+A completed checkpoint stays distinct from the delivered outcome. Fully completed work ends
+with Done; the recommendation does not force extra phases or interrupt authorized execution.
+
 ## Files and installation
 
 `SKILL.md` is the entrypoint. References hold optional command-specific guidance. `ROUTING.md`
