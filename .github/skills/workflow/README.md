@@ -40,6 +40,18 @@ The previous skill, including local changes and historical evaluation cases, is 
 [Workflow v1.0.0 release](https://github.com/johnviklund/agent-skills/releases/tag/workflow-v1.0.0).
 Extract `.github/skills/workflow/` from that release's source archive to recover it.
 
+## What the workflow optimizes
+
+Use each model where it helps, spend less on straightforward work, and learn from verified
+mistakes. Outcome checkpoints reconsider model fit and repeated work without forcing a user
+handoff. High allows more reasoning where needed; it does not pin every later step to the most
+expensive setting.
+
+Closeout turns meaningful failures into improvements to tests, skills, or operating guidance and
+reports what was saved. Active `MEMORY.md` has a size budget: consolidate before adding, keep
+current essentials, and move history to durable references loaded on demand. Use the repo's
+existing budget, or roughly 1,500 words when none is defined. Logs alone do not constitute learning.
+
 ## Commands
 
 | Command | Result |

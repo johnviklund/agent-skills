@@ -8,8 +8,11 @@ that no review happened.
 
 Correct statements in affected docs that the work made stale. Preserve settled principles and
 unrelated work; an unresolved conflict is a product decision, not authority to rewrite direction.
-Update relevant TODO/roadmap entries honestly. Capture a durable learning only when it adds
-non-obvious knowledge; see [learning](learning-worklog.md). No mandatory global documentation sweep.
+Update relevant TODO/roadmap entries honestly. Read and apply [learning](learning-worklog.md):
+review this run's material mistakes, save verified prevention where future tasks will find it,
+and enforce the active-memory budget. Report saved improvements (or no warranted new lesson),
+memory size before/after if changed, and any pending consolidation. Do this before clearing
+scratch so useful evidence is not lost. No unrelated documentation sweep or invented learnings.
 
 Commit or publish only within existing authorization. Group coherent changes, and verify that the
 committed/released result is the one checked. Do not imply that `wrap` authorizes deployment,

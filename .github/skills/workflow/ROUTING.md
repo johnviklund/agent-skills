@@ -12,6 +12,18 @@ availability is unverified. Respect explicit model choices. Avoid broad model re
 settings interview for every task. Low/Medium/High express workflow effort, not provider-specific
 setting names. A higher level buys reasoning and verification, not extra phases or longer prose.
 
+Reconsider model fit when the kind of work changes, for example from a consequential policy
+choice to a bounded mechanical implementation. Recommend the model suited to that work using
+observed results when available. High permits extra reasoning; it does not require using the
+most expensive model/effort throughout. Recommend a cheaper setting when sufficient, respecting
+explicit model choices and accounting for the context cost of a handoff. Prefer one bounded
+second-model contribution over having several models repeat the same investigation.
+
+Escalate only for a concrete unresolved difficulty. If attempts repeat without new evidence,
+change the diagnostic approach or recommend a better-suited model instead of looping. Report
+actual usage/cost when available; never invent estimates or promise an exact token cap. Keep
+relevant check results so unchanged work does not trigger repeated full-suite or full-review runs.
+
 Keep the main executor responsible for implementation and fixes. Give the reviewer the objective,
 constraints, code/diff, and check results so it can form its own judgment. Review where an error
 would be expensive to carry forward; do not have both models repeat all the work. Resolve findings

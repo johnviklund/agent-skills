@@ -11,8 +11,11 @@ description: >
 
 # Workflow v2
 
-Get the user's intended outcome working and verified. Choose preparation to resolve real
-uncertainty; do not make an already clear task pass through a fixed chain of phases.
+Get the user's intended outcome working and verified while using models where they help,
+controlling unnecessary token use, and turning verified mistakes into reusable improvements.
+Choose preparation to resolve real uncertainty; do not make a clear task pass through fixed phases.
+At meaningful outcome boundaries, check model fit, unnecessary repeated work, and pending lessons.
+These are working checkpoints, not mandatory user interruptions.
 
 ## Entry commands
 

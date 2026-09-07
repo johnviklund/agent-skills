@@ -9,6 +9,33 @@ Put each lesson in its existing home: environment facts in memory, reusable task
 skill, product/design decisions in their canonical document. Do not turn one incident into a
 universal requirement or require another skill invocation to write a straightforward entry.
 
+## Make each run improve future work
+
+At closeout, inspect material failures, reviewer findings, and expensive detours from this run.
+For each verified lesson, identify the cause and what would prevent recurrence, then update the
+smallest appropriate existing test, skill, operating rule, or reference. A log entry alone is not
+prevention. Add a regression test when it meaningfully exercises a recurring failure; avoid tests
+that merely repeat implementation wording. Keep provisional theories out of standing rules.
+Verify that any destination cited actually contains the lesson and can be found by a future task.
+Report what changed and where, or explicitly say no new durable lesson was warranted. Do not
+manufacture a lesson, skill, or evaluation case to satisfy a quota.
+
+## Keep active memory bounded
+
+`MEMORY.md` is a small active working set, not an append-only history. Before writing and at
+closeout, measure it against the repo's existing size budget; when none exists, use roughly
+1,500 words as a default target. Consolidate before adding: replace superseded current state,
+merge duplicates, and move historical detail to `MEMORY_ARCHIVE.md` or the repo's durable
+solution notes, searched only when relevant. Route product/design doctrine and reusable how-to
+knowledge to their proper owners instead of copying it into active memory.
+
+Keep current safety boundaries and unresolved blockers visible. Before replacing text with a
+short pointer, verify the destination contains the actual information. Preserve provenance and
+recoverability; never truncate mechanically to hit the budget. If useful active content still
+cannot fit, report the specific unresolved consolidation and recommend the available memory
+cleanup command. Do not silently append beyond the budget or claim memory maintenance complete.
+Record size before/after when memory changed; do not load the entire archive at startup.
+
 Durable entries must cite durable files or verified commits, never depend on `.workflow/` files.
 If a lesson needs a scratch artifact as evidence, preserve that artifact in its durable location
 before writing the citation. The active plan can hold the pending lesson until that is done.
