@@ -33,6 +33,15 @@ An explicitly requested command bounds the work: `plan` produces a plan, `review
 `assess` recommends. A later instruction to continue or implement authorizes continuing within
 that scope. Do not reinterpret an advisory request as permission to build.
 
+## Effort: Low, Medium, High
+
+Work commands accept an optional level after the command, for example `workflow run Low <idea>`
+or `workflow assess High ROADMAP.md — <item>`. Use **Medium** when omitted; retain an explicit
+level through the task until the user changes it. Read [routing](ROUTING.md) to apply the level.
+The level controls model effort and useful independent review, not plan length or scope. It is
+not an exact token cap or a literal provider reasoning setting. Keep checks necessary for
+correctness at every level. Assessment recommends; it never switches models or starts a review.
+
 ## Choose the smallest useful process
 
 | Evidence about the task | Approach |
@@ -84,9 +93,9 @@ against current code and later user decisions. Preserve meaningful decisions and
 not regenerate missing phases, reset completed work, or equate checked steps with deployment.
 Revalidate stale assumptions where they matter rather than rejecting a whole plan on timestamps.
 
-Stay in the current session and model by default. Reset or hand off only for a concrete context,
-capability, or review need. Read [routing](ROUTING.md) only when a model recommendation or handoff
-is useful. No mandatory model swaps, vendor checks, next-step cards, or subagent fan-out.
+Keep one executor's context through a coherent change. Use the selected level's routing for
+capability and independent review; reset or hand off only when it helps that work. No required
+phase-by-phase model swaps or next-step cards.
 
 ## Completion
 

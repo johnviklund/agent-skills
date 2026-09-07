@@ -7,13 +7,25 @@ Examples:
 
 ```text
 workflow assess Add a saved filter to the existing dashboard
-workflow run Fix the empty search state and verify it in the browser
+workflow run Low Fix the empty search label
+workflow run High Implement the agreed ROADMAP.md item
 workflow execute .workflow/plan.md
 ```
 
 A clear task goes straight to implementation and verification. A larger task gets a short plan
 around usable outcomes. A consequential unknown gets the specific investigation, decision, or
 rehearsal needed to resolve it. These are judgments, not separate mandatory tracks.
+
+## One effort choice
+
+Use **Low**, **Medium** (default), or **High** after a work command. Ideas, roadmap items, and
+existing plans are all valid inputs. Low favors economical execution; Medium adds a second-model
+review for substantial changes; High uses deeper reasoning and focused independent review.
+Prefer another provider for that review. All levels keep the plan short and verify correctness.
+
+The skill recommends concrete model settings when available. It does not silently change your
+model, equate these levels with provider settings, or guarantee an exact token budget. Model
+review is focused on consequential decisions and changes, not repeated at every phase.
 
 ## What changed from v1
 
@@ -48,7 +60,7 @@ missing phases. Assessment is optional, and requesting a plan does not authorize
 ## Files and installation
 
 `SKILL.md` is the entrypoint. References hold optional command-specific guidance. `ROUTING.md`
-contains model-selection principles and is read only when a recommendation or handoff is useful.
+defines the three effort levels and how to use a second model.
 Historical `evals/` cases remain available for review evaluation.
 
 Install the workflow folder through your existing skill installer or your agent's supported skill

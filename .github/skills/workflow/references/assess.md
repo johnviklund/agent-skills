@@ -10,9 +10,14 @@ scoring framework, full skill inventory, or preliminary specification.
 
 Recommend one approach in a brief paragraph or a few bullets, normally under 200 words:
 - the intended outcome;
-- the recommended approach and the concrete reason;
+- the recommended approach, effort level, and model/effort when known, with one concrete reason;
+- whether a second model should review a consequential decision or change, only when useful;
 - the next useful change and how to verify it;
 - a material decision or delivery dependency, only if one exists.
+
+Apply the selected level from [routing](../ROUTING.md). If another level would suit the task
+better, recommend it with a reason; preserve an explicit user choice. Do not add a provider
+selection round or perform the recommended review during advisory assessment.
 
 For a complex task, identify the first useful end-to-end slice and the risky assumption to test.
 Do not generate a file-by-file backlog for later milestones. Keep the full requested objective

@@ -19,6 +19,7 @@ authorized implementation run, fix in-scope findings and recheck the affected be
 A separate patch plan is useful only if the fixes themselves need coordination. Do not loop on
 unchanged findings or repeat a whole review merely because supporting prose changed.
 
-Use independent review when required by the user/repo or valuable for the risk, within available
-delegation authority. Be honest about review coverage and independence; never pretend a model
-switch or independent review occurred. Availability alone must not force repeated handoffs.
+Apply the selected level's [model routing](../ROUTING.md) for independent review. Be honest
+about coverage and independence; never pretend a model switch or independent review occurred.
+A reviewer checks the stated objective against evidence; agreement between models alone does
+not prove correctness.
