@@ -16,38 +16,30 @@ any time something worth keeping gets solved — don't wait for wrap-up:
 - [durable→memory] <the fix, gotcha, or decision>
 - [durable→skill] <the transferable principle, stripped of concrete schema/names/logic>
 - [durable→design] <the UI pattern/convention/token decision>
-- [durable→eval] <shape> — <what the golden case proves> (artifacts: <which .workflow files / diff / output>)
+- [durable→eval] code-review — <the P0/P1 that was missed, and by whom> (artifacts: the diff + the finding)
 - [drop] <one-off noise>
 ```
 
-### `[durable→eval]` — every run should exam future models
+### `[durable→eval]` — a small reviewer exam, and nothing else
 
-Evals are a side effect of shipping, never separate work: each run's approved artifacts become
-golden test cases that future models must pass before earning a seat in the routing tables. Cases
-are filed under the **seat** they exam — the same seat names `ROUTING.md` maps — while the *shape*
-of the case lives in the filename, so one seat can hold more than one kind of exam:
+Models earn seats on **trial runs**, not exams (protocol in `ROUTING.md`): a candidate takes a
+seat for a real run, and the worklog's `Run:`/`Seats:` lines are the evidence. The one exception
+is the strict reviewer, because a reviewer miss is expensive and a diff with known findings is a
+cheap, honest exam. So the only case shape is `code-review`, filed under `evals/strict-reviewer/`:
 
-| Case shape | Seat directory | Input → approved output |
+| Case shape | Seat directory | Input → what a pass must name |
 |---|---|---|
-| `spec` | `default-executor` | this run's `brainstorm.md` → the *approved* `spec.md` |
-| `plan-audit` | `strict-reviewer` | the approved `spec.md` → the *approved* `plan.md` |
-| `code-review` | `strict-reviewer` | a diff containing a *confirmed* P0/P1 → the finding that caught it |
-| `mechanical-transform` | `mechanical-lane` | a transform prompt with known-correct output |
+| `code-review` | `strict-reviewer` | a self-contained diff → the confirmed P0/P1 findings in it, one line each |
 
-Tag the line with the **shape**; wrap resolves the seat directory from this table. `code-review`
-cases are the most valuable — a candidate reviewer must catch everything the incumbent caught.
-`brainstorm-partner` and `heavy-executor` are real seats with no admitted case shape yet; leave
-those directories absent rather than inventing a shape to fill them.
+**Admission test:** a case is deposited only when a P0/P1 was *missed by the writer and caught by
+the reviewer*, or *missed by the reviewer and caught later* (the most discriminating kind — file it
+when the miss surfaces, even in a later run). Routine findings teach nothing. **Cap: 8 cases,
+rolling** — when full, a new case displaces the weakest, never appends past the cap; a set under
+the cap is fine, an empty one is fine. There are no spec, plan, or mechanical sets: an approved
+plan or spec is not a reusable exam, and those seats prove themselves on trial runs.
 
-**Admission test — deposit only discriminating cases:** a case earns a slot only if it would
-plausibly separate models (the approved output required real judgment, or a model actually got
-it wrong first). Routine cases teach nothing. **Cap: ~15 cases per case shape, rolling** — per
-shape, not per directory, so `strict-reviewer` holds up to ~15 `plan-audit` cases *and* ~15
-`code-review` cases. When full, a new case displaces the weakest *of its own shape*, never one of
-another shape and never a plain append: ranking a plan audit against a code review is meaningless
-because they exam different capabilities, and a shared pool would let one shape crowd the other
-out of the exam entirely. Wrap performs the deposit (see
-`references/wrap.md`); tag the line any time during the run, at latest before wrap.
+Tag the line `[durable→eval] code-review — <what was missed, by whom>` any time during the run;
+wrap performs the deposit (see `references/wrap.md`).
 
 Then invoke `memory.remember` (a sibling skill in this same repo, available from both CLIs) to
 actually route each line — any time, not only at wrap-up. It reads `MEMORY.md`/`AGENTS.md`/
@@ -74,15 +66,22 @@ capped and rolls off. Never let it grow into a second memory file that confuses 
   session). Shape:
 
   ```markdown
-  ## YYYY-MM-DD · <one-line what> · <model>
+  ## YYYY-MM-DD · <one-line what> · <vendor> · <model>
   - <1–4 terse bullets: what shipped / changed>
   - Commits: <sha> <sha> ... (+ <other-repo> <sha> if it spanned repos)
   - Review: <verdict> @ <reviewed sha>   (workflow runs only — omit when no review ran)
+  - Run: <steps> steps · <cycles> review cycles · <deviations> deviations · <overturned> findings overturned   (workflow runs only)
+  - Seats: 0 <vendor·model> · 2 <vendor·model> · 3 <vendor·model> · 4 <vendor·model>   (workflow runs only; add 1 when spec ran)
   - Why: <one line>
   ```
 
   For a completed `workflow realign` evidence review that accepted no redline, the entry may use
   `Commits: none — docs confirmed current`; omit `Review:` because this is not a standard workflow run.
+
+  The `Run:` and `Seats:` lines are how models are evaluated: read the numbers from `plan.md`
+  (checklist length, `## Deviations`, `Writer:` lines) and `review.md` (`## Cycle N` count,
+  dispositions marked wrong-by-human) at wrap, so `checkup` can compare a candidate's runs on a
+  seat against the incumbent's without re-reading artifacts that wrap deletes.
 
   The `Review:` field exists because `.workflow/review.md` is deleted at wrap and is not reliably
   in git, so this line is the only surviving trace that the verdict was reached and against which commit.

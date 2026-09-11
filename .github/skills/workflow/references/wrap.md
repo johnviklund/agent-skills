@@ -2,7 +2,7 @@
 
 > ⚠️ **Invoke the `workflow` skill before acting on this file** — reading it raw is how the closing next-step card gets dropped.
 
-Seat: wrap runs on a mid-tier seat at medium effort, auto-approve, in either harness — mapping
+Seat: wrap runs on a mid-tier seat at medium effort, auto-approve — mapping
 and the practical after-review model swap in `ROUTING.md`. Rationale: wrap is procedural — the
 only judgment calls are commit messages that read as worklog lines and `memory.remember`'s
 routing decisions, which rules out the mechanical lane but doesn't justify a heavy or reviewer
@@ -69,16 +69,13 @@ Commit, push, curate, and clean up — in one go:
    Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
    only add items the human explicitly deferred during this run, in the right section); and the
    TODO entry points at the product docs step 5 just corrected, it never duplicates them.
-7. **Eval deposit** — for every `[durable→eval]` line in `.workflow/learnings.md`, resolve its
-   shape to a seat via the case-shape table in `references/learning-worklog.md`, then write a
-   golden case to `evals/<seat>/<shape>-<YYYY-MM-DD>-<slug>.md` in the repo. Each case must be
-   self-contained, because the source artifacts are run scratch about to be cleared in step 9 — **copy content in, don't point at
-   `.workflow/` paths**: the input (e.g. the brainstorm text, the spec, the diff), the approved
-   output, grading notes (what a passing answer must contain, known traps), and provenance
-   (date, commit shas, and which model produced and approved it; never a harness, provider,
-   vendor, or coding-agent product name). Enforce the admission test
-   and the ~15-per-shape rolling cap from `references/learning-worklog.md` — displace the
-   weakest case of the same shape when full, never append past the cap. Commit with the rest.
+7. **Eval deposit** — usually nothing. For each `[durable→eval] code-review` line in
+   `.workflow/learnings.md` that passes the admission test in `references/learning-worklog.md`
+   (a P0/P1 missed by the writer or by the reviewer), write one self-contained case to
+   `evals/strict-reviewer/code-review-<YYYY-MM-DD>-<slug>.md` — the diff copied in (never a
+   `.workflow/` path), the P0/P1 findings a pass must name (one line each), and provenance (date,
+   sha, which model missed it). **Cap 8, rolling:** if the set is full, replace the weakest case
+   or skip — never append past the cap. Commit with the rest.
 8. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,
    git-pointing entry, rolling the oldest off if over ~15; commit and push it with the rest.
 9. **Clear the run — by inventory, not by list.** Once `memory.remember` confirms every line is
@@ -128,4 +125,12 @@ because it is the only destructive step: everything worth keeping is already in 
 or routed by `memory.remember` before a single file is touched. Never delete `learnings.md`
 before `memory.remember` has actually routed every line — it
 enforces this itself, but don't race ahead of it. Open a PR only if not committing straight to
-`main`. When wrap-up is done, close with the ✅ done card from `SKILL.md`, not a next-phase card.
+`main`.
+
+**Wrap's chat receipt is fixed, one line per step:** final checks (pass / known-environmental);
+shortcut grep (clean / what was found); commits + push (shas); learnings routed (count → where);
+product-doc truth (per doc: no changes, or the edit — one line each, ESCALATE items as a lettered
+decision list); TODO hygiene (items archived/rewritten, or none); eval cases deposited (count);
+worklog entry (yes); `.workflow/` cleared (deleted / archived / left — counts). Anything that needs
+a decision is a lettered item with a recommended default. Then the ✅ done card from `SKILL.md`,
+not a next-phase card.

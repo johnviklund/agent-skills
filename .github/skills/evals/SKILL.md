@@ -1,90 +1,53 @@
 ---
 name: evals
 description: >
-  Runs model exams against the eval golden sets deposited by the workflow skill: "evals.run
-  <seat> [candidate model]" exams a candidate on one seat's cases (seats: spec, plan, reviewer,
-  mechanical), grades with the incumbent strict reviewer plus a human spot check, scores quality
-  AND cost/latency, and writes a one-page scorecard to evals/scorecards/. "evals.list" shows set
-  and scorecard status. Trigger only on explicit "evals.run ...", "/evals.run ...", or
-  "evals.list" invocations -- never on casual mentions of evals or testing. Routing changes are
-  propose-only: this skill recommends fallback-order edits to the workflow skill's tables but
-  never applies them. Expensive by design; always confirms case count and cost appetite before
-  running.
+  A recall check for strict-reviewer candidates, run only before swapping that seat: "evals.run
+  reviewer [vendor model effort]" shows the candidate each diff in evals/strict-reviewer/ (at
+  most 8) and records which planted P0/P1 findings it named; "evals.list" shows the set's
+  status. No other seat is examined — models earn every other seat on trial runs recorded in
+  WORKLOG.md. Trigger only on explicit "evals.run ..." or "evals.list" invocations, never on
+  casual mentions of evals or testing. Never edits the workflow skill or product code.
 ---
 
 # evals
 
-Exams candidate models against the golden sets that `workflow` deposits at wrap
-(`evals/<seat>/`). The triad: **workflow deposits → checkup detects → evals.run exams.** A model
-earns a seat in the `workflow` routing tables only by winning here — no seat without a job, no
-job without a score.
+One exam, one seat. `workflow` deposits a case at wrap only when a reviewer or writer *missed* a
+P0/P1 (`evals/strict-reviewer/code-review-*.md`, cap 8). Every other seat — brainstorm, spec,
+execution lanes — is judged on trial runs: the worklog's `Run:`/`Seats:` lines, compared by
+`checkup`. This skill exists because a reviewer miss is the expensive kind, and a diff with known
+findings is a cheap, honest exam of exactly that.
 
-Run when a new model releases, when checkup flags an unexamined model, or quarterly. Never
-mid-workflow-run, and never on someone else's initiative — the human invokes it.
+Run it before giving a new model the strict-reviewer seat, and not otherwise. The human invokes it.
 
 ## Commands
 
-- `evals.run <seat> [<harness> <model> <effort>]` — exam one seat. If the candidate isn't given,
-  ask. Seats: `spec`, `plan`, `reviewer`, `mechanical`.
-- `evals.list` — read-only: cases per seat, malformed/stale cases, existing scorecards, and which
-  routing-table models have no scorecard. (Overlaps `checkup evals` on purpose — this is the
-  quick pre-run view.)
+- `evals.run reviewer [<vendor> <model> <effort>]` — ask for the candidate if not given.
+- `evals.list` — read-only: cases present (≤8), any that are not self-contained, last exam result.
 
-## Procedure — `evals.run`
+## Procedure — `evals.run reviewer`
 
-**1. Preflight (before any model call).** Load `evals/<seat>/*.md`; verify each case is
-self-contained (input + approved output + grading notes + provenance — skip and flag any that
-aren't; don't fail the run on one bad case). State the bill upfront: N cases × (1 candidate call
-+ 1 grading call) plus the candidate's effort level, and **confirm cost appetite with the human
-before proceeding**. Confirm the candidate is actually available in its harness (`/model`).
+**1. Preflight.** Load `evals/strict-reviewer/*.md`; a case must carry the diff itself and the
+P0/P1 lines a pass must name — skip and flag any that don't, never fail the run on one. State the
+bill: N cases × one candidate call at the reviewer's review effort, no grader model. Confirm with
+the human. Fewer than 3 usable cases: say the exam is not meaningful and stop.
 
-**2. Run the candidate — one case at a time, fresh context each.** For every case, present the
-case *input* to the candidate in a fresh session/context with the same working conditions the
-seat gets from the `workflow` skill (the seat's phase instructions, same effort, read access to
-the repo state the case assumes — but never the approved output). Capture the candidate's full
-output verbatim, plus tokens/latency where the harness reports them. No retries beyond one
-mechanical failure (timeout/refusal) per case; a second failure scores the case as failed.
+**2. Run the candidate — one case, fresh context each.** Give the candidate the diff with the
+Phase 4 review instructions from the `workflow` skill, at the seat's review effort, and never the
+findings. Capture its findings list verbatim, plus tokens/latency where the CLI reports them. One
+retry on a mechanical failure; a second failure scores the case as missed.
 
-**3. Grade with the incumbent strict reviewer.** The grader is the current Phase 4 reviewer
-seat from the `workflow` routing tables — and **cross-vendor where possible**: if the candidate
-is from the grader's own family, prefer a different-vendor grader of comparable strength and
-note the substitution on the scorecard. Per case, the grader compares candidate output against
-the approved output using the case's grading notes and returns pass / partial / fail with a
-one-line reason. Reviewer-seat cases are strict: the candidate must catch **every** finding the
-case plants; a missed P0 is an automatic fail regardless of what else it caught.
+**3. Score by recall — no grader model.** Per case, per planted P0/P1: named or not. Present the
+table (case → planted finding → candidate's matching line, or "—") to the human; matching a
+finding is a two-minute human read, and the human's mark is final. Total = planted findings named
+÷ planted findings. Report cost and latency per case beside it.
 
-**4. Human spot check.** Present all failures plus a ~20% sample of passes for the human to
-confirm or overturn. Grader verdicts are hypotheses, not truth.
-
-**5. Score quality AND cost/latency.** Totals per seat: pass rate (weighted — reviewer P0
-catches matter more than style notes), cost per case, latency per case. A candidate that ties
-on quality but halves the cost is a win; say so explicitly.
-
-**6. Scorecard — one page, always.** Write `evals/scorecards/<YYYY-MM-DD>-<seat>-<model>.md`:
-candidate (harness/model/effort), grader used, per-case table (case → verdict → reason), totals,
-cost/latency, spot-check overturns, and a **recommendation**: promote to the seat, keep as
-fallback, or reject — with the one paragraph of reasoning a future reader needs. Commit it.
-
-**7. Routing is propose-only.** If the recommendation is promote/demote, print the exact edit to
-the `workflow` skill's routing/effort tables (which rows, old → new) — and stop. The human
-applies it. This skill never edits the `workflow` skill, and never touches product code at all.
+**4. Record.** Append one block to `evals/strict-reviewer/RESULTS.md` (create if absent): date,
+candidate (vendor · model · effort), recall N/M, per-case misses, cost/latency, one-line verdict.
+Commit it. No scorecard directory, no routing proposal — the human edits `ROUTING.md` if the number
+convinces them, and only a 100% recall on a set of ≥3 cases should.
 
 ## Ground rules
 
-- **Writes only `evals/scorecards/`** (and flags, in its report, bad cases for the human to fix).
-  Never edits cases, never edits the workflow skill, never edits code.
-- **Bounded.** One seat per invocation; if the human asks for "all seats", run them as separate
-  sequential exams with a cost confirmation each.
-- **Honest failure.** If a set is too small or too weak to discriminate (< ~5 usable cases, or
-  every case trivially passed by everything), say the exam is not meaningful yet and recommend
-  depositing better cases via the workflow's `[durable→eval]` tag instead of publishing a
-  hollow scorecard.
-- **Provenance discipline.** The scorecard names exact model IDs and effort levels, not
-  families — "Sonnet 5 xhigh via Copilot CLI", not "Claude".
-
-## Relationship to the other skills
-
-- `workflow` — deposits golden cases at wrap (`[durable→eval]` → `evals/<seat>/`); owns the
-  routing tables this skill's recommendations target.
-- `checkup` — audits set health and flags unexamined models (`checkup evals`); this skill is
-  what it delegates the actual exam to.
+- **Writes only `evals/strict-reviewer/RESULTS.md`.** Never edits cases, the workflow skill, or code.
+- **Bounded.** ≤8 cases, one seat, one candidate per invocation.
+- **Provenance.** Exact model and effort, never a family name.

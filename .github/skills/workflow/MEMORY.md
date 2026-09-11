@@ -5,10 +5,10 @@ Active, bounded memory for this repo. Read at session startup. Not a changelog (
 them) — entries here are environment facts, gotchas, preferences, and open gaps that fit nowhere
 else.
 
-### A loaded skill folder can be a disconnected snapshot, not this repo
-- **Topic:** Environment — installed working copy vs. the real clone
+### A Copilot-loaded skill folder can be a disconnected snapshot, not this repo
+- **Topic:** Environment — Copilot plugin working copy vs. the real clone
 - **Status:** current
-- **Decision:** A CLI can load this skill's content from a path like
+- **Decision:** Copilot CLI can load this skill's content from a path like
   `~/.agents/skills/workflow` that has **no `.git` at all** — a plugin-install snapshot, not the
   canonical clone. The canonical, push-able clone lives at
   `~/Documents/Projects/agent-skills` (see root `README.md`, "How this repo is wired up"). A

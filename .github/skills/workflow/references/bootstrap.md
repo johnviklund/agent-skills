@@ -28,7 +28,7 @@ questions can wait; identity questions cannot.
 |---|---|---|
 | `PRODUCT.md` | **The north star**: current state + desired end state, product purpose, users, core objects, workflows, principles, vocabulary, anti-goals | Synthesized from the PRD — the PRD's durable truth lands here |
 | `DESIGN.md` | The UI/design system | Synthesized if the PRD implies a UI; otherwise a two-line stub ("no UI yet; create on first UI work") |
-| `AGENTS.md` | Operating rules for coding agents: the doc-layer model (this table), write scopes, command contracts | Written fresh; includes this ownership table |
+| `AGENTS.md` | Operating rules for coding agents: the doc-layer model (this table), write scopes, command contracts, and a **Verifying your work** block | Written fresh; includes this ownership table and the verification block below |
 | `ROADMAP.md` | **The sequence**: phased initiatives to implement the PRD, each sized to be one future workflow run (brainstorm→wrap) | Derived from the PRD's scope; items point at `PRODUCT.md`, never restate it |
 | `MEMORY.md` | Cross-session environment facts, gotchas, open gaps — the layer of last resort | **Created empty** except a header explaining the entry schema and what does/doesn't belong |
 | `TODO.md` | Intake scratchpad for ideas between runs — never a roadmap | **Created empty** except its header rule ("don't implement just because it's listed") and section skeleton |
@@ -40,6 +40,14 @@ roadmap item is a pointer to a future workflow run, not a second product descrip
 same sentence appears in two docs, one of them is wrong. Unresolved decisions get one home each:
 product decisions (scope, direction, boundaries, stack) live in `PRODUCT.md`'s open-decisions
 list, every other unknown in `TODO.md`'s Open Questions.
+
+**3a. The verification block.** `AGENTS.md` carries a `## Verifying your work` section that every
+phase's checks are anchored to: one command each for build, test and lint (wrap a multi-step
+sequence in a single target that exits non-zero on failure), each with one line of what healthy
+output looks like, the rule "run these before reporting any step done and paste the result", and
+the rule "a failing test is fixed in the code, never by editing or deleting the test". If the
+repo has no such commands yet, write the block with the targets as TODOs — Phase 3's baseline
+step will refuse to run without them, which is the point.
 
 **4. Retire the PRD.** The PRD is frozen input, not a living doc — once `PRODUCT.md` exists,
 maintaining both guarantees drift. Move it to `docs/archive/PRD-<date>.md` (or delete it if the

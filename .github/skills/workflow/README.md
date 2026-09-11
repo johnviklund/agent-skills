@@ -1,27 +1,33 @@
 # workflow — a five-phase coding workflow skill for CLI coding agents
 
 A vendor-neutral [agent skill](https://code.claude.com/docs/en/skills) that runs a disciplined
-solo-dev loop across whatever CLI coding agents you use: **brainstorm → spec → audit & plan →
-execute → review → wrap**. Models fill **seats** (roles with an output contract); you map seats
+solo-dev loop across whatever CLI coding agents you use: **brainstorm → (spec) → audit & plan →
+execute → review → wrap** — spec is optional, run only when the brainstorm flags high uncertainty. Models fill **seats** (roles with an output contract); you map seats
 to your own CLIs and models in one file. Born as a personal two-CLI workflow; open-sourced
 because the shape turned out to be portable.
 
 ## Why it exists
 
-- **Seats, not vendors.** The workflow speaks in roles — brainstorm partner, default executor,
-  heavy executor, mechanical lane, strict reviewer. `ROUTING.md` maps those to your actual
-  tools. Swapping models is a one-file edit; the workflow never changes.
+- **Seats, not vendors — and never CLIs.** The workflow speaks in roles — brainstorm partner,
+  default executor, heavy executor, mechanical lane, strict reviewer. `ROUTING.md` maps those to
+  vendors and models; which CLI serves a model is your environment's business, not the skill's.
+  One CLI that serves both vendors, or one CLI per vendor — same mapping either way. Swapping
+  models is a one-file edit; the workflow never changes.
 - **Cross-vendor review.** The strict reviewer should be a different vendor from whichever model
-  wrote the code. Runs persist model names only; routing resolves independence without copying
-  harness or provider names into artifacts.
+  wrote the code. Each run records its writer, so the reviewer detects a same-vendor pairing and
+  declares degraded mode itself instead of relying on being told.
 - **Files are the state machine.** Every phase reads and writes `.workflow/*.md`, so any fresh
   session re-grounds from disk instead of trusting its own memory. Every phase persists *as it
   goes* — findings as they're confirmed, plan steps as they settle, execution state after every
   step — so running out of context costs warm cache and nothing else.
 - **Learning compounds.** Each run routes durable lessons to memory/skills/design docs, keeps a
-  bounded worklog, and deposits **golden eval cases** — approved specs, plans, and
-  caught-bug/finding pairs — so future models must pass an exam built from your real work
-  before earning a seat.
+  bounded worklog whose `Run:`/`Seats:` lines are the evidence a model is judged on — models
+  earn seats on real trial runs, not synthetic exams — and, rarely, deposits a **reviewer exam
+  case**: a diff whose P0/P1 a model missed, capped at 8.
+- **Chat is the receipt, files are the record.** Every phase's turn is bounded (~12 lines above
+  the next-step card); artifacts have line budgets and the plan is capped at 12 steps; every
+  question is one decision with lettered options and a recommended default. Detail lives in
+  `.workflow/`, not in the conversation.
 - **Gates where mistakes are expensive.** Clarifying questions before ambiguous or risky work,
   diff-by-diff approval on schema/contract edits, review with P0–P3 verdicts, patch loops bounded
   at three cycles, and a wrap that refuses to ship code the review never saw.
@@ -31,14 +37,24 @@ because the shape turned out to be portable.
 | File | Role | You edit it? |
 |---|---|---|
 | `SKILL.md` | The hub: invocation, state machine, seats & invariants, per-command index | No |
-| `ROUTING.md` | **Your mapping**: seat → (harness · model · effort), fallbacks, harness verbs | **Yes — this is the whole setup** |
+| `ROUTING.md` | **Your mapping**: seat → (vendor · model · effort), fallbacks, mode notes | **Yes — this is the whole setup** |
 | `references/*.md` | Full instructions per command, loaded one-per-invocation | No |
 
-`SKILL.md` and `references/` contain no vendor names by design; a brand name in either is a bug.
-They name only generic verbs — *reset*, *compact*, *context meter*, *model picker*, *explicit
-invocation* — and `ROUTING.md`'s **Harness verbs** table holds the literal command per tool. This
-README is reader-facing and names tools freely. The shipped `ROUTING.md` is the author's real
-mapping (Codex CLI + Copilot CLI) plus an example Claude Code pairing for forks.
+`SKILL.md` and `references/` contain no vendor names by design, and no file in the skill names a
+CLI product; a brand name in the wrong place is a bug. The skill names only generic verbs —
+*reset*, *compact*, *context meter*, *model picker*, *explicit invocation* — and the cheat sheet
+below holds the literal command per CLI. This README is reader-facing and names tools freely. The
+shipped `ROUTING.md` is the author's real mapping (OpenAI writes, Anthropic reviews).
+
+## CLI cheat sheet (reader-facing — the skill never depends on this)
+
+Verify each cell against the CLI's own `/` menu — these drift.
+
+| CLI | Serves | Reset session | Compact | Context meter | Model picker | Explicit skill invocation | Autonomy / speed / breadth modes |
+|---|---|---|---|---|---|---|---|
+| Codex CLI | OpenAI models | `/new` (`/clear` also works) | `/compact` | `/status` | `/model` (effort also via `model_reasoning_effort` in `~/.codex/config.toml`) | `$workflow` | `/goal` (autonomy), `/fast` (speed), GPT-5.6 `ultra` (breadth) |
+| Copilot CLI | Both vendors | `/clear` | `/compact` (auto-compacts near ~80% — treat as a deadline, reset at a step boundary first) | `/context` | `/model` (effort also via `--reasoning-effort`) | description-matched; as a plugin, `/<plugin>:workflow` | none sanctioned by default |
+| Claude Code | Anthropic models | `/clear` | `/compact` | `/context` | `/model` | `/workflow` | `/effort ultracode` and the Task/sub-agent tool (breadth, read-only seats only) |
 
 ## What a run writes
 
@@ -61,10 +77,7 @@ never ran. `Inputs` and `Base` let a phase notice its input went stale and ask, 
 silently building on it.
 
 Durable output goes to the repo: commits, `WORKLOG.md`, `MEMORY.md`, `TODO.md`, product docs, and
-golden eval cases at `evals/<seat-slug>/<shape>-<YYYY-MM-DD>-<slug>.md` — seat slugs matching
-`ROUTING.md` (`strict-reviewer`, `default-executor`, …) and shape one of `spec`, `plan-audit`,
-`code-review`, `mechanical-transform`. Runtime files may record model names, but never the active
-harness, provider, vendor, or coding-agent product.
+reviewer exam cases at `evals/strict-reviewer/code-review-<YYYY-MM-DD>-<slug>.md` (the only eval set).
 
 ## Install
 
@@ -96,8 +109,8 @@ solely in `.agents/skills/` loads in Copilot CLI and silently never appears in C
 
 Then:
 
-1. **Rewrite `ROUTING.md`** for your CLIs and models — seat table, phase table, harness verbs.
-   That is the entire configuration.
+1. **Rewrite `ROUTING.md`** for your vendors and models — seat table, phase table, mode notes.
+   That is the entire configuration; add your CLI to the cheat sheet above if it isn't listed.
 2. **Smoke test**: `workflow status` in each CLI (does it load?), `workflow next` (does it read
    `ROUTING.md`?), then one toy `workflow brainstorm` → `workflow wrap` run end to end.
 
@@ -116,8 +129,7 @@ cd .agents/skills/workflow && git pull      # or re-copy the folder
 ```
 
 Keep your own `ROUTING.md` — it is the only file you edit, and an update should never overwrite
-it. Copy the incoming `ROUTING.md` only to pick up new *sections* (e.g. the harness-verbs table),
-then re-enter your own mappings. After updating, run `/skills reload` in Copilot CLI, or restart
+it. Copy the incoming `ROUTING.md` only to pick up new *sections*, then re-enter your own mappings. After updating, run `/skills reload` in Copilot CLI, or restart
 the session in Codex and Claude Code, then re-run the smoke test.
 
 If you edit the skill itself: keep `SKILL.md` under ~205 lines, keep vendor names out of
@@ -133,9 +145,9 @@ casual mentions of "plan" or "review" never trigger it.
 |---|---|
 | `workflow brainstorm <idea>` | Interactive dialogue → `brainstorm.md`; reviews your `TODO.md` for related items |
 | `workflow improve <feature> - goal: <goal>` | Brainstorm seeded by a real code audit |
-| `workflow spec` | Verified technical spec → `spec.md` |
-| `workflow plan` | Cross-vendor audit → file-by-file checklist with per-step verification + suggested skills → `plan.md` |
-| `workflow execute` | One step at a time: edit, check, diff, commit, persist state |
+| `workflow spec` | *Optional* — verified interface map → `spec.md`, only when the brainstorm card recommends it |
+| `workflow plan` | Cross-vendor audit of spec or brainstorm against real code → ≤12-step checklist with per-step verification + skills → `plan.md` |
+| `workflow execute` | One step at a time, scope-locked to the step: edit, check, diff, commit, persist state |
 | `workflow review` | Strict senior review, empirical verification, P0–P3 verdict; patch cycle bounded at 3 |
 | `workflow wrap` | Final checks, commit/push, reconcile product docs, route learnings, deposit eval cases, update `TODO.md` + worklog, disposition everything in `.workflow/` |
 | `workflow todo <idea>` | Capture an idea into `TODO.md`, well-placed and well-shaped |
@@ -143,25 +155,26 @@ casual mentions of "plan" or "review" never trigger it.
 | `workflow realign` | Evidence-backed, human-approved re-check of `PRODUCT.md`/`DESIGN.md` against what actually shipped |
 | `workflow status` / `next` / `log` / `learn` | Where am I / what's the next step card / ad-hoc worklog entry / capture a learning |
 
-Every phase response ends with a **next-step card**: reset-or-continue, the next model/effort,
-what to read, and the exact line to paste. There is no compact
+Every phase response ends with a **next-step card**: reset-or-continue, which vendor/model/
+effort (from `ROUTING.md`), what to read, and the exact line to paste. There is no compact
 command — resetting is lossless and safe at any context fullness, so it replaced compaction
 entirely.
 
 ## Companion skills (optional, separate)
 
-- **checkup** — read-only workspace health report; audits eval-set health and flags unexamined
+- **checkup** — read-only workspace health report; compares trial-run numbers per seat and flags unexamined
   models.
 - **evals.run** — exams a candidate model on a seat's golden cases and writes a scorecard;
   seat changes in `ROUTING.md` are then a deliberate, evidenced edit.
 
-The triad: *workflow deposits → checkup detects → evals.run exams.*
+Models earn seats on trial runs recorded in the worklog; `evals.run reviewer` is the one exam,
+a ≤8-case recall check run only before swapping the strict reviewer.
 
 ## Design constraints (on purpose)
 
-Single-voice: no reviewer personas, no self-orchestrated sub-agents (a harness's parallel mode
-is allowed only on read-only seats, for breadth). Bounded everything: worklog ~15 entries, eval
-sets ~15 cases per case shape, patch loops max 3 cycles. The hub stays under ~205 lines; growth
+Single-voice: no reviewer personas, no self-orchestrated sub-agents (a CLI's parallel mode
+is allowed only on read-only seats, for breadth). Bounded everything: worklog ~15 entries, the
+reviewer eval set 8 cases, patch loops max 3 cycles. The hub stays under ~205 lines; growth
 means a new reference file, not a longer hub. When editing instructions: each rule stated once,
 outcomes over step prescription, absolutes only for true invariants.
 
