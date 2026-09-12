@@ -45,6 +45,13 @@ Three rules make this work:
 
 Without this file, `workflow status` and `workflow wrap` will correctly claim review hasn't run.
 
+**When a prescribed reproduction step doesn't reproduce, suspect the finding, not the harness.**
+If a planned or patch-cycle step says a specific input should fail (or should not fail) and the
+opposite happens, re-price the finding itself before adjusting the test to match the plan's
+expected shape. Stubbing out the mechanism that produced the unexpected result — to preserve the
+plan's prescribed step shape — destroys the evidence that the plan rested on a false premise, and
+lets a disproven finding still ship as a "fix."
+
 **P3 is capped; noise is excluded.** Report at most five P3s and summarize the rest as a count;
 the count is enough for a disposition of "defer". Do not report generated paths, anything a
 linter or CI check already enforces, or style and naming — those are not findings. **A repeat is
