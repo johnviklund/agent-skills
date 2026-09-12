@@ -41,7 +41,9 @@ something to patch inline at wrap's effort/approval settings.
 Commit, push, curate, and clean up — in one go:
 
 1. Run final checks: build, type-check, full test suite (call out known-environmental failures,
-   don't treat them as regressions).
+   don't treat them as regressions). If the receipt-rule diff since the plan's `Base` is empty,
+   the run changed no code — record the empty diff as the proof and skip the suite. A check
+   command that is not found is a failure, not a pass.
 2. Grep for leftover shortcuts: `TODO: Implement`, `NotImplementedError`, `...`, `placeholder`,
    `real implementation`, and any old contract version literal — nothing should still pin it.
 3. Commit the remaining changes — which the entry gate has already narrowed to allowlisted

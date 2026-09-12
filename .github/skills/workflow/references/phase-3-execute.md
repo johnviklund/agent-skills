@@ -59,7 +59,9 @@ won't infer:
   `Check: <pass/fail + the one number that proves it>` · `Commit: <sha>` — the diff is shown for
   review where approval requires it, nothing else is narrated.
 - **Deviations are logged, not improvised.** Take the conservative option, note it under
-  "Deviations" in the plan, keep going. Stop outright on a failed check or unresolved file.
+  "Deviations" in the plan, keep going. Stop outright on a failed check or unresolved file; a
+  check command that is not found (exit 127) is a failed check, and a check that cannot be
+  satisfied as written is a deviation to report, never a number to adjust the text toward.
 
 Append learnings as they happen (`references/learning-worklog.md`), not only at wrap.
 

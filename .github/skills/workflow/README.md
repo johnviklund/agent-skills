@@ -1,4 +1,4 @@
-# workflow (v2.01) — a five-phase coding workflow skill for CLI coding agents
+# workflow (v2.02) — a five-phase coding workflow skill for CLI coding agents
 
 A vendor-neutral [agent skill](https://code.claude.com/docs/en/skills) that runs a disciplined
 solo-dev loop across whatever CLI coding agents you use: **brainstorm → (spec) → audit & plan →
