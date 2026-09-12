@@ -8,7 +8,7 @@ Commits save *what* changed; `MEMORY.md`, skills, and `DESIGN.md` save *why*. Th
 of the workflow, not an afterthought: **solve a real problem → remember it. Do the same kind of
 thing 3+ times → turn it into a skill.**
 
-Append one line per learning to `.workflow/learnings.md` before any reset, and
+Append one line per learning to `.workflow/<slug>/learnings.md` before any reset, and
 any time something worth keeping gets solved — don't wait for wrap-up:
 
 ```text
@@ -41,12 +41,40 @@ plan or spec is not a reusable exam, and those seats prove themselves on trial r
 Tag the line `[durable→eval] code-review — <what was missed, by whom>` any time during the run;
 wrap performs the deposit (see `references/wrap.md`).
 
-Then invoke `memory.remember` (a sibling skill in this same repo, available from both CLIs) to
-actually route each line — any time, not only at wrap-up. It reads `MEMORY.md`/`AGENTS.md`/
-`README.md`/`DESIGN.md`/every existing skill's frontmatter *and every installed plugin's skill
-names* before deciding a destination, so it won't create a skill that collides with one you don't
-own. For periodic `MEMORY.md` cleanup, invoke `memory.compact` manually — it never runs on its
-own.
+### `[durable→memory]` — pattern pages, not a flat list
+
+Repo memory is a folder: **`MEMORY.md` is the index** (one line per page: `- [<slug>](memory/<slug>.md) — <one-line claim> · occurrences N · <last confirmed>`), and **each durable pattern is a page in `memory/<slug>.md`**. A page is small and always the same shape:
+
+```markdown
+# <claim in one line>
+Applies when: <the situation that should trigger recall>
+Root cause: <why it happens — one or two lines>
+Fix: <what to do — concrete, with paths or commands where they exist>
+Evidence: <run slug or sha> · <run slug or sha>          ← one entry per occurrence
+Occurrences: N · Last confirmed: YYYY-MM-DD · Status: active | superseded by <slug>
+```
+
+A repeat is not a new page: `memory.remember` finds the existing page by claim, appends the run
+slug as an evidence entry — once per run, never twice — bumps `Occurrences`, updates `Last
+confirmed`, and marks the learnings line `[routed → …]` so a second pass skips it. That count is what makes the
+second-occurrence review tag mechanical, and `Occurrences: 3` is the signal to consider a skill
+(`[durable→skill]`) — the page then records `Promoted to: <skill>` and stays as the why. Pages
+never move into `.workflow/`; they are canonical docs and follow the canonical-doc edit rules.
+
+Then invoke `memory.remember` (a sibling skill in this same repo) to actually route each line —
+any time, not only at wrap-up. It reads `MEMORY.md`/`memory/`/`AGENTS.md`/`README.md`/`DESIGN.md`/
+every existing skill's frontmatter *and every installed plugin's skill names* before deciding a
+destination, so it won't create a skill that collides with one you don't own. For periodic
+`memory/` cleanup, invoke `memory.compact` manually — it never runs on its own.
+
+### `[durable→skill]` — logged, then trialed, never just applied
+
+A change to a skill is gated the same way a model is: on the runs after it. `memory.remember`
+applies the edit in its own commit (never mixed with code) and adds a line to the skills repo's
+`SKILL-IMPACT.md` (`<date> · <skill> · <what changed> · from: <memory page> · trial until: <N runs>`).
+The next N worklog entries carry `Skills: <skill>@<sha>` so `checkup` can compare `Run:` numbers
+before and after; worse means revert the commit and log the reversal in the same file. A change
+considered and rejected is logged there too, so it is not re-proposed.
 
 ## Worklog — `workflow log`
 
@@ -66,12 +94,13 @@ capped and rolls off. Never let it grow into a second memory file that confuses 
   session). Shape:
 
   ```markdown
-  ## YYYY-MM-DD · <one-line what> · <vendor> · <model>
+  ## YYYY-MM-DD · <run slug> · <one-line what> · <vendor> · <model>
   - <1–4 terse bullets: what shipped / changed>
   - Commits: <sha> <sha> ... (+ <other-repo> <sha> if it spanned repos)
   - Review: <verdict> @ <reviewed sha>   (workflow runs only — omit when no review ran)
   - Run: <steps> steps · <cycles> review cycles · <deviations> deviations · <overturned> findings overturned   (workflow runs only)
-  - Seats: 0 <vendor·model> · 2 <vendor·model> · 3 <vendor·model> · 4 <vendor·model>   (workflow runs only; add 1 when spec ran)
+  - Seats: 0 <vendor·model> · 2 <vendor·model> · 3 <vendor·model> · 4 <vendor·model>   (workflow runs only; add 1 when spec ran; suffix "(trial)" where a trial model ran)
+  - Skills: workflow@<sha>[, <other skill>@<sha>]   (workflow runs only — the skill versions that ran, so a skill change can be judged like a model)
   - Why: <one line>
   ```
 
@@ -83,7 +112,7 @@ capped and rolls off. Never let it grow into a second memory file that confuses 
   dispositions marked wrong-by-human) at wrap, so `checkup` can compare a candidate's runs on a
   seat against the incumbent's without re-reading artifacts that wrap deletes.
 
-  The `Review:` field exists because `.workflow/review.md` is deleted at wrap and is not reliably
+  The `Review:` field exists because `.workflow/<slug>/review.md` is deleted at wrap and is not reliably
   in git, so this line is the only surviving trace that the verdict was reached and against which commit.
 
 - **When it's written:**

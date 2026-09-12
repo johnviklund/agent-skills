@@ -4,8 +4,8 @@ description: >
   Trigger ONLY on a message of the form "workflow <command>" or "/workflow <command>" — a
   deliberate invocation of this personal five-phase solo-dev coding workflow; never on casual
   mentions of spec, plan, execute, review, or learn elsewhere in a message. Commands: brainstorm,
-  improve, spec, plan, execute, review, learn, wrap, status, next, log, todo, bootstrap, realign;
-  bare "workflow" = next.
+  improve, spec, plan, execute, review, park, learn, wrap, status, next, log, todo, bootstrap,
+  realign; most take an optional run slug; bare "workflow" = next.
 ---
 
 # Workflow
@@ -21,69 +21,67 @@ map to CLIs, models, efforts, and fallbacks in **`ROUTING.md`** — the only fil
 and the only one a fork edits.
 
 **Invocation is deliberate, not ambient:** a message starting with `workflow` or `/workflow` plus a
-command word (see *Command index*); most CLIs reserve `/` for built-ins, so if the CLI swallows
-the slash, drop it — both forms are identical. A **bare** `workflow` is `workflow next`. **Do not**
-treat unprefixed mentions of "spec", "plan", "execute", "review", or "learn" as an invocation.
+command word and, for phase commands, an optional run slug (`workflow plan auth-refresh`); most
+CLIs reserve `/` for built-ins, so if the CLI swallows the slash, drop it. A **bare** `workflow` is
+`workflow next`. **Do not** treat unprefixed mentions of "spec", "plan", "execute", "review", or
+"learn" as an invocation.
 
-## Where are we? (re-grounding) — `workflow status`
+## Runs and where we are — `workflow status`
 
-Report which phase is next without acting, then wait for an explicit `workflow <phase>`. The
-`.workflow/` files are the state machine, more trustworthy than memory. Every artifact header
-carries `Status:`, and **`drafting` means resume that phase, never advance past it**; standalone
-`realign.md` is not phase state. Review is read-only, so `review.md` is its *only* evidence — never
-infer "review done" without it. With every artifact `complete`:
+**One run = one folder, `.workflow/<slug>/`**, created by `workflow brainstorm <slug>`, tracked in
+git, kept forever. A folder is self-describing — any fresh context can pick a run up from its files
+alone — so the run files are the state machine. Every artifact header carries `Status:` (`drafting` ·
+`complete` · `parked` · `done`); **`drafting` means resume that phase, never advance past it**; a run
+whose `brainstorm.md` is `parked` or `done` is not live. `review.md` is review's *only* evidence. For a live run:
 
-| `.workflow/` | Next |
+| in `.workflow/<slug>/` | Next |
 |---|---|
-| empty | Phase 0 — Brainstorm |
-| `brainstorm.md` | Phase 2 — Audit & Plan — or Phase 1 — Spec, only if the brainstorm's card called for it |
+| `brainstorm.md` only | Phase 2 — Audit & Plan — or Phase 1 — Spec, only if the brainstorm's card called for it |
 | `+ spec.md` | Phase 2 — Audit & Plan |
 | `+ plan.md`, checklist incomplete | Phase 3 — Execute |
-| checklist complete; no `review.md`, or its `Base` ≠ HEAD | Phase 4 — Review |
-| `+ patch_plan.md` | mid patch cycle — `references/phase-4-review.md` |
-| `review.md`, verdict clean or all findings dispositioned, `Base` = HEAD | wrap-up |
+| checklist complete; no `review.md`, or code changed since its `Base` | Phase 4 — Review |
+| `+ patch_plan.md` with unchecked steps | Phase 3 — Execute (runs the patch plan, not the plan) |
+| `patch_plan.md` complete; code changed since `review.md`'s `Base` | Phase 4 — Review, cycle N+1 |
+| `review.md` with no open finding and no code change since its `Base` | wrap-up (resumes `wrap.md` if present) |
 
-**Phase 1 is optional** — default route 0 → 2 → 3 → 4 → wrap. The brainstorm card recommends
-`workflow spec` only for schema/SQL/contract-coupled work, subsystems the brainstorm could not size,
-or an unfamiliar codebase. `workflow status` prints exactly three lines and stops: **Phase:** where
-the state machine is; **Blocker:** what stops advancing, or `none`; **Next:** the line to send.
+**Phase 1 is optional** — default route 0 → 2 → 3 → 4 → wrap. **Resolving the slug:** a phase
+command names one, or there is exactly one live run — else list the live runs and ask, lettered.
+Grounding reads only live runs (`grep -l 'Status: \(drafting\|complete\)' .workflow/*/brainstorm.md`),
+never done or parked folders. `workflow status` prints one line per non-done run — `slug · phase ·
+blocker or none · next command` — then stops.
 
-If a `workflow <phase>` mismatches the file state (e.g. `execute` with no `plan.md`), say so and
-ask. Grounding also reads `ROUTING.md` (the seat and the mapping every card resolves), `AGENTS.md`,
-`MEMORY.md`, `PRODUCT.md`/`DESIGN.md` (if product/UI is in scope), repo-root `TODO.md` (intake
-scratchpad — Phase 0, Phase 2's TODO-impact check, wrap's TODO hygiene), `git log --oneline -15`, `git status`.
+If a `workflow <phase>` mismatches the run's state (e.g. `execute` with no `plan.md`), say so and
+ask. Grounding also reads `ROUTING.md`, `AGENTS.md`, `MEMORY.md` (the index of `memory/`),
+`PRODUCT.md`/`DESIGN.md` (if product/UI is in scope), repo-root `TODO.md` (ideas not yet
+brainstormed), `git log --oneline -15`, `git status`.
 
 ## Clarify before running a phase (every phase)
 
 After re-grounding, before the first edit or line of output: **is anything material unclear, or
 is a misunderstanding here expensive?** If yes, ask one round of max 2–3 questions shaped per
-*Reporting* below, and wait; if no, act — this gate must not turn every phase into an interview.
-Ask when: **ambiguous target/scope**; **command/state mismatch**; **high-cost-if-wrong work
-ahead** (schema/SQL/contract, migrations, deletions — "I read this as X — correct?"); **a silent
-assumption doing heavy lifting**; **an undecided input** — a phase never encodes an open question
-as a checklist step or placeholder; it asks, then writes. Skip the gate for mechanical, low-risk,
-clearly-specified work (`status`, `next`, `log`, `todo`, mechanical-lane edits). This complements
-the in-phase rules (Phase 0 dialogue, Phase 3 stop-on-deviation); it doesn't replace them.
+*Reporting*, and wait; if no, act — the gate must not turn every phase into an interview. Ask
+when: **ambiguous target/scope**; **command/state mismatch**; **high-cost-if-wrong work ahead**
+(schema/SQL/contract, migrations, deletions — "I read this as X — correct?"); **a silent assumption
+doing heavy lifting**; **an undecided input** — never encoded as a checklist step or placeholder.
+Skip it for mechanical, clearly-specified work (`status`, `next`, `log`, `todo`, mechanical edits).
 
 ## Reporting to the human (every phase)
 
 **The artifact is the record; chat is the receipt.** The human runs many projects at once and reads
-chat on a phone; anything that is not a result or a decision goes in the `.workflow/` file, not the
+chat on a phone; anything that is not a result or a decision goes in the run's file, not the
 turn. A phase's user-visible output above the card is at most ~12 lines:
 
-- **Result** — what the phase did, ≤3 plain-language lines. No restating the plan, findings, or
-  paste block; no narrating tool calls or file reads.
-- **Decisions needed** — one numbered list, each item answerable with a letter: the question first,
+- **Result** — what the phase did, ≤3 plain-language lines; no restating plan, findings, or paste
+  block, no narrating tool calls.
+- **Decisions needed** — one numbered list, each item answerable with a letter: question first,
   plain words, two sentences max; options on their own lines; a **recommended default** marked, so
-  the list can be answered "all defaults except 2b". One decision per item; no term the human
-  hasn't used unless defined in the same breath. This shape governs *every* question and escalation
-  in *every* phase — clarify gate, ESCALATE items, review escalations, wrap contradictions.
-- **A negative result is one line.** "`PRODUCT.md` — no changes." is complete; proving a negative
-  with citations is noise. Evidence accompanies positive findings only.
+  the list can be answered "all defaults except 2b". One decision per item; no undefined jargon.
+  This shape governs *every* question and escalation in *every* phase.
+- **A negative result is one line** ("`PRODUCT.md` — no changes."); evidence accompanies positives only.
 
 **Artifact budgets** — thinking is unbounded, files are not: `brainstorm.md` ≤ ~40 lines; `spec.md`
-≤ ~60; `plan.md` ≤ ~100 with ≤ 12 steps (more means the run is too big — propose a split and ask);
-`review.md` grows with real findings only. Meet a budget by cutting prose, never checks.
+≤ ~60; `plan.md` ≤ ~100 with ≤ 12 steps (more = split the run and ask); `review.md` grows with real
+findings only. Meet a budget by cutting prose, never checks.
 
 ## Seats — roles, not vendors
 
@@ -99,37 +97,34 @@ Which vendor and model fill each seat, at what effort, with what fallback — th
 a model earns a seat on trial runs, not exams (protocol there). **Portable invariants:**
 
 - **Cross-vendor review.** The strict reviewer is a different vendor from whichever model wrote
-  the code; a same-vendor review is a degraded mode — note it when unavoidable.
-- **No double work.** Never run the same step in two sessions or two models.
+  the code; same-vendor review is a degraded mode — note it. **No double work:** never run the
+  same step in two sessions or two models.
 - **Availability first.** Check the CLI's model picker at session start; walk ROUTING.md's
   fallback chain in order; never retry blindly or silently switch to an auto/default model.
-- **Effort scales with risk, not habit.** Lowest level that reliably works: mechanical lowest,
-  schema/contract and review highest (levels in ROUTING.md). Before *raising* effort on a
+- **Effort scales with risk, not habit** (levels in ROUTING.md). Before *raising* effort on a
   struggling step, check whether it lacks a success criterion — a clearer completion bar beats
   more thinking. A new model baselines at the incumbent's effort and tests one level lower.
-- **Approval scales with blast radius.** Read-only work needs none; mechanical-lane edits
-  auto-approve; logic-bearing and schema/contract edits are reviewed diff by diff (the full
-  phase→approval map is in ROUTING.md alongside the efforts).
-- **Sub-agent/parallel modes are for read-only breadth only** — a read-only seat, many
-  files/subsystems checkable *independently*, findings still *verified, not trusted*. Never on
-  anything that writes: parallel writers break one-step-at-a-time and lockstep.
+- **Approval scales with blast radius.** Read-only none; mechanical auto; logic-bearing and
+  schema/contract edits reviewed diff by diff (phase→approval map in ROUTING.md).
+- **Sub-agent/parallel modes are for read-only breadth only** — a read-only seat, independently
+  checkable files, findings still *verified, not trusted*. Never on anything that writes.
 
 ## Context hygiene
 
-Reset the session at every phase handoff — re-ground from `.workflow/*.md` + git instead of
-dragging the previous seat's context forward; the reset is where the model swap happens. Mid-phase,
-reset too: every phase writes its artifact incrementally, so a reset costs warm cache only and,
-unlike compaction, is safe at any fullness. This skill names only the verb — *reset*, *compact*,
-*context meter*, *model picker*; the literal command is the CLI's own (`README.md` has a cheat sheet).
+Every phase runs in a fresh context — today a reset session, later a delegated agent — re-grounded
+from `.workflow/<slug>/` + git, never from the previous seat's context; the handoff is where the
+model swap happens. Mid-phase, reset too: artifacts are written incrementally, so a reset costs warm
+cache only and, unlike compaction, is safe at any fullness. This skill names only the verb — *reset*,
+*compact*, *context meter*, *model picker*; the literal command is the CLI's own (cheat sheet in `README.md`).
 
 ## Next recommended step — `workflow next` (or bare `/workflow`)
 
 Every phase ends with this card as the turn's **last user-visible output** — **mandatory, no
-substitute**: a conversational closer is not the card, and where a CLI ends the turn with a
-completion/summary tool the card belongs *inside* that summary. Row 2 is **resolved from
-`ROUTING.md` at print time** — concrete vendor, model, effort and first fallback; a seat name or
-"see ROUTING.md" defeats the card's purpose, which is that the human never opens a file to learn
-which model to pick. `workflow next` prints the card on demand without doing phase work. Exact shape:
+substitute**: a closer sentence is not the card; where a CLI ends the turn with a summary tool the
+card goes *inside* it. Row 2 is **resolved from `ROUTING.md` at print time** — open the file in the
+closing turn and copy the next seat's vendor, model, effort, context window and first fallback
+(a *Trial* entry prints instead of the primary, marked so); a seat name or "see ROUTING.md" is a
+defect: the card exists so the human never opens a file to pick a model. `workflow next` prints it on demand. Exact shape:
 
 ---
 ### ▶ Next recommended step
@@ -139,7 +134,7 @@ which model to pick. `workflow next` prints the card on demand without doing pha
 | # | Step | Setting |
 |---|------|---------|
 | 1 | Reset session? | Yes — reset before the handoff (or *No — continue this session*) |
-| 2 | Vendor · model · effort | resolved values, e.g. "<vendor> · <model> · <effort> — fallback: <model> <effort>" |
+| 2 | Vendor · model · effort · context | resolved values, e.g. "<vendor> · <model> · <effort> · <context window> — fallback: <model> <effort>" |
 | 3 | Ground in | exact files to read first |
 | 4 | Invoke | the `workflow <phase>` command to send |
 
@@ -151,12 +146,12 @@ Paste next:
 ---
 
 Defaults: reset Yes at every handoff, No only for continued same-seat work; autonomy/speed
-toggles No unless ROUTING.md sanctions them for that seat, never on review seats. Row 3 lists the `.workflow/*.md`
-files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md` when product/UI is
-in scope, `git diff`/`git log` for review/wrap.
+toggles No unless ROUTING.md sanctions them for that seat, never on review seats. Row 3 lists the
+`.workflow/<slug>/` files that phase reads, plus `AGENTS.md`/`MEMORY.md`, `PRODUCT.md`/`DESIGN.md`
+when product/UI is in scope, `git diff`/`git log` for review/wrap.
 
-When the run is finished (plan checked off, review clean or patched, learnings routed, `.workflow/`
-dispositioned) print the ✅ done card instead: one line on what shipped; one line on product-doc
+When the run is finished (plan checked off, review clean or patched, learnings routed, folder
+archived) print the ✅ done card instead: one line on what shipped; one line on product-doc
 truth (corrected what, or none); recommended next (`workflow brainstorm <next ROADMAP.md
 initiative>` or `workflow improve ...`; `memory.compact` if `MEMORY.md` grew; PR if not on `main`).
 
@@ -165,13 +160,20 @@ initiative>` or `workflow improve ...`; `memory.compact` if `MEMORY.md` grew; PR
 - **Clarify before you build** (gate above). **Verify, don't trust** — check every interface,
   signature, column against real code; a generated spec is a hypothesis. **No backward-compat
   shims** unless asked; contract versions in lockstep producer→validator→consumer.
-- **Handoff files live in `.workflow/`** — run scratch, **tracked in some repos, gitignored in
-  others** (check; it decides if wrap's clean-up is recoverable); commit after each verified step.
+- **Run files live in `.workflow/<slug>/` and are tracked** — commit after each verified step.
+  Wrap archives a run (`Status: done`, transient files dropped); it never deletes a folder.
 - **Provenance header** — every `.workflow/` artifact opens with five lines: `Command:`, `Created:`
   (date), `Base:` (git sha), `Inputs:` (`<artifact> @ <its Base sha>` or `none`), `Status:`
   (`drafting` until the closing section is written, then `complete`). At phase entry check the
-  input's header holds — `Status: complete`, `Inputs` untouched since its `Created`, `Base` an
-  ancestor of HEAD — else name the staleness and ask first.
+  input's header holds — `Status: complete`, `Inputs` untouched since its `Created` — and that its
+  **relevant code is fresh**: `git diff --stat <Base>..HEAD -- <every file the artifact names>` is
+  empty apart from this run's own step commits. Ancestry alone proves nothing; else name the
+  staleness and route to the phase that must rerun (a stale plan → `workflow plan <slug>`).
+- **Receipt files vs code.** `*.md` and `*.txt` are receipts; everything else — any script,
+  config, or data file, in *any* directory including `.workflow/` and `docs/` — is code.
+  "Code changed since sha X" means `git diff --stat X..HEAD -- . ':(exclude)*.md' ':(exclude)*.txt'`
+  is non-empty; receipt commits never stale a review, and code never ships unreviewed because of
+  the folder it sits in. Nothing outside `.workflow/` may depend on anything inside it.
 - **Report per *Reporting*; always close with the next-step card** (or ✅ done card).
 
 ## Command index
@@ -185,6 +187,7 @@ Read the listed reference before acting; `status` and `next` need only this file
 | `workflow plan` | `references/phase-2-plan.md` |
 | `workflow execute` | `references/phase-3-execute.md` |
 | `workflow review` (+ patch cycle) | `references/phase-4-review.md` |
+| `workflow park [slug]` | `references/phase-0-brainstorm.md` (parking section) |
 | `workflow wrap` | `references/wrap.md` |
 | `workflow learn`, `workflow log` | `references/learning-worklog.md` |
 | `workflow todo [idea]` | `references/todo.md` |
@@ -193,9 +196,8 @@ Read the listed reference before acting; `status` and `next` need only this file
 
 ## Keeping this skill alive
 
-These files are the one source of truth — edit them directly when the workflow's shape changes.
-**Growth rule:** a new feature = a new or extended reference file plus one Command-index line; this
-hub stays under ~205 lines. **Vendor rule:** only `ROUTING.md` names vendors or models, and no
+**Growth rule:** a new feature = a new or extended reference file plus one Command-index line;
+this hub stays under ~205 lines. **Vendor rule:** only `ROUTING.md` names vendors or models, and no
 file in the skill names a CLI product — `README.md` is reader-facing and exempt from both. **Prompt-style rule:** state each rule exactly once —
 four sanctioned exceptions defend paths a once-only statement can't reach: the ⚠️ head note (raw
 reads), the closing-card imperative at every phase tail, and paste blocks restating the

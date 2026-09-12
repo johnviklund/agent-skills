@@ -30,7 +30,7 @@ questions can wait; identity questions cannot.
 | `DESIGN.md` | The UI/design system | Synthesized if the PRD implies a UI; otherwise a two-line stub ("no UI yet; create on first UI work") |
 | `AGENTS.md` | Operating rules for coding agents: the doc-layer model (this table), write scopes, command contracts, and a **Verifying your work** block | Written fresh; includes this ownership table and the verification block below |
 | `ROADMAP.md` | **The sequence**: phased initiatives to implement the PRD, each sized to be one future workflow run (brainstorm→wrap) | Derived from the PRD's scope; items point at `PRODUCT.md`, never restate it |
-| `MEMORY.md` | Cross-session environment facts, gotchas, open gaps — the layer of last resort | **Created empty** except a header explaining the entry schema and what does/doesn't belong |
+| `MEMORY.md` + `memory/` | `MEMORY.md` is the index; each durable pattern is a page in `memory/<slug>.md` (shape in `references/learning-worklog.md`) | **Created empty** except a header explaining the entry schema and what does/doesn't belong |
 | `TODO.md` | Intake scratchpad for ideas between runs — never a roadmap | **Created empty** except its header rule ("don't implement just because it's listed") and section skeleton |
 | `README.md` | Short orientation: what this is + a pointer table to the docs above | A page, not a spec |
 
@@ -55,10 +55,10 @@ human prefers; it lives in git either way) and note in `PRODUCT.md`'s header tha
 the PRD as of the bootstrap date.
 
 **5. Wire the hygiene.** `.gitignore` with the usual junk (`.DS_Store`, `.env*`, venvs, build
-output); create `WORKLOG.md` with its bounded-rolling header. Decide `.workflow/` deliberately and
-say which you chose: ignore it (scratch stays private, wrap's deletes are unrecoverable) or track
-it (run artifacts and receipts are archived and recoverable, and wrap's clean-up is a reviewable
-commit) — see `references/wrap.md` step 9c.
+output); create `WORKLOG.md` with its bounded-rolling header. `.workflow/` is **tracked, always**:
+runs are the repo's history and wrap refuses to finish in a repo that ignores them. Make sure no
+`.gitignore` rule matches it (`git check-ignore -q .workflow` must fail), and create
+`.workflow/.gitkeep` so the folder exists in the bootstrap commit.
 
 **6. Audit before committing (recommended, strict-reviewer seat, fresh session).** Check every
 claim in `PRODUCT.md` and `ROADMAP.md` traces to the PRD or an explicit human answer from step
@@ -68,7 +68,8 @@ against the freshly drafted north-star docs and feed the human's answers back in
 then commit everything as the bootstrap commit, and append the first `WORKLOG.md` entry.
 
 **7. Hand off.** Close with the next-step card recommending `workflow brainstorm <first
-ROADMAP.md initiative>` — from here on, the normal cycle owns everything.
+ROADMAP.md initiative>`, row 2 resolved from `ROUTING.md` to concrete vendor · model · effort ·
+context — from here on, the normal cycle owns everything.
 
 ## Afterwards
 

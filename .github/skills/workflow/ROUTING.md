@@ -32,32 +32,58 @@ works too.
 
 ## Seat mapping
 
-| Seat | Primary (vendor · model · effort) | Fallback chain |
-|---|---|---|
-| Brainstorm partner | Anthropic · Sonnet 5 · medium | OpenAI · GPT-5.6 Terra · medium |
-| Default executor | OpenAI · GPT-5.6 Terra · per phase table | GPT-5.5 · closest effort; then Anthropic · Sonnet 5 (breaks the vendor split — reviewer must then be OpenAI, degraded) |
-| Heavy executor | OpenAI · GPT-5.6 Sol · xhigh (P0 fixes: high) | GPT-5.5 · xhigh; then Anthropic · Sonnet 5 · xhigh (same caveat) |
-| Mechanical lane | OpenAI · GPT-5.6 Luna · low→medium | GPT-5.5 · low; then Anthropic · Sonnet 5 · low |
-| Strict reviewer | Anthropic · Opus 5 · high (review: max) | Sonnet 5 · xhigh; then OpenAI · GPT-5.6 Sol (degraded: same-vendor review — note it in `review.md`) |
+| Seat | Primary (vendor · model · effort) | Trial (vendor · model · effort, or —) | Fallback chain |
+|---|---|---|---|
+| Brainstorm partner | Anthropic · Sonnet 5 · medium | — | OpenAI · GPT-5.6 Terra · medium |
+| Default executor | OpenAI · GPT-5.6 Terra · per phase table | — | GPT-5.5 · closest effort; then Anthropic · Sonnet 5 (breaks the vendor split — reviewer must then be OpenAI, degraded) |
+| Heavy executor | OpenAI · GPT-5.6 Sol · xhigh (P0 fixes: high) | — | GPT-5.5 · xhigh; then Anthropic · Sonnet 5 · xhigh (same caveat) |
+| Mechanical lane | OpenAI · GPT-5.6 Luna · low→medium | — | GPT-5.5 · low; then Anthropic · Sonnet 5 · low |
+| Strict reviewer | Anthropic · Opus 5 · high (review: max) | — | Sonnet 5 · xhigh; then OpenAI · GPT-5.6 Sol (degraded: same-vendor review — note it in `review.md`) |
+
+**Trial column:** when a seat has a trial entry, the next-step card prints the trial model in row 2,
+marked `(trial)`, and the primary as the fallback; the worklog's `Seats:` line records what actually
+ran. Clear it after promoting or rejecting. One trial per seat, at most two seats in trial at once —
+otherwise a bad run can't be attributed.
+
+## Maintaining this file
+
+Nothing edits this file but the human; wrap writes evidence, checkup recommends. The loop:
+
+1. **New model released** → add it to *Vendors and models*, confirm its ID and the effort levels in
+   the picker, then put it in one seat's *Trial* column (for the strict reviewer, run
+   `evals.run reviewer` first). Effort: start at the incumbent's, try one level lower on the second run.
+2. **Run one or two real runs** → wrap records `Run:`/`Seats:`.
+3. **`checkup seats`** → prints the per-seat table and says promote / reject / need another run.
+4. **Edit here** → promote to *Primary* (old primary becomes first fallback) or reject; clear *Trial*;
+   bump *Last verified*. Effort and context columns change only on evidence from step 3 — never
+   because a new model "should" need less.
+5. **Stale check** → `checkup` flags *Last verified* older than 90 days; re-open the picker and
+   confirm every model ID still exists, because deprecations are silent.
 
 ## Phase → seat · effort · approval
 
-| Phase / work | Seat | Effort | Approval |
-|---|---|---|---|
-| Phase 0 — brainstorm | Brainstorm partner | medium | — (dialogue) |
-| Phase 1 — spec (optional) | Default executor | xhigh | — (read-only) |
-| Phase 2 — audit & plan | Strict reviewer | high; xhigh hardest cases | — (read-only) |
-| Phase 3 — mechanical edits | Mechanical lane | low → medium | auto |
-| Phase 3 — logic-bearing edits | Default executor | high | review each diff |
-| Phase 3 — schema/SQL/contract | Heavy executor | xhigh | review each diff |
-| Phase 4 — review | Strict reviewer | max | — (read-only) |
-| Patch plan (any severity) | Strict reviewer | high | — |
-| Fix P0s | Heavy executor | high | review each diff |
-| Fix P1/P2/P3s | Default executor | medium | auto |
-| Final check & wrap-up | Brainstorm partner | medium | auto |
-| TODO intake (`workflow todo`) | Brainstorm partner | medium | auto (writes only `TODO.md`) |
-| Bootstrap (`workflow bootstrap`) | Brainstorm partner (docs) + Strict reviewer (audit) | high | propose each doc, confirm before writing |
-| Realign (`workflow realign`) | Strict reviewer | high | human approval per candidate before canonical-doc write |
+| Phase / work | Seat | Effort | Context | Approval |
+|---|---|---|---|---|
+| Phase 0 — brainstorm | Brainstorm partner | medium | standard | — (dialogue) |
+| Phase 1 — spec (optional) | Default executor | xhigh | large | — (read-only) |
+| Phase 2 — audit & plan | Strict reviewer | high; xhigh hardest cases | large | — (read-only) |
+| Phase 3 — mechanical edits | Mechanical lane | low → medium | standard | auto |
+| Phase 3 — logic-bearing edits | Default executor | high | standard | review each diff |
+| Phase 3 — schema/SQL/contract | Heavy executor | xhigh | standard; large if the step spans many files | review each diff |
+| Phase 4 — review | Strict reviewer | max | large | — (read-only) |
+| Patch plan (any severity) | Strict reviewer | high | standard | — |
+| Fix P0s | Heavy executor | high | standard | review each diff |
+| Fix P1/P2/P3s | Default executor | medium | standard | auto |
+| Final check & wrap-up | Brainstorm partner | medium | standard | auto |
+| TODO intake (`workflow todo`) | Brainstorm partner | medium | standard | auto (writes only `TODO.md`) |
+| Bootstrap (`workflow bootstrap`) | Brainstorm partner (docs) + Strict reviewer (audit) | high | large | propose each doc, confirm before writing |
+| Realign (`workflow realign`) | Strict reviewer | high | large | human approval per candidate before canonical-doc write |
+
+**Context window:** `standard` = the model's default (256K-class); `large` = the biggest the picker
+offers (1M-class). Large only where the seat must hold the whole repo or a wide diff at once —
+audit, review, spec, bootstrap. Execution runs one scope-locked step at a time and does not
+benefit; dialogue seats don't either. Large costs more per call and dilutes attention on small
+inputs, so it is a per-seat setting, not a default.
 
 **Single-vendor sessions** (only one vendor available today): OpenAI only — Terra for Phase 0/1,
 Luna/Terra/Sol by step shape for Phase 3, Sol for Phase 2/4 (degraded same-vendor review). Anthropic

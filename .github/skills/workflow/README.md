@@ -1,4 +1,4 @@
-# workflow — a five-phase coding workflow skill for CLI coding agents
+# workflow (v2.01) — a five-phase coding workflow skill for CLI coding agents
 
 A vendor-neutral [agent skill](https://code.claude.com/docs/en/skills) that runs a disciplined
 solo-dev loop across whatever CLI coding agents you use: **brainstorm → (spec) → audit & plan →
@@ -16,7 +16,7 @@ because the shape turned out to be portable.
 - **Cross-vendor review.** The strict reviewer should be a different vendor from whichever model
   wrote the code. Each run records its writer, so the reviewer detects a same-vendor pairing and
   declares degraded mode itself instead of relying on being told.
-- **Files are the state machine.** Every phase reads and writes `.workflow/*.md`, so any fresh
+- **Files are the state machine.** Every phase reads and writes `.workflow/<slug>/*.md`, so any fresh
   session re-grounds from disk instead of trusting its own memory. Every phase persists *as it
   goes* — findings as they're confirmed, plan steps as they settle, execution state after every
   step — so running out of context costs warm cache and nothing else.
@@ -32,13 +32,69 @@ because the shape turned out to be portable.
   diff-by-diff approval on schema/contract edits, review with P0–P3 verdicts, patch loops bounded
   at three cycles, and a wrap that refuses to ship code the review never saw.
 
+## Walkthrough — one run
+
+```text
+workflow brainstorm auth-refresh      # creates .workflow/auth-refresh/, dialogue → brainstorm.md
+                                      # closing card names the next model + effort + context, and
+                                      # says "Next: plan" (or "spec" for schema/contract-heavy work)
+workflow plan auth-refresh            # cross-vendor audit against real code → plan.md (≤12 steps)
+workflow execute auth-refresh         # one scope-locked step at a time; commit per step
+workflow review auth-refresh          # P0–P3 verdict → review.md; patch cycle if needed
+workflow wrap auth-refresh            # checks, push, docs reconciled, learnings → memory/,
+                                      # worklog entry, folder archived (Status: done)
+```
+
+Every phase ends with a **next-step card** — reset or continue, the exact vendor · model · effort
+· context to pick, what to read, the line to paste. Reset the session at each handoff; the card
+tells you to. With only one live run the slug is optional.
+
+## Several runs at once
+
+```text
+workflow brainstorm export-csv        # ... "good idea, not now" → Status: parked
+workflow brainstorm rate-limits       # a second live run
+workflow status                       # auth-refresh · Phase 3 · none · workflow execute auth-refresh
+                                      # rate-limits  · Phase 2 · none · workflow plan rate-limits
+                                      # export-csv   · parked at Phase 0 · unpark: <what would>
+workflow park rate-limits             # set aside at any phase; nothing deleted
+workflow plan export-csv              # unpark = invoke the phase it was at
+```
+
+One home per idea: `TODO.md` holds ideas not yet brainstormed; a parked folder holds ideas that
+have been; a live folder is in flight. Park before planning when you can — a parked plan goes
+stale with the next commit, and the provenance gate will make you re-plan.
+
+## What a run folder holds
+
+```text
+.workflow/auth-refresh/
+  brainstorm.md    problem, scope, approach, non-goals, "Next: plan|spec"   ← status of record
+  spec.md          optional; deleted at wrap (its content is in plan.md)
+  plan.md          findings · ≤12-step checklist · coverage of brainstorm scope · risks · impacts · deviations
+  patch_plan.md    only during a patch cycle; run by `workflow execute`; deleted at wrap
+  review.md        coverage · P0–P3 findings with dispositions and Resolved stamps, one section per cycle
+  learnings.md     tagged lines, routed by memory.remember (each marked [routed → …]); kept as the record
+  wrap.md          wrap's own checkpoint, so an interrupted wrap resumes instead of restarting
+```
+
+Runs are tracked in git and never deleted: after wrap the folder is the run's history, readable
+by anyone (or any agent) later. Grounding only ever reads live runs, so the archive costs nothing.
+
+Two rules keep the archive honest. **Receipts vs code:** `*.md`/`*.txt` are receipts; anything
+else — a script in `.workflow/`, a config in `docs/` — is code, must be reviewed, and can't ship
+through wrap's commit. **Freshness is per file, not per ancestry:** a plan is stale when any file
+it names changed since its `Base` (other than by its own steps), which is exactly what happens to
+a parked plan — it gets re-audited, not executed.
+
 ## Repo layout
 
 | File | Role | You edit it? |
 |---|---|---|
-| `SKILL.md` | The hub: invocation, state machine, seats & invariants, per-command index | No |
-| `ROUTING.md` | **Your mapping**: seat → (vendor · model · effort), fallbacks, mode notes | **Yes — this is the whole setup** |
+| `SKILL.md` | The hub: invocation, runs & state machine, seats & invariants, reporting rule, per-command index | No |
+| `ROUTING.md` | **Your mapping**: seat → (vendor · model · effort · context), trial column, fallbacks, how models earn seats | **Yes — this is the whole setup** |
 | `references/*.md` | Full instructions per command, loaded one-per-invocation | No |
+| `SKILL-IMPACT.md` | Log of every change to these skills and what the runs after it showed; `Mode:` line sets whether skill edits are autonomous or approved | Yes (mode line; accept/reject rows) |
 
 `SKILL.md` and `references/` contain no vendor names by design, and no file in the skill names a
 CLI product; a brand name in the wrong place is a bug. The skill names only generic verbs —
@@ -58,8 +114,8 @@ Verify each cell against the CLI's own `/` menu — these drift.
 
 ## What a run writes
 
-Run scratch lives in `.workflow/` — ignore it or track it, your call (see `references/wrap.md`
-step 9c; tracking makes wrap's clean-up recoverable and reviewable). Every artifact opens with a
+Each run lives in `.workflow/<slug>/`, tracked in git, and stays after wrap as the run's record
+(transient files dropped, `Status: done`). Every artifact opens with a
 five-line provenance
 header, and the state machine reads it rather than guessing from which files exist:
 
@@ -67,7 +123,7 @@ header, and the state machine reads it rather than guessing from which files exi
 Command: workflow spec
 Created: 2026-07-28
 Base:    <git sha when the file was created>
-Inputs:  .workflow/brainstorm.md @ <its own Base sha>
+Inputs:  .workflow/<slug>/brainstorm.md @ <its own Base sha>
 Status:  drafting        # → complete when the phase writes its closing section
 ```
 
@@ -76,7 +132,7 @@ be mistaken for a finished one, and a review that died at 90% is distinguishable
 never ran. `Inputs` and `Base` let a phase notice its input went stale and ask, instead of
 silently building on it.
 
-Durable output goes to the repo: commits, `WORKLOG.md`, `MEMORY.md`, `TODO.md`, product docs, and
+Durable output goes to the repo: commits, `WORKLOG.md`, `MEMORY.md` + `memory/` pages, `TODO.md`, product docs, and
 reviewer exam cases at `evals/strict-reviewer/code-review-<YYYY-MM-DD>-<slug>.md` (the only eval set).
 
 ## Install
@@ -90,7 +146,7 @@ follows a symlink, so keep one canonical copy and point the others at it:
 mkdir -p .agents/skills && cp -r workflow .agents/skills/workflow   # canonical copy
 mkdir -p .claude/skills && ln -s ../../.agents/skills/workflow .claude/skills/workflow
 mkdir -p .codex/skills  && ln -s ../../.agents/skills/workflow .codex/skills/workflow
-echo '.workflow/' >> .gitignore   # optional — track .workflow/ instead if you want recoverable run artifacts
+git add .workflow/               # runs are tracked — do not gitignore .workflow/
 ```
 
 Copilot CLI reads `.agents/skills/` directly, so the canonical copy already covers it.
@@ -112,7 +168,8 @@ Then:
 1. **Rewrite `ROUTING.md`** for your vendors and models — seat table, phase table, mode notes.
    That is the entire configuration; add your CLI to the cheat sheet above if it isn't listed.
 2. **Smoke test**: `workflow status` in each CLI (does it load?), `workflow next` (does it read
-   `ROUTING.md`?), then one toy `workflow brainstorm` → `workflow wrap` run end to end.
+   `ROUTING.md`?), then one toy `workflow brainstorm hello` → `workflow wrap hello` end to end,
+   and check `.workflow/hello/` is committed with `Status: done`.
 
 **Verify locally before trusting the paths above.** Skill discovery has moved before and is
 version-dependent — some builds gated skills behind a feature flag. `/skills` (Codex, Copilot)
@@ -128,8 +185,8 @@ disabling it.
 cd .agents/skills/workflow && git pull      # or re-copy the folder
 ```
 
-Keep your own `ROUTING.md` — it is the only file you edit, and an update should never overwrite
-it. Copy the incoming `ROUTING.md` only to pick up new *sections*, then re-enter your own mappings. After updating, run `/skills reload` in Copilot CLI, or restart
+Keep your own `ROUTING.md` and `SKILL-IMPACT.md` — they are the files you edit, and an update
+should never overwrite them. Copy the incoming `ROUTING.md` only to pick up new *sections*, then re-enter your own mappings. After updating, run `/skills reload` in Copilot CLI, or restart
 the session in Codex and Claude Code, then re-run the smoke test.
 
 If you edit the skill itself: keep `SKILL.md` under ~205 lines, keep vendor names out of
@@ -143,13 +200,14 @@ casual mentions of "plan" or "review" never trigger it.
 
 | Command | What it does |
 |---|---|
-| `workflow brainstorm <idea>` | Interactive dialogue → `brainstorm.md`; reviews your `TODO.md` for related items |
+| `workflow brainstorm <slug>` | Creates `.workflow/<slug>/`; interactive dialogue → `brainstorm.md`; reviews `TODO.md` for related items |
 | `workflow improve <feature> - goal: <goal>` | Brainstorm seeded by a real code audit |
 | `workflow spec` | *Optional* — verified interface map → `spec.md`, only when the brainstorm card recommends it |
 | `workflow plan` | Cross-vendor audit of spec or brainstorm against real code → ≤12-step checklist with per-step verification + skills → `plan.md` |
 | `workflow execute` | One step at a time, scope-locked to the step: edit, check, diff, commit, persist state |
 | `workflow review` | Strict senior review, empirical verification, P0–P3 verdict; patch cycle bounded at 3 |
-| `workflow wrap` | Final checks, commit/push, reconcile product docs, route learnings, deposit eval cases, update `TODO.md` + worklog, disposition everything in `.workflow/` |
+| `workflow park [slug]` | Set a run aside at any phase; unpark by invoking the phase it was at |
+| `workflow wrap` | Final checks, commit/push, reconcile product docs, route learnings to `memory/`, deposit eval cases, update `TODO.md` + worklog, archive the run folder |
 | `workflow todo <idea>` | Capture an idea into `TODO.md`, well-placed and well-shaped |
 | `workflow bootstrap` | Stand up `AGENTS.md`/`MEMORY.md`/`TODO.md` and repo conventions in a fresh project |
 | `workflow realign` | Evidence-backed, human-approved re-check of `PRODUCT.md`/`DESIGN.md` against what actually shipped |
@@ -160,15 +218,43 @@ effort (from `ROUTING.md`), what to read, and the exact line to paste. There is 
 command — resetting is lossless and safe at any context fullness, so it replaced compaction
 entirely.
 
-## Companion skills (optional, separate)
+## Companion skills (separate folders, same repo)
 
-- **checkup** — read-only workspace health report; compares trial-run numbers per seat and flags unexamined
-  models.
-- **evals.run** — exams a candidate model on a seat's golden cases and writes a scorecard;
-  seat changes in `ROUTING.md` are then a deliberate, evidenced edit.
+| Skill | Role in the loop |
+|---|---|
+| `memory.remember` | Routes a run's `learnings.md` at wrap: repeats bump an existing `memory/` page's occurrence count; new lessons become pages; `Occurrences: 3` promotes a principle into a skill (logged in `SKILL-IMPACT.md`, trialed) |
+| `memory.compact` | Manual, proposal-only cleanup of `memory/`: merges same-claim pages, splits legacy inline `MEMORY.md` entries into pages, archives stale ones |
+| `checkup` | Read-only health report: skill wiring, memory pages, docs, runs (stalled/parked), config, and the per-seat and per-skill-change comparison of worklog numbers that decides promotions |
+| `evals` | The one exam: `evals.run reviewer`, a ≤8-case recall check run only before swapping the strict reviewer |
 
-Models earn seats on trial runs recorded in the worklog; `evals.run reviewer` is the one exam,
-a ≤8-case recall check run only before swapping the strict reviewer.
+## How models and skills earn their place
+
+Neither is benchmarked; both are trialed on real runs. Put a candidate model in a seat's **Trial**
+column in `ROUTING.md`; the card prints it, wrap records it in the worklog's `Seats:` line;
+`checkup seats` compares it with the incumbent after two runs; you promote or reject in
+`ROUTING.md`. A skill change works the same way: `memory.remember` (or you) edits the skill, adds
+a `SKILL-IMPACT.md` line marked `trialing`, and the next runs' `Skills:` lines let `checkup`
+compare before/after. Worse means revert the commit and log it.
+
+**Autonomous or approved — your call.** `SKILL-IMPACT.md` starts with `Mode: autonomous` or
+`Mode: approve`. Autonomous: `memory.remember` applies skill edits directly, in their own commit.
+Approve: it writes `SKILL.md.proposed` beside the skill and logs the row as `proposed`; you accept
+with `mv`, and `checkup` nags about anything left proposed. The log is identical either way.
+
+## Migrating a v1 repo
+
+A flat `.workflow/*.md` from v1 is one run: `mkdir .workflow/<slug> && git mv .workflow/*.md
+.workflow/<slug>/`, remove `.workflow/` from `.gitignore` if it is there, and run `workflow status`.
+A flat `MEMORY.md` keeps working as an index with inline entries until `memory.compact` splits it
+into pages; nothing breaks in between.
+
+## Built for the next step
+
+v2 keeps every run as a self-describing folder, keeps memory as pages, and gives every command an
+explicit slug — no hidden "current run." That is deliberate: it lets a coordinating agent in a
+persistent thread hand runs to delegated agents, even several at once, with git and the run
+folders as the only shared state. Nothing in v2 depends on that future; everything in it is
+compatible with it.
 
 ## Design constraints (on purpose)
 

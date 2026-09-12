@@ -2,10 +2,11 @@
 name: memory.remember
 description: >
   Capture durable learnings, new feature behavior, and operating rules from the
-  current session, then write them directly into the current repo's MEMORY.md
-  and related repo-local docs in one pass — including promoting reusable
-  principles into a skill (new or existing) and refining DESIGN.md in place
-  when the repo has one, so durable lessons don't just pile up as memory prose.
+  current session, then write them directly into the current repo's memory
+  pages (memory/<slug>.md, indexed by MEMORY.md) and related repo-local docs in
+  one pass — a repeat bumps an existing page's occurrence count instead of
+  adding a line; 3 occurrences promotes the principle into a skill (logged in
+  SKILL-IMPACT.md and trialed); DESIGN.md is refined in place when present.
   Use when the user says "remember this", "save this for later", "update
   memory", "curate learnings", or asks to record a new workflow, repo rule,
   design decision, or important lesson — including at the end of a
@@ -33,7 +34,8 @@ Treat repo memory as separate layers with different owners:
 
 - **Agent operating contract:** `AGENTS.md`, read by agents during startup. Use it for stable repo operating rules, command contracts agents must follow, and high-risk gotchas that prevent repeated mistakes.
 - **Operator reference:** `README.md`, read by humans and agents when workflow/setup/output shape matters. Use it for setup, command examples, workflow descriptions, output structure, and troubleshooting.
-- **Active memory:** `MEMORY.md`, read during normal session startup. It is the layer of **last
+- **Active memory:** `memory/<slug>.md` pages, indexed by `MEMORY.md` (which is read at session
+  startup; a page is opened when its index line matches the situation). It is the layer of **last
   resort** — the place for things a future coding session needs but that fit **nowhere else**:
   model/agent-relevant facts, the working environment (OS, tools, paths, credential locations),
   durable user preferences, repo-specific gotchas and workarounds, temporary in-flight state
@@ -50,24 +52,44 @@ Treat repo memory as separate layers with different owners:
 
 Repo-local durable memory lives in the repo. Do not use `~/.codex/memories/` as the source of truth for repo memory.
 
-## MEMORY.md Schema
+## Memory schema — pages, not entries
 
-Every entry in `MEMORY.md` follows this structure:
+`MEMORY.md` is the **index**: one line per page, nothing else —
+`- [<slug>](memory/<slug>.md) — <claim in one line> · occurrences N · <last confirmed>`.
+Every durable lesson is a **page** at `memory/<slug>.md` (kebab-case slug from the claim), always
+this shape:
 
 ```markdown
-### <Topic>
-- **Topic:** <join key — e.g., "Vector storage", "Embedding model">
-- **Status:** current | superseded | conflict
-- **Decision:** <one or two sentences>
-- **Supersedes:** <entry reference or —>
-- **Superseded by:** <entry reference or —>
-- **Last confirmed:** <YYYY-MM-DD>
-- **Source:** <session ID, repo, or PR>
+# <claim in one line>
+Applies when: <the situation that should trigger recall>
+Root cause: <why it happens — one or two lines>
+Fix: <what to do — concrete, with paths or commands where they exist>
+Evidence: <run slug or sha> · <run slug or sha>          ← one entry per occurrence
+Occurrences: N · Last confirmed: YYYY-MM-DD · Status: active | superseded by <slug>
+Promoted to: <skill name>                                 ← only once promoted
 ```
 
-## The MEMORY.md admission test
+**A repeat is not a new page.** Before creating one, search existing pages by claim (`grep -il`
+on the key nouns of `memory/*.md` and the index): a match means append an `Evidence` entry, bump
+`Occurrences`, update `Last confirmed`, and refine the `Fix` if the new occurrence taught
+something. The count is what makes promotion mechanical — so it must be honest:
 
-Before writing anything to `MEMORY.md`, run every candidate through this gate. It may stay in
+- **One run, one occurrence.** An `Evidence` entry is a run slug (or a sha outside a run) and is
+  **unique per page**: if the page already lists this run, do not append and do not bump. Routing
+  the same run three times — mid-run, at wrap, after an interrupted wrap — leaves `Occurrences`
+  exactly where one routing left it. `Occurrences` always equals the number of distinct entries.
+- **Routed lines are marked, then skipped.** After routing a tagged line in
+  `.workflow/<slug>/learnings.md`, append ` [routed → <destination> <YYYY-MM-DD>]` to that line in
+  place; a line already carrying the mark is skipped on every later pass. The mark is the routing
+  receipt and survives resets because it lives in the tracked run folder.
+- **A promotion is applied once.** Before promoting at `Occurrences: 3`, check the page for
+  `Promoted to:` and `SKILL-IMPACT.md` for a row on the same page: an existing `proposed` or
+  `trialing` row means the promotion is pending or done — do not create a second. Legacy v1 inline entries still in
+`MEMORY.md` (the old `### Topic` blocks) are read as pages-to-be; `memory.compact` splits them.
+
+## The memory admission test
+
+Before writing any page, run every candidate through this gate. It may stay in
 active memory **only if all four are true**:
 
 1. **Useful next session** — a future coding session would waste time or repeat a mistake without it.
@@ -80,31 +102,32 @@ active memory **only if all four are true**:
    pointer, never a copy.
 
 If a candidate fails the test, it does not "wait" in memory to be promoted later — that deferral is
-exactly how `MEMORY.md` drifts into a second product/design ledger. Route it to its real home in the
+exactly how memory drifts into a second product/design ledger. Route it to its real home in the
 **same pass**, or drop it.
 
-## Keeping MEMORY.md bounded (cap + consolidate-before-add)
+## Keeping memory bounded (cap + consolidate-before-add)
 
-`MEMORY.md` has no automatic compaction, so this skill enforces the bound at write time (inspired by
+Memory has no automatic compaction, so this skill enforces the bound at write time (inspired by
 bounded-memory designs like Hermes, where an over-limit write is refused until the agent consolidates):
 
-- Treat roughly **~40 structured entries / ~40 KB** as a soft ceiling. Near or over it, **consolidate
-  before adding**: merge overlapping entries into one tighter entry, or route/drop stale ones, in the
-  same pass — do not just append.
-- Prefer replacing/merging an existing entry over adding a new one whenever the topic already exists.
-- If consolidation can't get a genuinely new, test-passing entry to fit under the ceiling, that is the
-  signal to run `memory.compact` (or redistribute entries to their canonical owners) rather than let
-  the file grow.
+- Treat roughly **~40 pages / a ~40 KB index** as a soft ceiling. Near or over it, **consolidate
+  before adding**: merge overlapping pages into one (sum the evidence, keep the higher count), or
+  route/drop stale ones, in the same pass — do not just add a page.
+- The repeat rule above is the main lever: most "new" lessons are a fourth occurrence of an existing
+  page, not a page.
+- If consolidation can't get a genuinely new, test-passing page to fit under the ceiling, that is the
+  signal to run `memory.compact` (or redistribute pages to their canonical owners) rather than let
+  the folder grow.
 
 ## Workflow
 
 When the user invokes `/remember`:
 
 1. **Read context**
-   - Read `MEMORY.md` and `AGENTS.md` in the current repo.
+   - Read `MEMORY.md` (the index) and `AGENTS.md` in the current repo; open only the `memory/` pages whose index line plausibly matches a candidate.
    - Read the `name` + `description` frontmatter of every skill under `.github/skills/*/SKILL.md` (repo-local) and the shared `agent-skills` repo's `.github/skills/*/SKILL.md` — just the frontmatter, not the full body — so you know what already exists before proposing a new skill or a new bullet in one.
    - **Also list every installed plugin's skill names** — e.g. `ls ~/.copilot/installed-plugins/*/*/skills/` and `~/.copilot/installed-plugins/_direct/*/skills/` (Copilot), and `ls ~/.codex/skills/` (Codex, which mirrors plugin-provided skills alongside repo-local symlinks). You need these names for one reason only: never propose a new repo-local skill whose name collides with one of them (see the naming-collision rule in step 2).
-   - Check whether the repo has a `DESIGN.md` and, if this session touched `.workflow/*.md` scratch files (see step 3), whether they still exist.
+   - Check whether the repo has a `DESIGN.md` and, if this session was a `workflow` run, which `.workflow/<slug>/` folder it was (see step 3).
    - Read `~/.ai-memory/<repo-id>/sessions.log` for recent session entries (last 10). If it does not exist, skip it gracefully.
    - Read recent git history: `git log --oneline -20`.
    - Read `README.md` only if the learning changes operator-facing setup or features.
@@ -113,12 +136,13 @@ When the user invokes `/remember`:
 2. **Classify the target layer before writing**
    - `AGENTS.md`: stable operating rules, command-contract requirements, agent workflow boundaries, repeated gotchas, and "never do X" guidance.
    - `README.md`: operator-facing setup, usage, workflow shape, output structure, and troubleshooting.
-   - `MEMORY.md`: current behavior-shaping lessons that future sessions need but that are not yet stable enough or broad enough for AGENTS/README.
+   - A `memory/` page: current behavior-shaping lessons that future sessions need but that are not yet stable enough or broad enough for AGENTS/README — as a new page, or an occurrence on an existing one.
    - `MEMORY_ARCHIVE.md`: history, evidence, old baselines, long explanations, and superseded decisions.
    - `docs/solutions/`: detailed postmortems, implementation patterns, and reusable technical explanations.
    - **A skill:** a transferable, schema-agnostic *principle* — "how to design/review/build X well" — that has proven itself across more than this one feature. This is the layer that keeps `MEMORY.md` from becoming an ever-growing pile of principle prose that nobody reads at startup. Apply the promotion bar before choosing this:
      - **Existing skill first.** If a skill already covers this domain (check the frontmatter you read in step 1), add or refine a bullet there instead of creating a new skill.
-     - **New-skill bar.** Only create a new skill when the pattern (a) has recurred 3+ times, (b) is reusable beyond this one feature/schema, and (c) genuinely doesn't fit any existing skill's stated scope. One occurrence is a `MEMORY.md` entry, not a skill.
+     - **New-skill bar.** Only create a new skill when the pattern (a) has recurred 3+ times — which now means a page with `Occurrences: 3` or more, not a judgment call — (b) is reusable beyond this one feature/schema, and (c) genuinely doesn't fit any existing skill's stated scope. One occurrence is a page, not a skill.
+     - **Every skill edit is logged and trialed — and the log's `Mode:` line decides who applies it.** Read the first line of the skills repo's `SKILL-IMPACT.md`. `Mode: autonomous`: write the `SKILL.md` edit directly, in its own commit (never mixed with code, so it can be reverted alone), and add the row `<date> · <skill> · <what changed> · from: <memory page> · trial until: 3 runs · trialing`. `Mode: approve`: do not touch `SKILL.md`; write the full proposed file as `SKILL.md.proposed` beside it, add the same row with outcome `proposed`, and tell the human `accept: mv <path>/SKILL.md.proposed <path>/SKILL.md` (they flip the row to `trialing` on accepting). Either way the source page gets `Promoted to: <skill>` and stays as the why; `checkup seats` judges the change on the runs after it. Missing `Mode:` line = approve.
      - **Never collide with an installed plugin's skill name.** Before naming a new skill (or matching it against an "existing skill" to extend), check it against the plugin skill list you gathered in step 1. A repo-local skill folder that shares a name with an installed plugin's skill silently shadows that plugin's real skill in this repo — the plugin skill becomes permanently unreachable here, even though it looks installed. This is not a hypothetical: it has already happened (a repo-local `ce-debug` shadowed the `compound-engineering` plugin's real `ce-debug`, a completely different and more capable skill). If the name collides, pick a different, repo-specific prefix instead (e.g. `cx-` for a CX Intelligence repo) — never reuse a plugin's namespace for repo-local content, even if the plugin's naming convention looks like a natural fit.
      - **Strip before writing.** A skill entry is the principle only — no concrete schema, object/column/field names, file paths, or business logic. Those stay in the code and in `MEMORY.md`.
    - **`DESIGN.md`** (only if the repo has one): durable UI/design-system decisions. Refine the relevant section in place — it is a living doc, not an append-only log. If a change would contradict or majorly restructure an existing section, flag it instead of overwriting.
@@ -127,46 +151,45 @@ When the user invokes `/remember`:
 3. **Detect CE sessions and workflow scratch**
    - Check if any files under `docs/brainstorms/`, `docs/plans/`, or `docs/solutions/` were modified or created in this session.
    - If CE artifacts were touched, capture only session metadata and a short pointer to the durable CE note. Do not duplicate the full pattern write-up in active memory.
-   - Separately, check for `.workflow/*.md` scratch files (`brainstorm.md`, `spec.md`, `plan.md`, `patch_plan.md`, `learnings.md`) — this is a different, disposable-scratch convention (gitignored, per-run handoff state), not the CE `docs/plans/`/`docs/brainstorms/` convention. If `learnings.md` exists, treat its `[durable→skill]` / `[durable→memory]` / `[durable→design]` / `[drop]` tagged lines as the primary candidate list for this pass — they've already been pre-classified by the session that wrote them.
+   - Separately, check for a `workflow` run folder, `.workflow/<slug>/` (tracked, kept after wrap as the run's record — not the CE `docs/plans/`/`docs/brainstorms/` convention). If its `learnings.md` exists, treat its `[durable→skill]` / `[durable→memory]` / `[durable→design]` / `[drop]` tagged lines as the primary candidate list for this pass — they've already been pre-classified by the session that wrote them — and use the run slug as the `Evidence` entry on every page it touches.
 
 4. **Extract and reconcile in one pass**
-   - Produce candidate entries in the structured schema above.
-   - Check each candidate against `AGENTS.md`, `README.md`, `MEMORY.md`, `MEMORY_ARCHIVE.md`, existing skills, and `DESIGN.md` before writing.
+   - Produce candidate pages in the page shape above.
+   - Check each candidate against `AGENTS.md`, `README.md`, the `MEMORY.md` index and matching pages, `MEMORY_ARCHIVE.md`, existing skills, and `DESIGN.md` before writing.
    - Reconcile each candidate against its canonical owner:
-     - **New entry:** add it to `MEMORY.md`
-     - **Update existing:** keep the decision, bump `Last confirmed`, refresh the source if useful
-     - **Supersede existing:** move the old entry out of active memory and keep the new one active
+     - **Repeat of an existing page:** if this run slug is not yet in `Evidence`, append it, bump `Occurrences`, update `Last confirmed`, refine `Fix` if warranted — no new page; if the slug is already there, only refine `Fix`
+     - **New page:** write `memory/<slug>.md` and add its index line to `MEMORY.md`
+     - **Supersede existing:** set the old page `Status: superseded by <new-slug>`, drop it from the active index (keep the file for the chain, or move it to the archive)
      - **Archive-only:** write it to `MEMORY_ARCHIVE.md` instead of active memory
      - **Promote:** update `AGENTS.md` or `README.md`, then archive or omit the duplicate memory copy
-     - **Promote to skill:** add the stripped principle to an existing skill, or create a new one only if it clears the new-skill bar above; then archive or omit the duplicate memory copy
+     - **Promote to skill:** add the stripped principle to an existing skill, or create a new one only if it clears the new-skill bar above; log it in `SKILL-IMPACT.md`; mark the page `Promoted to:` — the page stays (it is the why and the evidence)
      - **Refine design doc:** update the relevant `DESIGN.md` section in place when the repo has one
      - **Conflict:** keep the active entry conservative and add a short conflict note only when the contradiction is real and cannot be resolved from the repo
 
 5. **Keep active memory lean during the same pass**
-   - Merge exact duplicates.
+   - Merge pages that make the same claim (sum evidence, keep the higher count).
    - Remove duplicated prose when the rule already lives in `AGENTS.md` or `README.md`, or the principle already lives in a skill.
-   - Keep only short pointers in active memory when `docs/solutions/` already contains the durable write-up.
-   - Move superseded, stale, verbose, or low-frequency historical entries into `MEMORY_ARCHIVE.md`.
+   - Keep only short pointers in a page's `Fix` when `docs/solutions/` already contains the durable write-up.
+   - Move superseded, stale, verbose, or low-frequency historical pages into `MEMORY_ARCHIVE.md` and drop their index lines.
    - If `MEMORY_ARCHIVE.md` does not exist yet, create it with a minimal archive header before moving entries.
 
 6. **Write immediately**
    - Update every relevant repo-local file in the same pass:
-     - `MEMORY.md` for active durable lessons
+     - `memory/<slug>.md` pages plus their `MEMORY.md` index lines for active durable lessons
      - `MEMORY_ARCHIVE.md` for cold history
      - `AGENTS.md` for operating rules
      - `README.md` only when the user-facing setup or workflow changed
-     - the relevant skill's `SKILL.md` for any promoted principle (new or existing skill)
+     - the relevant skill's `SKILL.md` for any promoted principle (new or existing skill), plus its `SKILL-IMPACT.md` line, in their own commit
      - `DESIGN.md` for any refined design-system section, when the repo has one
    - Also update the shared `agent-skills` repo when the change affects a shared skill or another cross-repo convention.
 
 7. **Optional wrap-up, when finishing a workflow pass**
-   - If `.workflow/learnings.md` exists and every tagged line in it has now been routed to a destination, offer to run the repo's existing build/test/lint checks, commit the routed changes, and push.
-   - Only delete `.workflow/*.md` scratch files (`brainstorm.md`, `spec.md`, `plan.md`, `patch_plan.md`, `learnings.md`) after their durable lines have actually been promoted somewhere — never delete `learnings.md` first and reconcile later.
-   - This step is optional and only relevant when the session was following a staged brainstorm → spec → plan → execute → review workflow; a plain "remember this" ask has no wrap-up to do.
+   - If `.workflow/<slug>/learnings.md` exists and every tagged line in it has now been routed, say so in one line (`routed N lines → M pages, K skill edits`) — the `workflow` wrap step owns the checks, commit, push, and archiving of the run folder. Never delete or empty anything under `.workflow/`; run folders are kept.
+   - This step is optional and only relevant when the session was a `workflow` run; a plain "remember this" ask has no wrap-up to do.
 
 ## What to Save
 
-Save to `MEMORY.md` only what passes the admission test above — typically:
+Save to a `memory/` page only what passes the admission test above — typically:
 
 - **Environment facts:** OS, language/runtime quirks, tool availability, key paths, where
   credentials live (never the credentials themselves).
@@ -195,27 +218,27 @@ Everything else routes to its owner in the same pass (do not stage it in memory)
 - Speculative ideas that were not actually adopted
 - Long CE pattern write-ups already captured under `docs/solutions/`
 - Stable operator or agent rules already promoted to `README.md` or `AGENTS.md`
-- A single occurrence dressed up as a skill — one instance is a `MEMORY.md` entry; only 3+ recurrences earn a new skill
+- A single occurrence dressed up as a skill — one instance is a page; `Occurrences: 3` earns a skill
 
 ## Rules
 
 - Aggregates only. Never persist customer-level details.
 - If nothing durable was learned, say so instead of forcing an update.
 - Do not put operational rules in `SOUL.md`; keep identity there and operations in `AGENTS.md`.
-- Do not treat `MEMORY.md` as a changelog; write only the durable part that should survive. The
+- Do not treat memory as a changelog; write only the durable part that should survive. The
   session-level "what was built/changed" log is `WORKLOG.md` (owned by the `workflow` skill), not memory.
 - Route product/architecture/design doctrine to `PRODUCT.md`/`DESIGN.md` and durable how-to
-  principles to a skill in the **same pass**; never stage them in `MEMORY.md` "to promote later".
-- Keep `MEMORY.md` bounded: near the ~40-entry / ~40 KB soft ceiling, consolidate or route before
-  adding (see *Keeping MEMORY.md bounded*), and recommend `memory.compact` when it won't fit.
+  principles to a skill in the **same pass**; never stage them in a page "to promote later".
+- Keep memory bounded: near the ~40-page soft ceiling, consolidate or route before adding (see
+  *Keeping memory bounded*), and recommend `memory.compact` when it won't fit.
 - Do not use active `MEMORY.md` as an evidence warehouse. Move long explanations, superseded history, and low-frequency lookup material to `MEMORY_ARCHIVE.md`.
 - Do not load `MEMORY_ARCHIVE.md` during normal extraction unless it is needed to reconcile or archive a specific candidate.
 - Before adding active memory, check whether `AGENTS.md`, `README.md`, `MEMORY_ARCHIVE.md`, or an existing skill already owns the same lesson.
 - Prefer one canonical owner over duplicated prose. Active memory may point to a canonical owner, but should not repeat it.
 - Prefer extending an existing skill over creating a new one. A new skill needs 3+ recurrences, reusability beyond one feature, and a genuine scope gap — see the promotion bar above.
 - Strip concrete schema, object/field names, and business logic out of anything written into a skill; skills hold principles, code and `MEMORY.md` hold specifics.
-- `DESIGN.md` is refined in place, section by section — never append a dated log entry to it the way you would to `MEMORY.md`.
-- Never delete `.workflow/*.md` scratch files before their durable lines have actually been promoted to a destination.
+- `DESIGN.md` is refined in place, section by section — never append a dated log entry to it the way you would to a memory page.
+- Never delete, empty, or rename anything under `.workflow/` — run folders are the repo's history; the `workflow` skill's wrap step archives them.
 - When a shared skill itself changes (this one, `memory.compact`, or any other skill in `agent-skills`), update that skill's own docs as part of the same remember pass.
-- Every entry must use the structured schema. No flat bullets.
-- The `Source` field should reference the current session or commit when possible.
+- Every page uses the page shape; `MEMORY.md` holds index lines only. No flat bullets, no inline entries.
+- Every `Evidence` entry names a run slug or commit, is unique per page, and `Occurrences` equals the number of entries; a routed learnings line carries its `[routed → …]` mark and is never routed again.

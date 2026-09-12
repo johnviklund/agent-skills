@@ -8,19 +8,31 @@ only judgment calls are commit messages that read as worklog lines and `memory.r
 routing decisions, which rules out the mechanical lane but doesn't justify a heavy or reviewer
 seat; the hard reasoning already happened in review.
 
-**Precondition — review evidence.** Before anything else, confirm `.workflow/review.md` exists with
-`Status: complete`, its verdict is clean or every finding is dispositioned, and its `Base` is the current HEAD (no code
-commits after the reviewed sha). If it's missing or stale, don't lecture that review "hasn't
-run" — it may have run before this artifact existed — say the evidence is missing/stale and
-print the next-step card routing to `workflow review`.
+**Precondition — review evidence.** Before anything else, confirm `.workflow/<slug>/review.md`
+exists with `Status: complete` and **no open finding**: every `fix now` carries `Resolved: @ <sha>`
+from a later review cycle, every `defer` on a P0/P1 carries `Approved by human:`, and `wontfix`
+carries a reason. A `fix now` without `Resolved:` is intended work, not done work — stop and route
+to `workflow execute <slug>` (patch plan) or `workflow review <slug>`. Then confirm **no code changed
+since the reviewed `Base`** per `SKILL.md`'s receipt rule (`git diff --stat <Base>..HEAD --
+. ':(exclude)*.md' ':(exclude)*.txt'` is empty) — receipt commits such as the review itself are
+fine, any code commit is not. If it's missing or stale, don't lecture that review "hasn't run" —
+say the evidence is missing/stale and print the next-step card routing to `workflow review`.
 
 **Precondition — clean code tree.** Then run `git status --porcelain`. Every modified or untracked
-path it reports must fall inside this allowlist: `TODO.md`, `MEMORY.md`, `WORKLOG.md`, `ROADMAP.md`,
-`PRODUCT.md`, `DESIGN.md`, `docs/`, `evals/`, `.gitignore`, `.workflow/` (which shows up here in
-repos that track it). Anything outside it is code the review verdict never saw — stop,
-name the offending paths, and print the next-step card routing to `workflow review`. Wrap does not
-launder unreviewed code through its own commit. Dirt *inside* the allowlist is wrap's normal input
-and gets committed in step 3.
+path must be a receipt file (`*.md`, `*.txt`) or `.gitignore`; a script, config, or data file
+anywhere — `.workflow/`, `docs/`, `evals/` included — is code the review verdict never saw: stop,
+name the paths, and route to `workflow review`. Wrap does not launder unreviewed code through its
+own commit. Receipt dirt is wrap's normal input and gets committed in step 3.
+
+**Checkpoint — `wrap.md`.** Wrap makes several commits and can be interrupted between them, so it
+keeps its own artifact: on first entry create `.workflow/<slug>/wrap.md` with the provenance header
+(`Inputs: review.md @ <its Base>`, `Base:` = that reviewed sha, `Status: drafting`) and a `## Steps`
+checklist of the nine steps below; tick each step as it lands (with the commit sha where one was
+made). On re-entry with a `wrap.md` present, re-run the preconditions against *its* `Base`, then
+resume at the first unticked step — never redo a ticked one. Steps are written to be safe to
+repeat if a tick was lost: step 3 commits only what is dirty, step 4 skips lines already marked
+routed, step 8 skips if `WORKLOG.md` already has an entry for this slug, step 9 is a no-op on an
+already-archived folder.
 
 **Escalate on failure, don't fix in wrap:** if step 1's final checks surface a regression, stop —
 that's a mini review→patch cycle (route it through the patch-cycle rows in `ROUTING.md`), not
@@ -36,9 +48,10 @@ Commit, push, curate, and clean up — in one go:
    doc/scratch paths. **Commit discipline:** use session-level messages that read as a
    worklog line on their own (what shipped + why), not terse "fix" stubs — the commit log is the
    portable backtrack record, so make it carry the narrative.
-4. Invoke `memory.remember` to route every tagged line in `.workflow/learnings.md` to its
-   destination (`MEMORY.md`, `AGENTS.md`, `README.md`, an existing or new skill, `DESIGN.md`),
-   commit those changes, and push.
+4. Invoke `memory.remember` to route every tagged line in `.workflow/<slug>/learnings.md` not yet
+   marked `[routed → …]` to its destination (a `memory/` page, `AGENTS.md`, `README.md`, an
+   existing or new skill, `DESIGN.md`); it marks each routed line and never counts a run twice.
+   Commit those changes, and push.
 5. **Product-doc truth** — answer this explicitly; silence is not an answer. Start from the plan's
    `## Product doc impacts`, then re-derive it from what actually shipped: deviations and patch
    cycles change scope after Phase 2, so the plan's list is the starting point, not the verdict.
@@ -64,13 +77,16 @@ Commit, push, curate, and clean up — in one go:
    every roadmap item step 5 just checked off has its `TODO.md` entries archived with a pointer to
    that item; and a roadmap item this run descoped or abandoned lands back in `TODO.md` as a
    deferred entry, naming what it was and why it stopped. A committed item may leave the roadmap,
-   but it never simply disappears.
+   but it never simply disappears. Parked runs are the third list: a `TODO.md` item that a parked
+   `.workflow/<slug>/` already brainstormed is archived with a pointer to the slug (the folder is
+   the item now); a parked run this run shipped or made moot is set `done` with one line saying
+   so. One home per idea: TODO (not yet brainstormed) → parked run (brainstormed) → live run.
 
    Boundaries: don't add new ideas on your own initiative (it's the human's scratchpad —
    only add items the human explicitly deferred during this run, in the right section); and the
    TODO entry points at the product docs step 5 just corrected, it never duplicates them.
 7. **Eval deposit** — usually nothing. For each `[durable→eval] code-review` line in
-   `.workflow/learnings.md` that passes the admission test in `references/learning-worklog.md`
+   `.workflow/<slug>/learnings.md` that passes the admission test in `references/learning-worklog.md`
    (a P0/P1 missed by the writer or by the reviewer), write one self-contained case to
    `evals/strict-reviewer/code-review-<YYYY-MM-DD>-<slug>.md` — the diff copied in (never a
    `.workflow/` path), the P0/P1 findings a pass must name (one line each), and provenance (date,
@@ -78,59 +94,36 @@ Commit, push, curate, and clean up — in one go:
    or skip — never append past the cap. Commit with the rest.
 8. Append this run's entry to `WORKLOG.md` (see `references/learning-worklog.md`): one capped,
    git-pointing entry, rolling the oldest off if over ~15; commit and push it with the rest.
-9. **Clear the run — by inventory, not by list.** Once `memory.remember` confirms every line is
-   routed and step 7's cases are deposited, enumerate **everything** this run left in
-   `.workflow/` — `git status --porcelain .workflow/` for the untracked/modified side, `git
-   ls-files .workflow/` for the tracked side, and a plain recursive listing to catch what both
-   miss. Phase artifacts are only part of it: runs also leave receipts, verification JSON, live
-   harnesses, and one-off import/migration scripts, and a fixed six-file delete list is why those
-   accumulate forever. Every path gets exactly one disposition from the table below; anything you
-   cannot confidently classify is **reported to the human, not guessed at**.
+9. **Archive the run — nothing leaves `.workflow/<slug>/`, nothing is deleted from the repo.** Once
+   `memory.remember` confirms every line is routed and step 7's cases are deposited:
 
-   **9a. Reference check — before any move or delete, no exceptions.** For each candidate path,
-   grep the repo *outside* `.workflow/` for both its filename and its bare module name (the stem
-   without `.py`/`.md`) — e.g. `rg -n -F '<stem>' --glob '!.workflow/**'`. That catches committed
-   tests that do `sys.path.insert(0, ROOT / ".workflow")` and then `import <stem>` by module name,
-   plus doc links, CI config, and `MEMORY.md`/`WORKLOG.md`/`evals/` pointers. **Any hit means the
-   artifact is load-bearing: do not move, rename, or delete it silently.** Stop, list the
-   referring files with line numbers, and put the decision to the human — repoint the referrer,
-   make the referrer resolve both the live and archived location, or leave the file where it is —
-   then act on the answer in the same commit. A module imported by name that moves under
-   `.workflow/archive/<date>/` fails at *collection*, so one archived script turns a green suite
-   into a single collection error and takes every unrelated test down with it. The grep costs
-   seconds; skipping it has already cost a full suite.
+   **9a. Drop the transient, keep the record.** In the run folder: delete `spec.md` and
+   `patch_plan.md` (their content is in `plan.md`/`review.md`); strip the `## Execution state`
+   block from `plan.md`; keep `brainstorm.md`, `plan.md` (with `## Deviations`), `review.md`,
+   `learnings.md` (now fully routed — it stays as the record of *what* was learned here), and
+   `wrap.md`. Set `Status: done` in `brainstorm.md` (the run's status of record) and in the kept
+   artifacts, `wrap.md` last.
 
-   **9b. Disposition by artifact class** — one rule per class, not one rule for the directory:
+   **9b. Anything else the run left** — receipts, verification JSON, one-off scripts, live
+   harnesses — stays in the run folder as evidence. Before moving or renaming any such file, grep
+   the repo *outside* `.workflow/` for its filename and bare module stem (`rg -n -F '<stem>'
+   --glob '!.workflow/**'`); a hit means it is load-bearing — leave it exactly where it is and tell
+   the human. A run folder is history: it is never emptied, never renamed, never reused.
 
-   | Class | What it is | Disposition |
-   |---|---|---|
-   | Transient scratch | The phase artifacts — `brainstorm.md`, `spec.md`, `plan.md` (including its `## Execution state` block — session scratch, not a durable doc), `patch_plan.md`, `review.md`, `learnings.md`, `realign.md` (and any `realign-stale-*.md`) — plus any working file whose only value was in-run | **Delete.** Their durable value already lives in the commits, the `evals/` cases, and wherever `memory.remember` routed it; and a stale `plan.md` left behind poisons the next run's re-ground, which trusts these files as truth. |
-   | Evidence / receipts | Run receipts, verification JSON, live-harness output, deployment proofs, manifests — anything `MEMORY.md`, `WORKLOG.md`, a commit message, or an `evals/` case points at | **Archive with pointers still resolving.** Move to `.workflow/archive/<YYYY-MM-DD>/` and update every pointer 9a found, in the same commit. If a pointer cannot be updated, the file does not move. Never delete evidence a durable doc cites — a dangling pointer is worse than a kept file. |
-   | Referenced code | Harnesses, importers, migration and one-off scripts that anything outside `.workflow/` imports, invokes, or path-inserts | **Never moved without updating the referrers first**, in the same commit — or left exactly where it is. Human decision per 9a; wrap never picks for them. |
-
-   **9c. Recoverability decides how careful to be.** `.workflow/` is **tracked in some repos and
-   gitignored in others** — check this one (`git check-ignore -v .workflow/`; `git ls-files
-   .workflow/`) instead of assuming either way. Tracked: a delete is a committed change,
-   recoverable from history, and belongs in this run's commit. Untracked/gitignored: a delete is
-   **unrecoverable** — so archive rather than delete anything in the evidence class, and confirm
-   with the human before deleting anything you had to classify by judgment rather than by the
-   table.
-
-   Commit the clean-up (where `.workflow/` is tracked) and push it, so the tree the next run
-   re-grounds from is the tree that's archived.
+   Commit the archive and push it, so the tree the next run re-grounds from is the tree that's
+   in git. `.workflow/` is tracked — if this repo ignores it, stop and say so; a run archive that
+   lives on one machine is not an archive.
 
 **Why this order:** commits are local — nothing leaves the machine until push. Code → learnings
-routed, evals deposited, and committed → **push** → clear the run. Clearing comes last precisely
-because it is the only destructive step: everything worth keeping is already in git, in `evals/`,
-or routed by `memory.remember` before a single file is touched. Never delete `learnings.md`
-before `memory.remember` has actually routed every line — it
-enforces this itself, but don't race ahead of it. Open a PR only if not committing straight to
+routed, evals deposited, and committed → **push** → archive the run. Archiving comes last because
+it is the only step that removes anything (the transient files), and by then everything worth
+keeping is already in git, in `evals/`, in `memory/`, or in the kept artifacts. Open a PR only if not committing straight to
 `main`.
 
 **Wrap's chat receipt is fixed, one line per step:** final checks (pass / known-environmental);
 shortcut grep (clean / what was found); commits + push (shas); learnings routed (count → where);
 product-doc truth (per doc: no changes, or the edit — one line each, ESCALATE items as a lettered
 decision list); TODO hygiene (items archived/rewritten, or none); eval cases deposited (count);
-worklog entry (yes); `.workflow/` cleared (deleted / archived / left — counts). Anything that needs
+worklog entry (yes); run archived (`<slug>` · done); parked runs still open (slugs, or none). Anything that needs
 a decision is a lettered item with a recommended default. Then the ✅ done card from `SKILL.md`,
 not a next-phase card.

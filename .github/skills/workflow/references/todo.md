@@ -8,7 +8,11 @@ it's a quick command; never spend a heavy or reviewer seat on it. Runs anytime, 
 session — it doesn't read or change `.workflow/` state.
 
 Capture the idea into repo-root `TODO.md` well-placed and well-shaped — intake only, never the
-start of implementation.
+start of implementation. `TODO.md` holds ideas *not yet brainstormed*; an idea that has been
+brainstormed lives as a `.workflow/<slug>/` run (live or parked) and is not listed here twice.
+Check `grep -l 'Status: parked' .workflow/*/brainstorm.md` before adding: a match means "that's
+parked as `<slug>` — unpark it or leave it," not a new item. If the idea is clearly run-sized and
+the human wants it now, offer `workflow brainstorm <slug>` instead of an intake line.
 
 **1. Read before writing.** Read `TODO.md` in full (if missing, create it with a short header
 stating it's the human's intake scratchpad, not a roadmap). If the idea touches product

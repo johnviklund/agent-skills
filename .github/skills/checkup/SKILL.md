@@ -1,14 +1,15 @@
 ---
 name: checkup
 description: >
-  Manual workspace checkup: a read-only health report for the current repo and the user's skill
-  wiring. Use when asked to check, audit, clean up, or tune the workspace -- phrases like
+  Read-only health report for the current repo and the user's skill wiring. Use when asked to
+  check, audit, clean up, or tune the workspace -- phrases like
   "checkup", "workspace health", "are my skills in check", "is memory compacted",
   "AGENTS/PRODUCT/DESIGN stale", "skill collisions", or "Codex parity". Checks skill hygiene
   (name collisions, folder-vs-frontmatter name, description length, Codex symlink parity, drift),
-  memory hygiene (MEMORY.md size/staleness, leftover proposals), doc freshness, workspace
-  cleanliness (leftover .workflow scratch, tracked junk, unpushed work), config health, and seat
-  performance (trial-run numbers from WORKLOG.md per model per seat, plus the reviewer exam set).
+  memory hygiene (MEMORY.md index vs memory/ pages, staleness, proposals), doc freshness,
+  workspace cleanliness (stalled or parked .workflow runs, tracked junk, unpushed work), config
+  health, and seat/skill performance (trial-run numbers from WORKLOG.md per model per seat and
+  per skill change, plus the reviewer exam set).
   Reports severity-ranked findings and prioritized fixes; delegates to memory.compact and
   evals.run reviewer; applies only opt-in safe fixes.
 ---
@@ -99,16 +100,24 @@ Then check:
 ### 2. Memory hygiene
 
 ```sh
-wc -lc MEMORY.md 2>/dev/null; grep -c '^### ' MEMORY.md 2>/dev/null
-ls MEMORY.proposed.md MEMORY_ARCHIVE.proposed.md skill-promotion-candidates.proposed.md 2>/dev/null
+wc -lc MEMORY.md 2>/dev/null; ls memory/*.md 2>/dev/null | wc -l
+grep -L '^Occurrences:' memory/*.md 2>/dev/null                      # pages missing the standard footer
+ls -d MEMORY.proposed.md memory.proposed MEMORY_ARCHIVE.proposed.md skill-promotion-candidates.proposed.md 2>/dev/null
 ```
 
-- **Size/entry pressure.** Warn when `MEMORY.md` is large (rough guide: > ~40 structured entries or
-  > ~40 KB). Recommend running `memory.compact` (do not compact here).
-- **Stale entries.** Flag entries whose `Last confirmed:` date is > 90 days before today.
-- **Superseded still active.** Any entry with `Status: superseded` still in `MEMORY.md` belongs in
-  `MEMORY_ARCHIVE.md`.
-- **Leftover proposals.** A lingering `MEMORY.proposed.md` (or archive/skill-promotion proposal)
+- **Index ↔ pages.** Every `memory/<slug>.md` has a line in `MEMORY.md` and every index line
+  resolves to a page; an orphan either way is ⚠️. Inline entries still in `MEMORY.md` (v1 shape)
+  are ⚠️ "not yet split into pages -- `memory.compact`".
+- **Page shape.** A page missing `Applies when` / `Root cause` / `Fix` / `Occurrences` is ⚠️ --
+  it can't be matched on repeat.
+- **Promotion signal.** A page with `Occurrences: 3` or more and no `Promoted to:` line is ⚠️ --
+  skill candidate (`memory.remember`), human decides.
+- **Size pressure.** > ~40 pages or `MEMORY.md` > ~40 KB: recommend `memory.compact` (do not
+  compact here).
+- **Stale pages.** `Last confirmed:` > 90 days before today.
+- **Superseded still active.** A page with `Status: superseded` still indexed as active belongs
+  in `MEMORY_ARCHIVE.md` / out of the index.
+- **Leftover proposals.** A lingering `MEMORY.proposed.md` / `memory.proposed/` (or archive/skill-promotion proposal)
   means a compaction was generated but never accepted or discarded -- ⚠️, recommend review/`mv` or delete.
 
 ### 3. Doc freshness & consistency
@@ -131,16 +140,23 @@ ls MEMORY.proposed.md MEMORY_ARCHIVE.proposed.md skill-promotion-candidates.prop
 ### 4. Workspace cleanliness
 
 ```sh
-ls .workflow/{brainstorm,spec,plan,patch_plan,review,learnings}.md 2>/dev/null   # leftover run scratch
+for d in .workflow/*/; do printf '%s ' "$d"; grep -m1 '^Status:' "$d/brainstorm.md" 2>/dev/null; done   # runs + status
+ls .workflow/*.md 2>/dev/null                                             # v1 flat scratch (needs migration)
+git check-ignore -q .workflow && echo 'IGNORED'                           # runs must be tracked
 git status --porcelain 2>/dev/null                                        # uncommitted work
 git log @{u}.. --oneline 2>/dev/null                                      # unpushed commits
 git ls-files | grep -Ei '(^|/)\.DS_Store$|(^|/)\.env$|/node_modules/|/\.venv|\.pyc$' 2>/dev/null
 ```
 
-- **Leftover `.workflow/*.md` run scratch** from an aborted workflow run -- ⚠️, recommend routing
-  learnings (`memory.remember`) then deleting, per the workflow's wrap step. If the leftover
-  `learnings.md` contains `[durable→eval]` lines, flag them specifically -- an undeposited
-  reviewer case dies with the scratch.
+- **Runs.** List every `.workflow/<slug>/` with its status. A `drafting`/`complete` run with no
+  commit touching it in ~14 days is ⚠️ "stalled -- park it or finish it". A `parked` run older
+  than ~90 days is ⚠️ "still wanted?". `done` runs are ✅, counted not listed. A run folder
+  missing `brainstorm.md`, or a `done` run still holding `spec.md`/`patch_plan.md`/an
+  `## Execution state` block, is ⚠️ (wrap didn't archive properly).
+- **v1 leftovers.** Flat `.workflow/*.md` files are ⚠️ "migrate into `.workflow/<slug>/`" (see the
+  workflow README); a gitignored `.workflow/` is 🔴 -- runs are the repo's history.
+- **One home per idea.** A `TODO.md` item naming the same thing as a parked run is ⚠️ -- archive
+  the TODO line with a pointer to the run.
 - **Tracked junk / secrets.** A committed `.DS_Store`, `.env`, virtualenv, build output, or `.pyc`
   is 🔴 (secrets) or ⚠️ (junk). A tracked `.env` is always 🔴 -- flag loudly.
 - **Uncommitted or unpushed work.** If the repo treats push as its archive/safety net, unpushed
@@ -153,7 +169,7 @@ git ls-files | grep -Ei '(^|/)\.DS_Store$|(^|/)\.env$|/node_modules/|/\.venv|\.p
 - **Light secret sniff.** Only flag obvious committed credential files or `.env`; do not attempt a
   deep secret scan (too noisy) -- point at a dedicated tool if the user wants depth.
 
-### 6. Seat performance & reviewer exam set
+### 6. Seat & skill performance, reviewer exam set
 
 Models earn seats on **trial runs**, not exams: every `workflow wrap` appends a `WORKLOG.md`
 entry with a `Run:` line (steps · review cycles · deviations · findings overturned) and a
@@ -170,6 +186,13 @@ tail -20 evals/strict-reviewer/RESULTS.md 2>/dev/null                  # last re
 - **Per-seat table.** From the last ~10 entries, group by seat → model and average cycles,
   deviations, and (for the reviewer) overturned findings. Read the incumbent per seat from the
   `workflow` skill's `ROUTING.md`. Print the table; it *is* the evaluation.
+- **Pending skill proposals.** `find . ~/.agents -name 'SKILL.md.proposed' 2>/dev/null` and any
+  `SKILL-IMPACT.md` row with outcome `proposed`: ⚠️ "awaiting your accept/reject — `mv` to accept,
+  delete and mark `rejected` to decline". Never accept or reject on the human's behalf.
+- **Skill trials.** Entries also carry `Skills: <skill>@<sha>`. For each `trialing` line in the
+  skills repo's `SKILL-IMPACT.md`, compare `Run:` numbers for entries at the new sha against the
+  entries before it: once the trial count is reached, ⚠️ "trial complete -- better / worse / no
+  signal, N runs"; worse means recommend reverting. Never edit the skill.
 - **Trial in progress.** A model on a seat with only one run: ✅ note "trial, 1 run -- needs one
   more before judging".
 - **Promotion candidate.** A non-incumbent with ≥2 runs that ties or beats the incumbent on
@@ -178,6 +201,8 @@ tail -20 evals/strict-reviewer/RESULTS.md 2>/dev/null                  # last re
   candidate worse than the incumbent: ⚠️ say so with the numbers; the decision is the human's.
 - **Missing evidence.** Recent entries without `Run:`/`Seats:` lines: ⚠️ the wrap step is being
   skipped -- nothing can be judged until it isn't.
+- **Stale routing.** `ROUTING.md`'s *Last verified* date > 90 days old, or a *Trial* entry with no
+  run in the last ~10 entries: ⚠️ re-verify model IDs in the picker / clear or use the trial.
 - **Reviewer exam set.** Cases referencing a `.workflow/` path are 🔴 (the scratch is gone; the case
   is worthless). More than 8 cases is ⚠️ (rolling cap; recommend a human prune). A case without
   an inlined diff or its P0/P1 lines is ⚠️. Zero cases is ✅ -- the set only grows on genuine
